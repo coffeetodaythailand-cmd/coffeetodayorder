@@ -555,63 +555,106 @@
   }
 
   /**
-   * ✅ อัปเกรด: ดาวน์โหลด PDF ออเดอร์ (กระดาษ A4)
-   * แก้ไข: กระดาษ A4 ตามสั่ง, ซ่อนเนียนตา (Stealth), แก้อาการหน้าขาว, แก้ฟอนต์ตก
+   * ✅ อัปเกรด: เปิดหน้าต่างใหม่ โหลด PDF A4 อัตโนมัติ แล้วปิดตัวเอง (แยกหน้า 100%)
    */
   function downloadPDF() {
+    const o = allOrders.find(x => x.id === currentViewingOrderId);
+    if(!o) return;
+
     const btn = document.getElementById('dlBtn');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing A4...';
     btn.disabled = true;
 
-    const sourceContent = document.getElementById('pdf-content');
-    
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'fixed';
-    wrapper.style.top = '0';
-    wrapper.style.left = '-9999px'; // ล่องหนนอกจอ ป้องกันหลอน
-    wrapper.style.width = '794px';  // ความกว้าง A4
-    wrapper.style.background = '#FFFFFF';
-    wrapper.style.padding = '40px'; 
-    wrapper.style.boxSizing = 'border-box';
-    wrapper.style.zIndex = '-9999';
+    // สร้างตารางข้อมูลใหม่เพื่อยัดลงหน้าต่างใหม่
+    let tableRows = '';
+    const items = o.items.split('\n');
+    items.forEach(line => {
+      if(line.trim() !== "") {
+        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(match) {
+          tableRows += `<tr><td style="padding:10px; border-bottom:1px solid #EEE;">${match[1]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;">${match[2]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;"><b>${match[3]}</b></td></tr>`;
+        } else {
+          tableRows += `<tr><td colspan="3" style="padding:10px; border-bottom:1px solid #EEE;">${line}</td></tr>`;
+        }
+      }
+    });
 
-    const clone = sourceContent.cloneNode(true);
-    clone.style.fontFamily = 'Tahoma, sans-serif'; // บังคับฟอนต์แก้สระตก
-    
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
+    // ใช้คำสั่ง window.open สร้างหน้ากระดาษแผ่นใหม่ (เหมือนตอนสั่งปริ้น)
+    const win = window.open('', '', 'width=800,height=600');
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Export PDF</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+        <style>
+          body { font-family: Tahoma, sans-serif; padding: 20px; color: #333; }
+          .box { padding: 40px; border: 2px solid #EEE; border-radius: 20px; max-width: 600px; margin: 0 auto; }
+          .header { text-align: center; color: #A91D3A; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+          .grid { display: flex; justify-content: space-between; margin-bottom: 20px; background: #F9F9F9; padding: 15px; border-radius: 10px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th { text-align: left; padding: 10px; border-bottom: 2px solid #DDD; font-size: 14px; color: #2D3133; }
+          .footer { text-align: center; margin-top: 40px; border-top: 1px dashed #CCC; padding-top: 20px; font-size: 12px; color: #888; }
+        </style>
+      </head>
+      <body>
+        <div id="pdf-content" class="box">
+          <div class="header">ORDER RECEIPT</div>
+          <div class="grid">
+            <div>
+              <div style="font-size:11px; color:#999;">ORDER ID</div>
+              <div style="font-size:14px; font-weight:bold;">${o.id}</div>
+              <div style="font-size:11px; color:#999; margin-top:10px;">BRANCH</div>
+              <div style="font-size:14px; font-weight:bold;">${o.branch}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px; color:#999;">DATE</div>
+              <div style="font-size:14px; font-weight:bold;">${o.date}</div>
+              <div style="font-size:11px; color:#999; margin-top:10px;">PHONE</div>
+              <div style="font-size:14px; font-weight:bold;">${o.phone || '-'}</div>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+          <div class="footer">
+            <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
+            <p>วันที่พิมพ์: ${new Date().toLocaleString("th-TH")}</p>
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            const element = document.getElementById('pdf-content');
+            html2pdf().set({
+              margin: 10,
+              filename: 'Receipt_${o.id}.pdf',
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).save().then(function() {
+              // พอดาวน์โหลดเสร็จ ให้หน้าต่างปิดตัวเอง
+              setTimeout(function() { window.close(); }, 1000);
+            });
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    win.document.close();
 
-    const opt = {
-      margin: 10,
-      filename: `Receipt_${currentViewingOrderId}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      // 💡 scrollY: 0 สำคัญที่สุด! กันหน้าขาวเวลากดดาวน์โหลดแล้วเลื่อนจออยู่
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } // ปรับเป็น A4 ตามสั่ง
-    };
-
+    // คืนค่าปุ่มทันที
     setTimeout(() => {
-      html2pdf().set(opt).from(wrapper).save().then(() => {
-        document.body.removeChild(wrapper);
-        btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
-        btn.disabled = false;
-      }).catch(err => {
-        console.error(err);
-        document.body.removeChild(wrapper);
-        btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
-        btn.disabled = false;
-      });
-    }, 500); 
+      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
+      btn.disabled = false;
+    }, 1000);
   }
 
   /**
-   * ✅ อัปเกรด: ดาวน์โหลดรายงานสรุปรายสาขา
-   * แก้ไข: ฟอนต์ไม่ตก, ไม่โผล่หลัง UI (Stealth), ชิดขอบบน, กันหน้าขาว
+   * ✅ อัปเกรด: เปิดหน้าต่างใหม่ โหลดรายงานสรุปอัตโนมัติ แล้วปิดตัวเอง (แยกหน้า 100%)
    */
   function downloadSummaryReport() {
-    if(allOrders.length === 0) {
-      return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
-    }
+    if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
     
     const btn = document.getElementById('summaryBtn');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -620,24 +663,18 @@
     const startDate = document.getElementById('sDate').value || "จุดเริ่มต้น";
     const endDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // จัดกลุ่มข้อมูลตามสาขา
+    // จัดกลุ่มข้อมูล
     const branchSummary = {};
-    
     allOrders.forEach(order => {
       const branchName = order.branch || "อื่นๆ";
-      
-      if (!branchSummary[branchName]) {
-        branchSummary[branchName] = {};
-      }
+      if (!branchSummary[branchName]) branchSummary[branchName] = {};
 
-      const lines = order.items.split('\n');
-      lines.forEach(line => {
+      order.items.split('\n').forEach(line => {
         const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
         if (match) {
           const itemName = match[1].trim();
           const stockVal = match[2].trim();
           const qtyOrdered = parseFloat(match[3]);
-          
           if(!branchSummary[branchName][itemName]) {
             branchSummary[branchName][itemName] = { total: 0, stock: stockVal };
           }
@@ -647,91 +684,86 @@
       });
     });
 
-    // สร้างกล่องล่องหน (Stealth Box) กันภาพผีโผล่หลัง UI
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'fixed';
-    wrapper.style.top = '0';
-    wrapper.style.left = '-9999px'; // ล่องหนนอกจอซ้ายสุด
-    wrapper.style.width = '794px'; 
-    wrapper.style.background = '#FFFFFF';
-    wrapper.style.padding = '10px 40px'; 
-    wrapper.style.boxSizing = 'border-box';
-    wrapper.style.zIndex = '-9999';
-
-    const reportDiv = document.createElement('div');
-    reportDiv.style.width = '100%';
-    reportDiv.style.color = '#333';
-    reportDiv.style.fontFamily = 'Tahoma, sans-serif'; // ล็อกฟอนต์แก้สระตก 100%
-
-    let tables = "";
-    
-    const sortedBranches = Object.keys(branchSummary).sort();
-    sortedBranches.forEach(b => {
-      let rs = "";
-      
-      const items = Object.entries(branchSummary[b]);
-      items.forEach(([it, d]) => {
-        rs += `
+    let branchTablesHTML = "";
+    Object.keys(branchSummary).sort().forEach(branch => {
+      let itemRows = "";
+      Object.entries(branchSummary[branch]).forEach(([item, data]) => {
+        itemRows += `
           <tr>
-            <td style="padding: 6px; border-bottom: 1px solid #EEE; font-size: 11px;">${it}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #EEE; text-align: center; font-size: 11px; color: #666;">${d.stock}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 11px; color: #A91D3A;">${d.total}</td>
-          </tr>
-        `;
+            <td style="padding:6px 10px; border-bottom:1px solid #EEE; font-size:12px;">${item}</td>
+            <td style="padding:6px 10px; border-bottom:1px solid #EEE; text-align:center; font-size:12px; color:#666;">${data.stock}</td>
+            <td style="padding:6px 10px; border-bottom:1px solid #EEE; text-align:center; font-weight:bold; font-size:12px; color:#A91D3A;">${data.total}</td>
+          </tr>`;
       });
-      
-      // page-break-inside: avoid เพื่อกันตารางฉีกครึ่งหน้า
-      tables += `
-        <div style="page-break-inside: avoid; margin-bottom: 20px; border: 1px solid #EEE; border-radius: 8px; overflow: hidden;">
-          <h2 style="background: #F8F9FA; padding: 10px; color: #A91D3A; border-left: 5px solid #A91D3A; font-size: 14px; margin: 0; font-weight: bold;">สาขา: ${b}</h2>
-          <table style="width: 100%; border-collapse: collapse;">
+
+      branchTablesHTML += `
+        <div style="page-break-inside:avoid; margin-bottom:20px; border:1px solid #EEE; border-radius:8px; overflow:hidden;">
+          <h2 style="background:#F8F9FA; padding:10px; color:#A91D3A; border-left:5px solid #A91D3A; font-size:16px; margin:0; font-weight:bold;">สาขา: ${branch}</h2>
+          <table style="width:100%; border-collapse:collapse;">
             <thead>
-              <tr style="background: #FAFAFA; font-size: 10px;">
-                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #EEE; width: 50%;">รายการสินค้า</th>
-                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #EEE;">ยอดคงเหลือล่าสุด</th>
-                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #EEE;">ยอดรวมสั่งซื้อ</th>
+              <tr style="background:#FAFAFA; font-size:12px;">
+                <th style="padding:8px 10px; text-align:left; border-bottom:2px solid #EEE; width:50%;">รายการสินค้า</th>
+                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE;">ยอดคงเหลือล่าสุด</th>
+                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE;">ยอดรวมสั่งซื้อ</th>
               </tr>
             </thead>
-            <tbody>${rs}</tbody>
+            <tbody>${itemRows}</tbody>
           </table>
         </div>
       `;
     });
 
-    reportDiv.innerHTML = `
-      <div style="text-align: center; margin-bottom: 20px; padding-top: 0;">
-        <h1 style="color: #A91D3A; margin: 0 0 5px 0; font-size: 22px; font-weight: bold;">CoffeeToday Summary Report</h1>
-        <p style="color: #888; font-size: 12px; margin: 0;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
-      </div>
-      ${tables}
-      <div style="text-align: center; font-size: 10px; color: #BBB; margin-top: 20px;">
-        พิมพ์เอกสารเมื่อ: ${new Date().toLocaleString("th-TH")}
-      </div>
-    `;
-
-    wrapper.appendChild(reportDiv);
-    document.body.appendChild(wrapper);
-
-    const opt = { 
-      margin: 10, 
-      filename: `Summary_${startDate}_${endDate}.pdf`, 
-      image: { type: 'jpeg', quality: 0.98 }, 
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-    };
+    // สร้างหน้าต่างใหม่ โหลดข้อมูล โหลด PDF แล้วปิด
+    const win = window.open('', '', 'width=800,height=600');
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Export PDF</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+        <style>
+          body { font-family: Tahoma, sans-serif; padding: 20px; color: #333; background: #FFF; }
+          .box { max-width: 800px; margin: 0 auto; }
+          .header { text-align: center; margin-bottom: 20px; }
+          h1 { color: #A91D3A; margin: 0 0 5px 0; font-size: 24px; font-weight: bold; }
+          p { color: #888; font-size: 14px; margin: 0; }
+          .footer { text-align: center; font-size: 11px; color: #BBB; margin-top: 30px; border-top: 1px dashed #EEE; padding-top: 10px; }
+        </style>
+      </head>
+      <body>
+        <div id="pdf-content" class="box">
+          <div class="header">
+            <h1>CoffeeToday Summary Report</h1>
+            <p>ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
+          </div>
+          ${branchTablesHTML}
+          <div class="footer">
+            พิมพ์เอกสารเมื่อ: ${new Date().toLocaleString("th-TH")}
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            const element = document.getElementById('pdf-content');
+            html2pdf().set({
+              margin: 10,
+              filename: 'Summary_${startDate}_${endDate}.pdf',
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).save().then(function() {
+              setTimeout(function() { window.close(); }, 1000);
+            });
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    win.document.close();
 
     setTimeout(() => {
-      html2pdf().set(opt).from(wrapper).save().then(() => {
-        document.body.removeChild(wrapper);
-        btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
-        btn.disabled = false;
-      }).catch(err => {
-        console.error(err);
-        document.body.removeChild(wrapper);
-        btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
-        btn.disabled = false;
-      });
-    }, 500);
+      btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
+      btn.disabled = false;
+    }, 1000);
   }
 
   function printOrder(data) { 
@@ -765,7 +797,6 @@
     if(pcObj) pcObj.destroy(); 
     if(scObj) scObj.destroy();
     
-    // ✅ เพิ่มข้อความไกด์แกน X (จำนวนที่สั่ง)
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
       data: { 
@@ -796,7 +827,6 @@
       } 
     });
     
-    // ✅ เพิ่มข้อความไกด์แกน X (จำนวนคงเหลือ)
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar', 
       data: { 
