@@ -130,7 +130,7 @@
         <i class="far fa-copy"></i>
       </button>
     </div>
-    <div style="font-size: 10px; color: #BBB; text-align: center; font-family: 'Prompt';">(กรณีเปิดใน Chrome หากกดไม่ติด ให้กดปุ่มก๊อปปี้ข้างเบอร์)</div>
+    <div style="font-size: 10px; color: #BBB; text-align: center; font-family: 'Prompt';">(กรณีเปิดใน Chrome หากกดไม่ติด ให้กดปุ่มก๊อกปี้ข้างเบอร์)</div>
   </div>
   <button class="fab-btn" onclick="toggleHelp()" title="Help Center">
     <i class="fas fa-question-circle" id="helpIcon"></i>
@@ -155,30 +155,59 @@
 
 <script>
   let pD = null, appData = null; 
-  
-  // 🚩 แก้ไขจุดที่ 1: ใส่ลิงก์ Web App ของคุณเบลล์ที่นี่
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
+  const CACHE_KEY = "coffee_today_menu_cache"; // กุญแจสำหรับจำข้อมูลในบราวเซอร์
 
-  // 🚩 แก้ไขจุดที่ 2: เปลี่ยนมาใช้ fetch เพื่อดึงข้อมูลสินค้าจากหลังบ้าน
+  /**
+   * ✅ อัปเกรดจุดที่ 1: ระบบ Nitro Browser Cache
+   * ดึงข้อมูลจากความจำมือถือขึ้นมาโชว์ทันทีใน 0.1 วินาที
+   */
   window.onload = () => {
+    // 1. ลองดึงข้อมูลเก่าที่เคยจำไว้มาโชว์ก่อน (Instant UI)
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+      appData = JSON.parse(cachedData);
+      buildProductUI(appData);
+      document.getElementById('loading-area').style.display = 'none';
+    }
+    
+    // 2. สั่ง Google ทำงานเบื้องหลังเพื่ออัปเดตข้อมูลใหม่ (Background Sync)
     fetch(GAS_URL + "?action=getClientData")
       .then(res => res.json())
       .then(data => {
+         const isFirstLoad = !appData;
+         
+         // จำข้อมูลใหม่ลงความจำมือถือ
+         localStorage.setItem(CACHE_KEY, JSON.stringify(data));
          appData = data;
-         buildProductUI(data);
-         document.getElementById('loading-area').style.display = 'none';
+
+         // ถ้าเป็นการเข้าครั้งแรก (ยังไม่มีแคช) ให้สร้าง UI ทันที
+         if (isFirstLoad) {
+             buildProductUI(data);
+             document.getElementById('loading-area').style.display = 'none';
+         }
+         // หมายเหตุ: ถ้ามีแคชอยู่แล้ว เราจะไม่โหลด UI ทับเพื่อป้องกันพนักงานที่กำลังพิมพ์อยู่แล้วช่องหาย
       })
-      .catch(err => showError("ไม่สามารถโหลดข้อมูลสินค้าได้: " + err));
+      .catch(err => {
+          if (!appData) showError("ไม่สามารถโหลดข้อมูลสินค้าได้: " + err);
+      });
   };
 
   function buildProductUI(initData) {
     const t = document.getElementById('tabs'), l = document.getElementById('lists');
+    
+    // ล้างข้อมูลเดิมก่อนสร้างใหม่
+    t.innerHTML = "";
+    l.innerHTML = "";
+
     if(!initData || !initData.categories || initData.categories.length === 0) {
       l.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">ไม่พบข้อมูลสินค้า</div>';
       return;
     }
+
     const fragmentTabs = document.createDocumentFragment();
     const fragmentLists = document.createDocumentFragment();
+
     initData.categories.forEach((c, i) => {
       const b = document.createElement('button'); 
       b.className = `tab-btn tbtn ${i===0?'active':''}`; 
@@ -190,28 +219,52 @@
         document.getElementById(`s-${i}`).classList.add('active'); 
       };
       fragmentTabs.appendChild(b);
+      
       const s = document.createElement('div'); 
       s.id = `s-${i}`; 
       s.className = `table-section ${i===0?'active':''}`;
+      
       let h = `<table width="100%"><thead><tr><th>สินค้า</th><th width="100" style="text-align:center;">คงเหลือ</th><th width="75" style="text-align:center;">สั่ง</th></tr></thead><tbody>`;
+      
       initData.products[c].forEach(p => { 
-        h += `<tr><td style="padding-right:10px;">${p.name}</td><td><div class="input-wrap"><input type="text" class="qty-in si" data-tab="${i}" placeholder="..."></div></td><td><div class="input-wrap"><input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0"></div></td></tr>`; 
+        h += `<tr>
+          <td style="padding-right:10px;">${p.name}</td>
+          <td>
+            <div class="input-wrap">
+              <input type="text" class="qty-in si" data-tab="${i}" placeholder="...">
+            </div>
+          </td>
+          <td>
+            <div class="input-wrap">
+              <input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0">
+            </div>
+          </td>
+        </tr>`; 
       });
       s.innerHTML = h + `</tbody></table>`; 
       fragmentLists.appendChild(s);
     });
+    
     t.appendChild(fragmentTabs);
     l.appendChild(fragmentLists);
+
     const oB = document.createElement('button'); oB.className='tab-btn tbtn'; oB.innerText='อื่นๆ';
     oB.onclick = () => { document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); oB.classList.add('active'); document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); document.getElementById('sec-others').classList.add('active'); };
     t.appendChild(oB); 
+    
+    // ล้างรายการ "อื่นๆ" เดิมก่อนแอดแถวใหม่
+    document.getElementById('custom-tbody').innerHTML = "";
     addRow(); 
   }
 
   function addRow() {
     const d = document.createElement('div'); d.className = 'other-row';
     const tabIdx = appData ? appData.categories.length : 0;
-    d.innerHTML = `<div class="col-name"><input type="text" class="main-in cn" style="margin:0;" placeholder="ระบุชื่อสินค้า..."></div><div class="col-stock"><input type="text" class="qty-in cs" data-tab="${tabIdx}" placeholder="..."></div><div class="col-qty"><input type="number" class="qty-in cq" placeholder="0"></div><i class="fas fa-trash-alt btn-del" onclick="this.parentElement.remove()"></i>`;
+    d.innerHTML = `
+      <div class="col-name"><input type="text" class="main-in cn" style="margin:0;" placeholder="ระบุชื่อสินค้า..."></div>
+      <div class="col-stock"><input type="text" class="qty-in cs" data-tab="${tabIdx}" placeholder="..."></div>
+      <div class="col-qty"><input type="number" class="qty-in cq" placeholder="0"></div>
+      <i class="fas fa-trash-alt btn-del" onclick="this.parentElement.remove()"></i>`;
     document.getElementById('custom-tbody').appendChild(d);
   }
 
@@ -224,7 +277,9 @@
   }
 
   function copyPhone(num) {
-    navigator.clipboard.writeText(num).then(() => showError("คัดลอกเบอร์โทรศัพท์เรียบร้อยแล้ว"));
+    navigator.clipboard.writeText(num).then(() => {
+      showError("คัดลอกเบอร์โทรศัพท์เรียบร้อยแล้ว");
+    });
   }
 
   function resetOrderUI() {
@@ -245,34 +300,68 @@
 
   function reviewOrder() {
     let d = "", h = "", hasItem = false;
-    const name = document.getElementById('cN').value.trim(), phone = document.getElementById('cP').value.trim(), email = document.getElementById('cE').value.trim(), branch = document.getElementById('cB').value.trim();
-    if(!name || !phone || !email || !branch) { window.scrollTo(0, 0); document.getElementById(name ? (phone ? (email ? 'cB' : 'cE') : 'cP') : 'cN').focus(); return showError("ระบุข้อมูลส่วนตัวให้ครบถ้วน"); }
-    const qis = document.querySelectorAll('.qi'), sis = document.querySelectorAll('.si'), tabBtns = document.querySelectorAll('.tbtn');
+    const name = document.getElementById('cN').value.trim();
+    const phone = document.getElementById('cP').value.trim();
+    const email = document.getElementById('cE').value.trim();
+    const branch = document.getElementById('cB').value.trim();
+
+    if(!name || !phone || !email || !branch) {
+      window.scrollTo(0, 0);
+      document.getElementById(name ? (phone ? (email ? 'cB' : 'cE') : 'cP') : 'cN').focus();
+      return showError("ระบุข้อมูลส่วนตัวให้ครบถ้วน");
+    }
+
+    const qis = document.querySelectorAll('.qi');
+    const sis = document.querySelectorAll('.si');
+    const tabBtns = document.querySelectorAll('.tbtn');
+    
     for(let i=0; i<qis.length; i++) {
       let qVal = parseFloat(qis[i].value) || 0;
       if(qVal > 0) {
         let remainVal = sis[i].value.trim();
-        if(!remainVal) { const targetTab = sis[i].dataset.tab; tabBtns[targetTab].click(); sis[i].focus(); return showError(`กรุณากรอก "คงเหลือ" ของ: ${qis[i].dataset.n}`); }
-        hasItem = true; d += `${qis[i].dataset.n} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
+        if(!remainVal) {
+          const targetTab = sis[i].dataset.tab;
+          tabBtns[targetTab].click();
+          sis[i].focus();
+          return showError(`กรุณากรอก "คงเหลือ" ของ: ${qis[i].dataset.n}`);
+        }
+        hasItem = true;
+        d += `${qis[i].dataset.n} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
       }
     }
-    const cns = document.querySelectorAll('.cn'), css = document.querySelectorAll('.cs'), cqs = document.querySelectorAll('.cq');
+
+    const cns = document.querySelectorAll('.cn');
+    const css = document.querySelectorAll('.cs');
+    const cqs = document.querySelectorAll('.cq');
+
     for(let i=0; i<cns.length; i++) {
-      let qVal = parseFloat(cqs[i].value) || 0, cName = cns[i].value.trim();
+      let qVal = parseFloat(cqs[i].value) || 0;
+      let cName = cns[i].value.trim();
       if(cName && qVal > 0) {
         let remainVal = css[i].value.trim();
-        if(!remainVal) { tabBtns[tabBtns.length - 1].click(); css[i].focus(); return showError(`กรุณากรอก "คงเหลือ" สำหรับรายการ: ${cName}`); }
-        hasItem = true; d += `${cName} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
+        if(!remainVal) {
+          tabBtns[tabBtns.length - 1].click();
+          css[i].focus();
+          return showError(`กรุณากรอก "คงเหลือ" สำหรับรายการ: ${cName}`);
+        }
+        hasItem = true;
+        d += `${cName} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
       }
     }
+
     if(!hasItem) return showError("กรุณาเลือกสินค้าอย่างน้อย 1 รายการ");
+    
     h += `<div style="border-bottom:2px solid #EEE; padding-bottom:10px; margin-bottom:15px;"><b>ผู้สั่ง:</b> ${name}<br><b>สาขา:</b> ${branch}</div><ul style="padding-left:20px;">`;
-    d.split('\n').filter(Boolean).forEach(line => { const m = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/); if(m) h += `<li>${m[1]} x <b style="color:var(--primary)">${m[3]}</b> (เหลือ: ${m[2]})</li>`; });
+    d.split('\n').filter(Boolean).forEach(line => {
+      const m = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+      if(m) h += `<li>${m[1]} x <b style="color:var(--primary)">${m[3]}</b> (เหลือ: ${m[2]})</li>`;
+    });
+
     pD = { name: name, phone: phone, email: email, branch: branch, details: d };
-    document.getElementById('rL').innerHTML = h + "</ul>"; document.getElementById('rM').style.display = 'flex';
+    document.getElementById('rL').innerHTML = h + "</ul>"; 
+    document.getElementById('rM').style.display = 'flex';
   }
 
-  // 🚩 แก้ไขจุดที่ 3: เปลี่ยนมาใช้ fetch POST เพื่อส่งออเดอร์กลับไปที่หลังบ้าน
   function confirmSubmit() {
     document.getElementById('cBtn').innerText = "กำลังส่ง...";
     document.getElementById('cBtn').disabled = true;
@@ -295,12 +384,10 @@
     })
     .catch(err => {
       showError("ไม่สามารถเชื่อมต่อกับ Server ได้");
-      document.getElementById('cBtn').innerText = "ยืนยันสั่ง";
+      document.getElementById('cBtn').innerText = "ืนยันสั่ง";
       document.getElementById('cBtn').disabled = false;
     });
   }
 </script>
 </body>
 </html>
-
-
