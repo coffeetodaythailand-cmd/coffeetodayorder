@@ -6,74 +6,386 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    :root { --primary: #A91D3A; --dark: #2D3133; --bg: #F8F9FA; }
-    body { font-family: 'Sarabun', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+    :root { 
+      --primary: #A91D3A; 
+      --dark: #2D3133; 
+      --bg: #F8F9FA; 
+    }
     
-    .card { max-width: 600px; margin: auto; background: #FFF; border-radius: 24px; border-top: 10px solid var(--primary); padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); position: relative; }
-    h2 { text-align: center; color: var(--primary); margin-bottom: 30px; font-family: 'Prompt'; }
+    body { 
+      font-family: 'Sarabun', sans-serif; 
+      background: var(--bg); 
+      margin: 0; 
+      padding: 20px; 
+    }
     
-    label { font-size: 13px; font-weight: 600; color: #666; margin-bottom: 5px; display: block; }
-    input.main-in { width: 100%; padding: 14px; margin-bottom: 20px; border: 1px solid #DDD; border-radius: 12px; box-sizing: border-box; outline: none; }
-    input:focus { border-color: var(--primary); }
+    .card { 
+      max-width: 600px; 
+      margin: auto; 
+      background: #FFF; 
+      border-radius: 24px; 
+      border-top: 10px solid var(--primary); 
+      padding: 35px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+      position: relative; 
+    }
     
-    .tab-btn { padding: 10px 22px; border: 1px solid #EEE; background: #FFF; border-radius: 50px; cursor: pointer; margin: 0 5px 10px 0; font-weight: 600; transition:0.2s; }
-    .tab-btn.active { background: var(--primary); color: #FFF; border-color: var(--primary); box-shadow: 0 4px 10px rgba(169,29,58,0.3); }
+    h2 { 
+      text-align: center; 
+      color: var(--primary); 
+      margin-bottom: 30px; 
+      font-family: 'Prompt'; 
+    }
     
-    .table-section { display: none; }
-    .table-section.active { display: block; animation: fadeIn 0.4s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    label { 
+      font-size: 13px; 
+      font-weight: 600; 
+      color: #666; 
+      margin-bottom: 5px; 
+      display: block; 
+    }
     
-    table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 5px; }
-    th { text-align: left; color: #999; font-size: 12px; padding-bottom: 5px; }
-    td { vertical-align: middle; }
+    input.main-in { 
+      width: 100%; 
+      padding: 14px; 
+      margin-bottom: 20px; 
+      border: 1px solid #DDD; 
+      border-radius: 12px; 
+      box-sizing: border-box; 
+      outline: none; 
+    }
     
-    .input-wrap { position: relative; width: 100%; }
-    .qty-in { width: 100%; padding: 10px; text-align: center; border: 1px solid #EEE; border-radius: 10px; font-weight: 600; background: #FAFAFA; box-sizing: border-box; outline: none; transition: 0.2s; font-size: 16px; }
-    .qty-in:focus { border-color: var(--primary); background: #FFF; }
+    input:focus { 
+      border-color: var(--primary); 
+    }
+    
+    .tab-btn { 
+      padding: 10px 22px; 
+      border: 1px solid #EEE; 
+      background: #FFF; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      margin: 0 5px 10px 0; 
+      font-weight: 600; 
+      transition:0.2s; 
+    }
+    
+    .tab-btn.active { 
+      background: var(--primary); 
+      color: #FFF; 
+      border-color: var(--primary); 
+      box-shadow: 0 4px 10px rgba(169,29,58,0.3); 
+    }
+    
+    .table-section { 
+      display: none; 
+    }
+    
+    .table-section.active { 
+      display: block; 
+      animation: fadeIn 0.4s; 
+    }
+    
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(5px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    table { 
+      width: 100%; 
+      border-collapse: separate; 
+      border-spacing: 0 8px; 
+      margin-top: 5px; 
+    }
+    
+    th { 
+      text-align: left; 
+      color: #999; 
+      font-size: 12px; 
+      padding-bottom: 5px; 
+    }
+    
+    td { 
+      vertical-align: middle; 
+    }
+    
+    .input-wrap { 
+      position: relative; 
+      width: 100%; 
+    }
+    
+    .qty-in { 
+      width: 100%; 
+      padding: 10px; 
+      text-align: center; 
+      border: 1px solid #EEE; 
+      border-radius: 10px; 
+      font-weight: 600; 
+      background: #FAFAFA; 
+      box-sizing: border-box; 
+      outline: none; 
+      transition: 0.2s; 
+      font-size: 16px; 
+    }
+    
+    .qty-in:focus { 
+      border-color: var(--primary); 
+      background: #FFF; 
+    }
 
-    .submit-btn { width: 100%; padding: 18px; background: var(--dark); color: #FFF; border: none; border-radius: 15px; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 30px; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    .submit-btn { 
+      width: 100%; 
+      padding: 18px; 
+      background: var(--dark); 
+      color: #FFF; 
+      border: none; 
+      border-radius: 15px; 
+      font-size: 18px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      margin-top: 30px; 
+      transition: 0.2s; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    }
+    
+    .submit-btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+    }
 
-    .other-header { display: flex; gap: 10px; font-size: 11px; color: #AAA; margin-bottom: 10px; padding: 0 5px; font-weight: 600; text-transform: uppercase; }
-    .other-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; animation: fadeIn 0.3s; }
+    .other-header { 
+      display: flex; 
+      gap: 10px; 
+      font-size: 11px; 
+      color: #AAA; 
+      margin-bottom: 10px; 
+      padding: 0 5px; 
+      font-weight: 600; 
+      text-transform: uppercase; 
+    }
+    
+    .other-row { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 12px; 
+      align-items: center; 
+      animation: fadeIn 0.3s; 
+    }
+    
     .col-name { flex: 1; }
     .col-stock { width: 100px; }
     .col-qty { width: 75px; }
-    .btn-del { color: #DDD; cursor: pointer; font-size: 16px; padding: 5px; transition: 0.2s; }
-    .btn-del:hover { color: var(--primary); }
     
-    .overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
-    .modal { background: #FFF; padding: 40px; border-radius: 30px; width: 90%; max-width: 450px; text-align: center; border-top: 12px solid var(--primary); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-    .summary-list { text-align: left; margin: 20px 0; background: #FDFDFD; padding: 20px; border-radius: 15px; max-height: 250px; overflow-y: auto; line-height: 1.8; border: 1px solid #F5F5F5; font-size: 14px; }
+    .btn-del { 
+      color: #DDD; 
+      cursor: pointer; 
+      font-size: 16px; 
+      padding: 5px; 
+      transition: 0.2s; 
+    }
+    
+    .btn-del:hover { 
+      color: var(--primary); 
+    }
+    
+    .overlay { 
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.8); 
+      backdrop-filter: blur(5px); 
+      align-items: center; 
+      justify-content: center; 
+    }
+    
+    .modal { 
+      background: #FFF; 
+      padding: 40px; 
+      border-radius: 30px; 
+      width: 90%; 
+      max-width: 450px; 
+      text-align: center; 
+      border-top: 12px solid var(--primary); 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+    }
+    
+    .summary-list { 
+      text-align: left; 
+      margin: 20px 0; 
+      background: #FDFDFD; 
+      padding: 20px; 
+      border-radius: 15px; 
+      max-height: 250px; 
+      overflow-y: auto; 
+      line-height: 1.8; 
+      border: 1px solid #F5F5F5; 
+      font-size: 14px; 
+    }
 
     #errT { 
-      position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); 
-      background: linear-gradient(135deg, #A91D3A 0%, #7a152a 100%); color: white; 
-      padding: 16px 30px; border-radius: 50px; z-index: 9999; font-family: 'Prompt'; 
-      font-size: 14px; display: flex; align-items: center; gap: 12px; 
-      box-shadow: 0 10px 30px rgba(169,29,58,0.4); transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
+      position: fixed; 
+      bottom: -100px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      background: linear-gradient(135deg, #A91D3A 0%, #7a152a 100%); 
+      color: white; 
+      padding: 16px 30px; 
+      border-radius: 50px; 
+      z-index: 9999; 
+      font-family: 'Prompt'; 
+      font-size: 14px; 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      box-shadow: 0 10px 30px rgba(169,29,58,0.4); 
+      transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
     }
-    #errT.show { bottom: 40px; }
-
-    .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; color: #BBB; }
-    .spinner { width: 45px; height: 45px; border: 4px solid #F3F3F3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    .fab-container { position: fixed; bottom: 25px; right: 25px; z-index: 999; display: flex; flex-direction: column; align-items: flex-end; gap: 15px; }
-    .fab-btn { width: 55px; height: 55px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 10px 25px rgba(169,29,58,0.4); transition: 0.3s; opacity: 0.85; border: none; }
-    .fab-btn:hover { transform: scale(1.1); opacity: 1; }
-    .help-menu { display: none; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); width: 240px; border-bottom: 5px solid var(--primary); animation: slideInUp 0.3s ease-out; }
-    @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     
-    .help-item-wrap { display: flex; align-items: center; justify-content: space-between; background: #F9F9F9; border-radius: 12px; margin-bottom: 8px; padding-right: 10px; }
-    .help-link { display: flex; align-items: center; gap: 12px; padding: 12px; text-decoration: none; color: var(--dark); flex: 1; font-size: 14px; font-weight: 600; }
-    .help-item { display: flex; align-items: center; gap: 12px; padding: 12px; text-decoration: none; color: var(--dark); border-radius: 12px; transition: 0.2s; font-size: 14px; font-weight: 600; margin-bottom: 5px; background: #F9F9F9; }
-    .help-item:hover, .help-link:hover { background: #F0F0F0; color: var(--primary); }
-    .help-item i, .help-link i { font-size: 18px; }
+    #errT.show { 
+      bottom: 40px; 
+    }
+
+    .loading-container { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 60px 0; 
+      color: #BBB; 
+    }
+    
+    .spinner { 
+      width: 45px; 
+      height: 45px; 
+      border: 4px solid #F3F3F3; 
+      border-top: 4px solid var(--primary); 
+      border-radius: 50%; 
+      animation: spin 1s linear infinite; 
+      margin-bottom: 15px; 
+    }
+    
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
+    }
+
+    .fab-container { 
+      position: fixed; 
+      bottom: 25px; 
+      right: 25px; 
+      z-index: 999; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-end; 
+      gap: 15px; 
+    }
+    
+    .fab-btn { 
+      width: 55px; 
+      height: 55px; 
+      background: var(--primary); 
+      color: white; 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 22px; 
+      cursor: pointer; 
+      box-shadow: 0 10px 25px rgba(169,29,58,0.4); 
+      transition: 0.3s; 
+      opacity: 0.85; 
+      border: none; 
+    }
+    
+    .fab-btn:hover { 
+      transform: scale(1.1); 
+      opacity: 1; 
+    }
+    
+    .help-menu { 
+      display: none; 
+      background: white; 
+      padding: 20px; 
+      border-radius: 20px; 
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15); 
+      width: 240px; 
+      border-bottom: 5px solid var(--primary); 
+      animation: slideInUp 0.3s ease-out; 
+    }
+    
+    @keyframes slideInUp { 
+      from { opacity: 0; transform: translateY(20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    .help-item-wrap { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      background: #F9F9F9; 
+      border-radius: 12px; 
+      margin-bottom: 8px; 
+      padding-right: 10px; 
+    }
+    
+    .help-link { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 12px; 
+      text-decoration: none; 
+      color: var(--dark); 
+      flex: 1; 
+      font-size: 14px; 
+      font-weight: 600; 
+    }
+    
+    .help-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 12px; 
+      text-decoration: none; 
+      color: var(--dark); 
+      border-radius: 12px; 
+      transition: 0.2s; 
+      font-size: 14px; 
+      font-weight: 600; 
+      margin-bottom: 5px; 
+      background: #F9F9F9; 
+    }
+    
+    .help-item:hover, .help-link:hover { 
+      background: #F0F0F0; 
+      color: var(--primary); 
+    }
+    
+    .help-item i, .help-link i { 
+      font-size: 18px; 
+    }
+    
     .line-color { color: #06C755; }
     .phone-color { color: #3498db; }
-    .copy-btn { background: none; border: none; color: #CCC; cursor: pointer; padding: 8px; transition: 0.2s; font-size: 16px; border-left: 1px solid #EEE; margin-left: 5px; }
-    .copy-btn:hover { color: var(--primary); }
+    
+    .copy-btn { 
+      background: none; 
+      border: none; 
+      color: #CCC; 
+      cursor: pointer; 
+      padding: 8px; 
+      transition: 0.2s; 
+      font-size: 16px; 
+      border-left: 1px solid #EEE; 
+      margin-left: 5px; 
+    }
+    
+    .copy-btn:hover { 
+      color: var(--primary); 
+    }
   </style>
 </head>
 <body>
@@ -81,11 +393,23 @@
 <div id="errT"><i class="fas fa-exclamation-circle"></i> <span id="errM"></span></div>
 
 <div class="card">
+  <div style="text-align:center; margin-bottom:15px;">
+    <img src="./emailLogo2025-09-11-03-46-29-029.png" style="width:110px; height:auto;">
+  </div>
+
   <h2><i class="fas fa-coffee"></i> CoffeeToday Order</h2>
-  <label>ชื่อผู้สั่ง</label><input type="text" id="cN" class="main-in" placeholder="ระบุชื่อของคุณ">
-  <label>เบอร์โทรศัพท์</label><input type="tel" id="cP" class="main-in" placeholder="08x-xxx-xxxx">
-  <label>อีเมลติดต่อ (บังคับ)</label><input type="email" id="cE" class="main-in" placeholder="example@email.com">
-  <label>สาขา</label><input type="text" id="cB" class="main-in" placeholder="ระบุชื่อสาขา">
+  
+  <label>ชื่อผู้สั่ง</label>
+  <input type="text" id="cN" class="main-in" placeholder="ระบุชื่อของคุณ">
+  
+  <label>เบอร์โทรศัพท์</label>
+  <input type="tel" id="cP" class="main-in" placeholder="08x-xxx-xxxx">
+  
+  <label>อีเมลติดต่อ (บังคับ)</label>
+  <input type="email" id="cE" class="main-in" placeholder="example@email.com">
+  
+  <label>สาขา</label>
+  <input type="text" id="cB" class="main-in" placeholder="ระบุชื่อสาขา">
   
   <div id="tabs" style="margin-bottom:20px; display:flex; flex-wrap:wrap;"></div>
   
@@ -137,33 +461,32 @@
   </button>
 </div>
 
-<div id="rM" class="overlay"><div class="modal">
-  <h3>📝 สรุปรายการสั่งซื้อ</h3>
-  <div id="rL" class="summary-list"></div>
-  <div style="display:flex; gap:10px;">
-    <button onclick="document.getElementById('rM').style.display='none'" style="flex:1; padding:15px; border:none; border-radius:12px; background:#F5F5F5; font-weight:600; cursor:pointer;">แก้ไข</button>
-    <button onclick="confirmSubmit()" id="cBtn" style="flex:1; padding:15px; background:var(--primary); color:#FFF; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">ยืนยันสั่ง</button>
+<div id="rM" class="overlay">
+  <div class="modal">
+    <h3>📝 สรุปรายการสั่งซื้อ</h3>
+    <div id="rL" class="summary-list"></div>
+    <div style="display:flex; gap:10px;">
+      <button onclick="document.getElementById('rM').style.display='none'" style="flex:1; padding:15px; border:none; border-radius:12px; background:#F5F5F5; font-weight:600; cursor:pointer;">แก้ไข</button>
+      <button onclick="confirmSubmit()" id="cBtn" style="flex:1; padding:15px; background:var(--primary); color:#FFF; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">ยืนยันสั่ง</button>
+    </div>
   </div>
-</div></div>
+</div>
 
-<div id="successModal" class="overlay"><div class="modal">
-  <i class="fas fa-check-circle" style="font-size:60px; color:#22c55e; margin-bottom:20px;"></i>
-  <h2 style="color:#22c55e; margin:0;">สั่งสำเร็จ!</h2>
-  <p id="showOrderId" style="font-size:24px; font-weight:bold; color:var(--dark); margin:15px 0;"></p>
-  <button onclick="resetOrderUI()" style="padding:12px 50px; background:var(--dark); color:#FFF; border:none; border-radius:50px; font-weight:600; cursor:pointer;">ตกลง</button>
-</div></div>
+<div id="successModal" class="overlay">
+  <div class="modal">
+    <i class="fas fa-check-circle" style="font-size:60px; color:#22c55e; margin-bottom:20px;"></i>
+    <h2 style="color:#22c55e; margin:0;">สั่งสำเร็จ!</h2>
+    <p id="showOrderId" style="font-size:24px; font-weight:bold; color:var(--dark); margin:15px 0;"></p>
+    <button onclick="resetOrderUI()" style="padding:12px 50px; background:var(--dark); color:#FFF; border:none; border-radius:50px; font-weight:600; cursor:pointer;">ตกลง</button>
+  </div>
+</div>
 
 <script>
   let pD = null, appData = null; 
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
-  const CACHE_KEY = "coffee_today_menu_cache"; // กุญแจสำหรับจำข้อมูลในบราวเซอร์
+  const CACHE_KEY = "coffee_today_menu_cache";
 
-  /**
-   * ✅ อัปเกรดจุดที่ 1: ระบบ Nitro Browser Cache
-   * ดึงข้อมูลจากความจำมือถือขึ้นมาโชว์ทันทีใน 0.1 วินาที
-   */
   window.onload = () => {
-    // 1. ลองดึงข้อมูลเก่าที่เคยจำไว้มาโชว์ก่อน (Instant UI)
     const cachedData = localStorage.getItem(CACHE_KEY);
     if (cachedData) {
       appData = JSON.parse(cachedData);
@@ -171,22 +494,16 @@
       document.getElementById('loading-area').style.display = 'none';
     }
     
-    // 2. สั่ง Google ทำงานเบื้องหลังเพื่ออัปเดตข้อมูลใหม่ (Background Sync)
     fetch(GAS_URL + "?action=getClientData")
       .then(res => res.json())
       .then(data => {
-         const isFirstLoad = !appData;
-         
-         // จำข้อมูลใหม่ลงความจำมือถือ
-         localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-         appData = data;
-
-         // ถ้าเป็นการเข้าครั้งแรก (ยังไม่มีแคช) ให้สร้าง UI ทันที
-         if (isFirstLoad) {
-             buildProductUI(data);
-             document.getElementById('loading-area').style.display = 'none';
-         }
-         // หมายเหตุ: ถ้ามีแคชอยู่แล้ว เราจะไม่โหลด UI ทับเพื่อป้องกันพนักงานที่กำลังพิมพ์อยู่แล้วช่องหาย
+          const isFirstLoad = !appData;
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          appData = data;
+          if (isFirstLoad) {
+              buildProductUI(data);
+              document.getElementById('loading-area').style.display = 'none';
+          }
       })
       .catch(err => {
           if (!appData) showError("ไม่สามารถโหลดข้อมูลสินค้าได้: " + err);
@@ -195,19 +512,14 @@
 
   function buildProductUI(initData) {
     const t = document.getElementById('tabs'), l = document.getElementById('lists');
-    
-    // ล้างข้อมูลเดิมก่อนสร้างใหม่
     t.innerHTML = "";
     l.innerHTML = "";
-
     if(!initData || !initData.categories || initData.categories.length === 0) {
       l.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">ไม่พบข้อมูลสินค้า</div>';
       return;
     }
-
     const fragmentTabs = document.createDocumentFragment();
     const fragmentLists = document.createDocumentFragment();
-
     initData.categories.forEach((c, i) => {
       const b = document.createElement('button'); 
       b.className = `tab-btn tbtn ${i===0?'active':''}`; 
@@ -219,52 +531,37 @@
         document.getElementById(`s-${i}`).classList.add('active'); 
       };
       fragmentTabs.appendChild(b);
-      
       const s = document.createElement('div'); 
       s.id = `s-${i}`; 
       s.className = `table-section ${i===0?'active':''}`;
-      
       let h = `<table width="100%"><thead><tr><th>สินค้า</th><th width="100" style="text-align:center;">คงเหลือ</th><th width="75" style="text-align:center;">สั่ง</th></tr></thead><tbody>`;
-      
       initData.products[c].forEach(p => { 
-        h += `<tr>
-          <td style="padding-right:10px;">${p.name}</td>
-          <td>
-            <div class="input-wrap">
-              <input type="text" class="qty-in si" data-tab="${i}" placeholder="...">
-            </div>
-          </td>
-          <td>
-            <div class="input-wrap">
-              <input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0">
-            </div>
-          </td>
-        </tr>`; 
+        h += `<tr><td style="padding-right:10px;">${p.name}</td><td><div class="input-wrap"><input type="text" class="qty-in si" data-tab="${i}" placeholder="..."></div></td><td><div class="input-wrap"><input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0"></div></td></tr>`; 
       });
       s.innerHTML = h + `</tbody></table>`; 
       fragmentLists.appendChild(s);
     });
-    
     t.appendChild(fragmentTabs);
     l.appendChild(fragmentLists);
-
-    const oB = document.createElement('button'); oB.className='tab-btn tbtn'; oB.innerText='อื่นๆ';
-    oB.onclick = () => { document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); oB.classList.add('active'); document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); document.getElementById('sec-others').classList.add('active'); };
+    const oB = document.createElement('button'); 
+    oB.className='tab-btn tbtn'; 
+    oB.innerText='อื่นๆ';
+    oB.onclick = () => { 
+      document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); 
+      oB.classList.add('active'); 
+      document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); 
+      document.getElementById('sec-others').classList.add('active'); 
+    };
     t.appendChild(oB); 
-    
-    // ล้างรายการ "อื่นๆ" เดิมก่อนแอดแถวใหม่
     document.getElementById('custom-tbody').innerHTML = "";
     addRow(); 
   }
 
   function addRow() {
-    const d = document.createElement('div'); d.className = 'other-row';
+    const d = document.createElement('div'); 
+    d.className = 'other-row';
     const tabIdx = appData ? appData.categories.length : 0;
-    d.innerHTML = `
-      <div class="col-name"><input type="text" class="main-in cn" style="margin:0;" placeholder="ระบุชื่อสินค้า..."></div>
-      <div class="col-stock"><input type="text" class="qty-in cs" data-tab="${tabIdx}" placeholder="..."></div>
-      <div class="col-qty"><input type="number" class="qty-in cq" placeholder="0"></div>
-      <i class="fas fa-trash-alt btn-del" onclick="this.parentElement.remove()"></i>`;
+    d.innerHTML = `<div class="col-name"><input type="text" class="main-in cn" style="margin:0;" placeholder="ระบุชื่อสินค้า..."></div><div class="col-stock"><input type="text" class="qty-in cs" data-tab="${tabIdx}" placeholder="..."></div><div class="col-qty"><input type="number" class="qty-in cq" placeholder="0"></div><i class="fas fa-trash-alt btn-del" onclick="this.parentElement.remove()"></i>`;
     document.getElementById('custom-tbody').appendChild(d);
   }
 
@@ -304,17 +601,14 @@
     const phone = document.getElementById('cP').value.trim();
     const email = document.getElementById('cE').value.trim();
     const branch = document.getElementById('cB').value.trim();
-
     if(!name || !phone || !email || !branch) {
       window.scrollTo(0, 0);
       document.getElementById(name ? (phone ? (email ? 'cB' : 'cE') : 'cP') : 'cN').focus();
       return showError("ระบุข้อมูลส่วนตัวให้ครบถ้วน");
     }
-
     const qis = document.querySelectorAll('.qi');
     const sis = document.querySelectorAll('.si');
     const tabBtns = document.querySelectorAll('.tbtn');
-    
     for(let i=0; i<qis.length; i++) {
       let qVal = parseFloat(qis[i].value) || 0;
       if(qVal > 0) {
@@ -329,11 +623,9 @@
         d += `${qis[i].dataset.n} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
       }
     }
-
     const cns = document.querySelectorAll('.cn');
     const css = document.querySelectorAll('.cs');
     const cqs = document.querySelectorAll('.cq');
-
     for(let i=0; i<cns.length; i++) {
       let qVal = parseFloat(cqs[i].value) || 0;
       let cName = cns[i].value.trim();
@@ -348,15 +640,12 @@
         d += `${cName} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
       }
     }
-
     if(!hasItem) return showError("กรุณาเลือกสินค้าอย่างน้อย 1 รายการ");
-    
     h += `<div style="border-bottom:2px solid #EEE; padding-bottom:10px; margin-bottom:15px;"><b>ผู้สั่ง:</b> ${name}<br><b>สาขา:</b> ${branch}</div><ul style="padding-left:20px;">`;
     d.split('\n').filter(Boolean).forEach(line => {
       const m = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
       if(m) h += `<li>${m[1]} x <b style="color:var(--primary)">${m[3]}</b> (เหลือ: ${m[2]})</li>`;
     });
-
     pD = { name: name, phone: phone, email: email, branch: branch, details: d };
     document.getElementById('rL').innerHTML = h + "</ul>"; 
     document.getElementById('rM').style.display = 'flex';
@@ -365,7 +654,6 @@
   function confirmSubmit() {
     document.getElementById('cBtn').innerText = "กำลังส่ง...";
     document.getElementById('cBtn').disabled = true;
-    
     fetch(GAS_URL, {
       method: "POST",
       body: JSON.stringify({ action: "submitOrder", formData: pD })
@@ -384,7 +672,7 @@
     })
     .catch(err => {
       showError("ไม่สามารถเชื่อมต่อกับ Server ได้");
-      document.getElementById('cBtn').innerText = "ืนยันสั่ง";
+      document.getElementById('cBtn').innerText = "ยืนยันสั่ง";
       document.getElementById('cBtn').disabled = false;
     });
   }
