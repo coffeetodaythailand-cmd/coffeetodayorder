@@ -225,7 +225,9 @@
             <input type="date" id="sDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
             <input type="date" id="eDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
             <button class="btn btn-red btn-sm" onclick="loadDashboardData(true)" style="padding:5px 15px; font-size:11px;">กรอง</button>
-            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="padding:5px 15px; font-size:11px; background:var(--blue); color:white;"><i class="fas fa-file-invoice"></i> สรุปรายสาขา</button>
+            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="padding:5px 15px; font-size:11px; background:var(--blue); color:white;">
+              <i class="fas fa-file-invoice"></i> สรุปรายสาขา
+            </button>
           </div>
         </div>
         <div style="height:260px;"><canvas id="bC"></canvas></div>
@@ -333,6 +335,7 @@
 
 <script>
   let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null;
+  
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
 
@@ -350,7 +353,6 @@
     const pInput = document.getElementById('passInput');
     lBtn.disabled = true; 
     lBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking PIN...';
-
     fetch(`${GAS_URL}?action=verifyLogin&pass=${pInput.value}`)
       .then(res => res.json())
       .then(res => {
@@ -451,8 +453,8 @@
   }
 
   /**
-   * ✅ ฟังก์ชันอัปเกรด: ดาวน์โหลด PDF ออเดอร์ (Order Receipt)
-   * แก้ไข: ล็อกพิกัดกล้องด้วย scrollY: 0 และล็อก Container เพื่อป้องกันหน้าขาว 100%
+   * ✅ อัปเกรด: ดาวน์โหลด PDF ออเดอร์ (Order Receipt)
+   * แก้ปัญหา: หลุดขอบ และตัวหนังสือตกด้วย Tahoma พร้อมล็อกกล้อง scrollY: 0
    */
   function downloadPDF() {
     const btn = document.getElementById('dlBtn');
@@ -461,12 +463,12 @@
 
     const sourceContent = document.getElementById('pdf-content');
     
-    // สร้าง Stealth Wrapper เพื่อคุมเลย์เอาต์ (ป้องกันรายงานชิดซ้ายและกันขาว)
+    // สร้าง Stealth Wrapper ล็อกพิกัดหน้ากล้องกันจอขาวและรายงานชิดซ้าย
     const wrapper = document.createElement('div');
-    wrapper.style = "position:fixed; top:0; left:-5000px; width:400px; display:flex; justify-content:center; background:#FFF; padding:20px; box-sizing:border-box;";
+    wrapper.style = "position:fixed; top:0; left:-5000px; width:400px; display:flex; justify-content:center; background:#FFF; z-index:-9999; padding:20px; box-sizing:border-box;";
     
     const clone = sourceContent.cloneNode(true);
-    // 💡 ล็อกฟอนต์ Tahoma และ Sarabun เพื่อกันตัวหนังสือตก
+    // 💡 บังคับใช้ Tahoma เพื่อกันตัวหนังสือภาษาไทยตกหล่น
     clone.style.fontFamily = 'Tahoma, "Sarabun", sans-serif'; 
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
@@ -475,6 +477,7 @@
       margin: 5,
       filename: `Receipt_${currentViewingOrderId}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
+      // 💡 scrollY: 0 สำคัญมาก เพื่อล็อกเป้าตากล้องไม่ให้ถ่ายที่ว่างสีขาว
       html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
       jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' } 
     };
@@ -489,19 +492,19 @@
   }
 
   /**
-   * ✅ ฟังก์ชันอัปเกรด: ดาวน์โหลดรายงานสรุปยอด (Summary Report)
-   * แก้ไข: ชิดขอบบน, ขนาดตัวหนังสือพอดี, ตัวหนังสือไม่ตกด้วย Tahoma, ล็อกพิกัดกันหน้าขาว
+   * ✅ อัปเกรด: ดาวน์โหลดรายงานสรุปรายสาขา (Summary Report)
+   * แก้ไข: ชิดขอบบน, ตัวหนังสือไม่ตก, เพิ่มคอลัมน์คงเหลือ, และกันรายงานโผล่หลัง UI
    */
   function downloadSummaryReport() {
     if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
     const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> สรุปรายสาขา...';
     btn.disabled = true;
 
     const startDate = document.getElementById('sDate').value || "จุดเริ่มต้น";
     const endDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // ประมวลผลข้อมูล: จัดกลุ่มสินค้าตามสาขา
+    // ประมวลผลข้อมูลจัดกลุ่มตามสาขา
     const branchSummary = {};
     allOrders.forEach(order => {
       const branchName = order.branch || "อื่นๆ";
@@ -524,11 +527,11 @@
 
     // สร้าง Stealth Wrapper (ล่องหนนอกจอ - ป้องกันเด้งชิดซ้ายและโผล่หลัง UI)
     const wrapper = document.createElement('div');
-    wrapper.style = "position:fixed; top:0; left:-5000px; width:800px; background:#FFF; padding:10px 30px; box-sizing:border-box;";
+    wrapper.style = "position:fixed; top:0; left:-5000px; width:750px; background:#FFF; padding:5px 25px; box-sizing:border-box;";
     
     const reportDiv = document.createElement('div');
-    // 💡 ล็อกฟอนต์ Tahoma ป้องกันภาษาไทยตกหล่น 100%
-    reportDiv.style = "width:100%; color:#333; font-family:Tahoma, sans-serif;";
+    // 💡 ล็อก Tahoma ป้องกันคำว่า "ยอดรวมสั่งซื้อ" เพี้ยน 100%
+    reportDiv.style = "width:100%; color:#333; font-family:Tahoma, sans-serif; padding-top:0;";
     
     let branchTablesHTML = "";
     Object.keys(branchSummary).sort().forEach(branch => {
@@ -548,9 +551,9 @@
           <table style="width:100%; border-collapse:collapse;">
             <thead>
               <tr style="background:#FAFAFA; font-size:10px;">
-                <th style="padding:8px 10px; text-align:left; border-bottom:2px solid #EEE; width:50%; font-family:'Tahoma';">รายการสินค้า</th>
-                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE; font-family:'Tahoma';">ยอดคงเหลือล่าสุด</th>
-                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE; font-family:'Tahoma';">ยอดรวมสั่งซื้อ</th>
+                <th style="padding:8px 10px; text-align:left; border-bottom:2px solid #EEE; width:50%; font-family:'Tahoma'; font-weight:bold;">รายการสินค้า</th>
+                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE; font-family:'Tahoma'; font-weight:bold;">ยอดคงเหลือล่าสุด</th>
+                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE; font-family:'Tahoma'; font-weight:bold;">ยอดรวมสั่งซื้อ</th>
               </tr>
             </thead>
             <tbody>${itemRows}</tbody>
@@ -577,7 +580,6 @@
       margin: 5,
       filename: `Summary_${startDate}_${endDate}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      // 💡 scrollY: 0 สำคัญมาก เพื่อกันหน้าขาว 100%
       html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
