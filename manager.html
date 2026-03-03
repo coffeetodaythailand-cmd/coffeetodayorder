@@ -297,19 +297,16 @@
 
 <div id="receiptModal" class="overlay">
   <div class="receipt-card">
-    
     <div id="pdf-content">
       <div style="text-align:center; margin-bottom:10px;">
         <h3 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:1px;">ORDER RECEIPT</h3>
       </div>
       <div id="receiptBody"></div>
-      
       <div style="margin-top: 30px; text-align: center; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #888;">
         <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
         <p>วันที่พิมพ์: <span id="printDate"></span></p>
       </div>
     </div>
-    
     <button id="dlBtn" class="btn" style="width:100%; margin-top:25px; padding:15px; background:var(--green); color:white;" onclick="downloadPDF()">
       <i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF
     </button>
@@ -494,9 +491,7 @@
   function viewOrderDetail(id) {
     const o = allOrders.find(x => x.id === id);
     if(!o) return;
-    
     currentViewingOrderId = id;
-
     let tableRows = '';
     const items = o.items.split('\n');
     items.forEach(line => {
@@ -520,66 +515,60 @@
         <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>`;
-      
     document.getElementById('receiptBody').innerHTML = bodyHtml;
     document.getElementById('printDate').innerText = new Date().toLocaleString("th-TH");
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
   /**
-   * ✅ ฟังก์ชันดาวน์โหลด PDF ออเดอร์ (Order Receipt)
-   * แก้ไข: ล็อกพิกัดกล้องด้วย scrollY: 0 ป้องกันภาพขาว 100%
+   * ✅ อัปเกรดดาวน์โหลด PDF ออเดอร์ (แก้หน้าขาว + ตัวหนังสือตก)
    */
   function downloadPDF() {
     const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> เตรียมไฟล์...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
     btn.disabled = true;
 
     const sourceContent = document.getElementById('pdf-content');
-    const clone = sourceContent.cloneNode(true);
     
-    clone.style.position = 'fixed'; // บังคับให้วัตถุติดหนึบกับหน้ากล้อง
-    clone.style.top = '0';
-    clone.style.left = '0';
+    // สร้าง Container คุมเพื่อล็อกตำแหน่งกันขาวและชิดซ้าย
+    const wrapper = document.createElement('div');
+    wrapper.style = "position:fixed; top:0; left:0; width:100%; height:100%; display:flex; justify-content:center; background:#FFF; z-index:-9999; padding-top:20px;";
+    
+    const clone = sourceContent.cloneNode(true);
     clone.style.width = '350px'; 
-    clone.style.padding = '20px';
-    clone.style.background = '#FFFFFF';
-    clone.style.zIndex = '-9999'; 
-    clone.style.fontFamily = 'Tahoma, sans-serif'; // ป้องกันตัวหนังสือตก
-    document.body.appendChild(clone);
+    clone.style.fontFamily = 'Tahoma, "Sarabun", sans-serif'; // กันตัวหนังสือตก
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
 
     const opt = {
-      margin:       5,
-      filename:     `Receipt_${currentViewingOrderId}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      // หัวใจสำคัญ: สั่งให้กล้องถ่ายพิกัดบนสุดเสมอ ไม่สนว่าเราเลื่อนจอไปไหน
-      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
-      jsPDF:        { unit: 'mm', format: [80, 200], orientation: 'portrait' } 
+      margin: 5,
+      filename: `Receipt_${currentViewingOrderId}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
+      jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' } 
     };
 
     setTimeout(() => {
       html2pdf().set(opt).from(clone).save().then(() => {
-        document.body.removeChild(clone);
+        document.body.removeChild(wrapper);
         btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
         btn.disabled = false;
       });
-    }, 500); // หน่วงเวลาให้วาดเสร็จ
+    }, 500);
   }
 
   /**
-   * ✅ ฟังก์ชันดาวน์โหลดรายงานสรุปรายสาขา (Summary Report)
-   * แก้ไข: ชิดขอบบน, ขนาดตัวหนังสือพอดี, ตัวหนังสือไม่ตก, และล็อกกล้องกันจอขาว
+   * ✅ อัปเกรดดาวน์โหลดรายงานสรุปยอด (แก้หน้าขาว + ตัวหนังสือตก + ชิดขอบบน + ย้ายทั้งสาขา)
    */
   function downloadSummaryReport() {
     if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
     const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสรุป...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     btn.disabled = true;
 
     const startDate = document.getElementById('sDate').value || "จุดเริ่มต้น";
     const endDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // ประมวลผลจัดกลุ่มข้อมูล
     const branchSummary = {};
     allOrders.forEach(order => {
       const branchName = order.branch || "อื่นๆ";
@@ -600,71 +589,38 @@
       });
     });
 
-    // สร้างกระดาษรายงานจำลอง (ล็อกพิกัดกันจอขาว)
+    // สร้าง Container คุมรายงาน
+    const wrapper = document.createElement('div');
+    wrapper.style = "position:fixed; top:0; left:0; width:100%; display:flex; justify-content:center; background:#FFF; z-index:-9999; padding:10px 0;";
+    
     const reportDiv = document.createElement('div');
-    reportDiv.style.position = 'fixed';
-    reportDiv.style.top = '0';
-    reportDiv.style.left = '0';
-    reportDiv.style.width = '750px'; 
-    reportDiv.style.padding = '5px 25px'; // ชิดขอบบนสุด
-    reportDiv.style.background = '#FFFFFF';
-    reportDiv.style.zIndex = '-9999';
-    reportDiv.style.color = '#333';
-    reportDiv.style.fontFamily = 'Tahoma, sans-serif'; // ฟอนต์มาตรฐานกันตัวหนังสือตก
-
-    let branchTablesHTML = "";
+    reportDiv.style = "width:750px; color:#333; font-family:Tahoma, sans-serif; padding-top:0;";
+    
+    let tables = "";
     Object.keys(branchSummary).sort().forEach(branch => {
-      let itemRows = "";
+      let rows = "";
       Object.entries(branchSummary[branch]).forEach(([item, data]) => {
-        itemRows += `
-          <tr>
-            <td style="padding: 5px; border-bottom: 1px solid #EEE; font-size: 11px;">${item}</td>
-            <td style="padding: 5px; border-bottom: 1px solid #EEE; text-align: center; font-size: 11px;">${data.stock}</td>
-            <td style="padding: 5px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 11px; color: #A91D3A;">${data.total}</td>
-          </tr>`;
+        rows += `<tr><td style="padding:5px; border-bottom:1px solid #EEE; font-size:11px;">${item}</td><td style="padding:5px; border-bottom:1px solid #EEE; text-align:center; font-size:11px;">${data.stock}</td><td style="padding:5px; border-bottom:1px solid #EEE; text-align:center; font-weight:bold; font-size:11px; color:#A91D3A;">${data.total}</td></tr>`;
       });
-
-      branchTablesHTML += `
-        <div style="page-break-inside: avoid; margin-bottom: 15px; border: 1px solid #EEE; border-radius: 6px; padding: 10px;">
-          <h2 style="color: #A91D3A; border-left: 4px solid #A91D3A; padding-left: 10px; font-size: 14px; margin: 0 0 10px 0;">สาขา: ${branch}</h2>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background: #FAFAFA; font-size: 10px;">
-                <th style="padding: 6px; text-align: left; border-bottom: 2px solid #EEE;">รายการสินค้า</th>
-                <th style="padding: 6px; text-align: center; border-bottom: 2px solid #EEE;">ยอดคงเหลือ</th>
-                <th style="padding: 6px; text-align: center; border-bottom: 2px solid #EEE;">ยอดรวมสั่งซื้อ</th>
-              </tr>
-            </thead>
-            <tbody>${itemRows}</tbody>
-          </table>
-        </div>
-      `;
+      tables += `<div style="page-break-inside:avoid; margin-bottom:15px; border:1px solid #EEE; border-radius:6px; padding:10px;"><h2 style="color:#A91D3A; border-left:4px solid #A91D3A; padding-left:10px; font-size:14px; margin:0 0 10px 0; font-family:'Tahoma'; font-weight:bold;">สาขา: ${branch}</h2><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#FAFAFA; font-size:10px;"><th style="padding:6px; text-align:left; border-bottom:2px solid #EEE;">รายการสินค้า</th><th style="padding:6px; text-align:center; border-bottom:2px solid #EEE;">ยอดคงเหลือล่าสุด</th><th style="padding:6px; text-align:center; border-bottom:2px solid #EEE;">ยอดรวมสั่งซื้อ</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     });
 
-    reportDiv.innerHTML = `
-      <div style="text-align: center; margin-bottom: 15px;">
-        <h1 style="color: #A91D3A; margin: 0 0 2px 0; font-size: 20px;">CoffeeToday Summary Report</h1>
-        <p style="color: #888; font-size: 11px; margin: 0;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
-      </div>
-      ${branchTablesHTML}
-      <div style="text-align: center; font-size: 9px; color: #BBB; margin-top: 20px;">
-        เอกสารพิมพ์เมื่อ: ${new Date().toLocaleString("th-TH")}
-      </div>
-    `;
-
-    document.body.appendChild(reportDiv);
+    reportDiv.innerHTML = `<div style="text-align:center; margin-bottom:15px; margin-top:0;"><h1 style="color:#A91D3A; margin:0 0 2px 0; font-size:22px; font-family:'Tahoma';">CoffeeToday Summary Report</h1><p style="color:#888; font-size:11px; margin:0;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p></div>${tables}<div style="text-align:center; font-size:9px; color:#BBB; margin-top:20px;">เอกสารพิมพ์เมื่อ: ${new Date().toLocaleString("th-TH")}</div>`;
+    
+    wrapper.appendChild(reportDiv);
+    document.body.appendChild(wrapper);
 
     const opt = {
-      margin:       [5, 5], 
-      filename:     `Summary_${startDate}_${endDate}.pdf`,
-      image:        { type: 'jpeg', quality: 1 },
-      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+      margin: 5,
+      filename: `Summary_${startDate}_${endDate}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
 
     setTimeout(() => {
       html2pdf().set(opt).from(reportDiv).save().then(() => {
-        document.body.removeChild(reportDiv);
+        document.body.removeChild(wrapper);
         btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
         btn.disabled = false;
       });
@@ -679,12 +635,13 @@
   function renderCharts(c) {
     if(bcObj) bcObj.destroy(); if(pcObj) pcObj.destroy(); if(scObj) scObj.destroy();
     
-    // ✅ เพิ่มข้อความไกด์ (ชิ้น) ที่แกนตัวเลข
+    // ✅ เพิ่มแกนไกด์: จำนวนที่สั่ง (ชิ้น)
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
       data: { labels: c.pL, datasets: [{ label: 'จำนวนสั่ง', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] }, 
       options: { 
-        maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+        maintainAspectRatio: false, indexAxis: 'y', 
+        plugins: { legend: { display: false } },
         scales: { x: { title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
       } 
     });
@@ -695,7 +652,7 @@
       options: { maintainAspectRatio: false, cutout: '78%' } 
     });
     
-    // ✅ เพิ่มข้อความไกด์ (ชิ้น) ที่แกนตัวเลข
+    // ✅ เพิ่มแกนไกด์: จำนวนคงเหลือล่าสุด (ชิ้น)
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar',
       data: {
@@ -708,7 +665,8 @@
         }]
       },
       options: { 
-        maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+        maintainAspectRatio: false, indexAxis: 'y', 
+        plugins: { legend: { display: false } },
         scales: { x: { title: { display: true, text: 'จำนวนคงเหลือล่าสุด (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
       }
     });
@@ -725,16 +683,7 @@
     });
     if(currentCat && d.grouped[currentCat]) {
       d.grouped[currentCat].forEach(i => { 
-        itemsHtml += `<div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">
-          <span style="font-weight:600; color:#444;">${i.name}</span>
-          <div style="display:flex; gap:25px; align-items:center;">
-            <label class="switch">
-              <input type="checkbox" ${i.status==='Active'?'checked':''} onchange="toggleItem('${i.rowId}', '${i.name}', '${currentCat}', this)">
-              <span class="slider"></span>
-            </label>
-            <i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${i.rowId}, '${i.name}', '${currentCat}')"></i>
-          </div>
-        </div>`; 
+        itemsHtml += `<div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;"><span style="font-weight:600; color:#444;">${i.name}</span><div style="display:flex; gap:25px; align-items:center;"><label class="switch"><input type="checkbox" ${i.status==='Active'?'checked':''} onchange="toggleItem('${i.rowId}', '${i.name}', '${currentCat}', this)"><span class="slider"></span></label><i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${i.rowId}, '${i.name}', '${currentCat}')"></i></div></div>`; 
       });
     }
     document.getElementById('catChips').innerHTML = chipsHtml;
@@ -767,7 +716,8 @@
     const name = document.getElementById('pN').value; const cat = document.getElementById('pCatSelect').value; if(!name) return; closeM('pM'); 
     const token = localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=updateProduct&id=${editTargetId}&name=${name}&cat=${cat}&status=Active&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("✅ บันทึกสินค้าเรียบร้อย!"); });
+      .then(res => res.json())
+      .then(d => { renderMenuAccordion(d); showToast("✅ บันทึกสินค้าเรียบร้อย!"); });
   }
   function changeLimit() { pgLim = parseInt(document.getElementById('rowSel').value); pgNum = 1; renderTable(); }
   function next() { if(pgNum * pgLim < allOrders.length){ pgNum++; renderTable(); } }
