@@ -527,52 +527,72 @@
   }
 
   /**
-   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF แก้อาการจอขาว 100% 
-   * โดยใช้วิธีส่งโครงสร้าง HTML ให้เครื่องพิมพ์ PDF ตรงๆ ไม่ง้อการแคปหน้าจอ
+   * ✅ อัปเกรดดาวน์โหลด PDF แบบแก้ปัญหาจอขาว 100%
+   * 1. กางกระดาษแบบเดียวกับหน้า Print
+   * 2. ซ่อนไว้ข้างหลังสุด แต่อยู่ในระยะที่กล้องมองเห็น
+   * 3. หน่วงเวลา 0.5 วิ เพื่อให้ระบบวาดตัวหนังสือลงกระดาษเสร็จก่อนแคปรูป
    */
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
 
     const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมไฟล์...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล PDF...';
     btn.disabled = true;
 
-    // 1. สร้างโครงสร้างแบบเดียวกับหน้า Print เปี๊ยบ เป็นข้อความ String โยนให้ html2pdf ไปวาดเอง
-    const htmlString = `
-      <div style="font-family: sans-serif; padding: 40px; background: #FFFFFF; width: 100%; box-sizing: border-box; color: #333;">
-        <div style="border: 3px solid #EEEEEE; padding: 50px; border-radius: 30px; background: #FFFFFF;">
-          <h1 style="color: #A91D3A; text-align: center; font-size: 32px; margin-bottom: 20px;">COFFEETODAY</h1>
-          <hr style="border: 0; border-top: 1px solid #EEEEEE; margin-bottom: 20px;">
-          <p style="font-size: 16px; line-height: 1.6;">Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p>
-          <div style="background: #FAFAFA; padding: 30px; white-space: pre-wrap; font-size: 14px; margin-top: 20px; border-radius: 15px; border: 1px solid #EEEEEE;">${o.items}</div>
-          <div style="margin-top: 40px; text-align: center; border-top: 1px dashed #CCCCCC; padding-top: 20px; font-size: 12px; color: #888888;">
-            <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
-            <p>วันที่พิมพ์: ${new Date().toLocaleString("th-TH")}</p>
-          </div>
+    // สร้างกล่องกระดาษจำลอง
+    const printDiv = document.createElement('div');
+    
+    // ตั้งค่าให้กล่องอยู่ในหน้าจอ (แต่ซ่อนไว้หลังสุด z-index: -1) เพื่อไม่ให้บั๊กขาว
+    printDiv.style.position = 'fixed';
+    printDiv.style.top = '0';
+    printDiv.style.left = '0';
+    printDiv.style.width = '650px'; 
+    printDiv.style.background = '#FFFFFF';
+    printDiv.style.zIndex = '-1'; 
+    printDiv.style.padding = '40px';
+    printDiv.style.boxSizing = 'border-box';
+    
+    // ยัดโค้ดหน้าตาเดียวกับใบ Print ใส่ลงไปในกระดาษจำลอง
+    printDiv.innerHTML = `
+      <div style="border:3px solid #EEE; padding:50px; border-radius:30px; background:#FFF; font-family: sans-serif; color: #333;">
+        <h1 style="color:#A91D3A; text-align:center; font-family:'Prompt', sans-serif;">COFFEETODAY</h1>
+        <hr style="border:0; border-top:1px solid #EEE; margin-bottom: 20px;">
+        <p style="font-size: 16px;">Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p>
+        <div style="background:#FAFAFA; padding:30px; white-space:pre-wrap; border-radius: 15px; border: 1px solid #EEE; font-size: 14px; margin-top: 20px;">${o.items}</div>
+        <div style="margin-top: 40px; text-align: center; border-top: 1px dashed #CCCCCC; padding-top: 20px; font-size: 12px; color: #888888;">
+          <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
+          <p>วันที่พิมพ์: ${new Date().toLocaleString("th-TH")}</p>
         </div>
       </div>
     `;
+    
+    // แปะกระดาษลงไปในเว็บชั่วคราว
+    document.body.appendChild(printDiv);
 
-    // 2. ตั้งค่า PDF ให้เป็นขนาด A4 แนวตั้ง
     const opt = {
       margin:       10,
       filename:     `Receipt_${o.id}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
+      image:        { type: 'jpeg', quality: 1 },
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
 
-    // 3. ป้อน String ให้ html2pdf ปั้นไฟล์ รับรองไม่ขาวจั๊วะแน่นอน!
-    html2pdf().set(opt).from(htmlString).save().then(() => {
-      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
-      btn.disabled = false;
-    }).catch(err => {
-      console.error(err);
-      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
-      btn.disabled = false;
-      alert('เกิดข้อผิดพลาดในการสร้าง PDF');
-    });
+    // ⏳ หัวใจสำคัญ: สั่งหน่วงเวลา 0.5 วิ เพื่อรอกระดาษวาดข้อความให้เสร็จสมบูรณ์ ก่อนให้กล้องแคป
+    setTimeout(() => {
+      html2pdf().set(opt).from(printDiv).save().then(() => {
+        // แคปเสร็จก็ลบกระดาษจำลองทิ้ง และคืนค่าปุ่ม
+        document.body.removeChild(printDiv);
+        btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
+        btn.disabled = false;
+      }).catch(err => {
+        console.error(err);
+        document.body.removeChild(printDiv);
+        btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
+        btn.disabled = false;
+        alert('เกิดข้อผิดพลาดในการสร้าง PDF');
+      });
+    }, 500); 
   }
 
   function printOrder(data) { 
