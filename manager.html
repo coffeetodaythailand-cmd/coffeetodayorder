@@ -7,6 +7,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
   <style>
     :root { 
       --red: #A91D3A; 
@@ -336,7 +338,6 @@
 <script>
   let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null;
   
-  // 🚩 ใส่ลิงก์ Web App
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
 
@@ -525,41 +526,57 @@
   }
 
   /**
-   * ✅ ฟังก์ชันดาวน์โหลด PDF: ใช้โครงสร้างเดียวกับการกด Print เพื่อความสมบูรณ์และลดปัญหาขอบขาว
+   * ✅ อัปเกรดดาวน์โหลด PDF แบบรอดพ้นบั๊ก 100%
+   * สร้างกระดาษจำลองผลักออกนอกจอ แล้วแคปเป็น A4 ปกติ
    */
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
+
+    const btn = document.getElementById('dlBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมไฟล์...';
+    btn.disabled = true;
+
+    // สร้างกระดาษจำลอง A4 เพื่อให้ html2pdf ไม่สับสนกับ Pop-up
+    const printDiv = document.createElement('div');
+    printDiv.style.position = 'absolute';
+    printDiv.style.left = '-9999px'; // ผลักไปซ่อนนอกจอ
+    printDiv.style.top = '0';
+    printDiv.style.width = '600px'; 
+    printDiv.style.padding = '40px';
+    printDiv.style.background = '#FFFFFF';
+    printDiv.style.fontFamily = 'sans-serif';
     
-    // สร้างหน้าต่างใหม่ที่มีรูปแบบเหมือนหน้าพิมพ์
-    const win = window.open('','','width=650,height=800'); 
-    win.document.write(`
-      <html>
-        <head>
-          <title>${o.id}</title>
-          <style>
-            body{font-family:sans-serif;padding:40px;} 
-            .box{border:3px solid #EEE;padding:50px;border-radius:30px;} 
-            h1{color:#A91D3A;text-align:center;}
-          </style>
-        </head>
-        <body>
-          <div class="box">
-            <h1>COFFEETODAY</h1>
-            <hr>
-            <p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p>
-            <div style=\"background:#FAFAFA;padding:30px;white-space:pre-wrap;\">${o.items}</div>
-          </div>
-          <script>
-            // สั่งให้เมื่อโหลดหน้าเสร็จ เปิดหน้าต่างพิมพ์ทันที (สามารถเลือก Save as PDF ได้)
-            window.onload = function() {
-                window.print();
-            }
-          <\/script>
-        </body>
-      </html>
-    `); 
-    win.document.close(); 
+    // โครงสร้างเดียวกับหน้า Print 100%
+    printDiv.innerHTML = `
+      <div style="border:3px solid #EEE; padding:50px; border-radius:30px; background:#FFF;">
+        <h1 style="color:#A91D3A; text-align:center; font-family:'Prompt', sans-serif;">COFFEETODAY</h1>
+        <hr style="border:0; border-top:1px solid #EEE; margin:bottom:20px;">
+        <p style="font-size:16px;">Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p>
+        <div style="background:#FAFAFA; padding:30px; white-space:pre-wrap; font-size:14px; color:#333; margin-top:20px; border-radius:15px; border:1px solid #EEE;">${o.items}</div>
+        <div style="margin-top: 30px; text-align: center; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 12px; color: #888;">
+          <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
+          <p>วันที่พิมพ์: ${new Date().toLocaleString("th-TH")}</p>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(printDiv);
+
+    // กำหนดค่า PDF ให้เป็นขนาด A4 สวยๆ
+    const opt = {
+      margin:       10,
+      filename:     `Receipt_${o.id}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+    };
+
+    html2pdf().set(opt).from(printDiv).save().then(() => {
+      document.body.removeChild(printDiv);
+      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
+      btn.disabled = false;
+    });
   }
 
   function printOrder(data) { 
