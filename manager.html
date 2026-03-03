@@ -225,9 +225,6 @@
             <input type="date" id="sDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
             <input type="date" id="eDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
             <button class="btn btn-red btn-sm" onclick="loadDashboardData(true)" style="padding:5px 15px; font-size:11px;">กรอง</button>
-            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="padding:5px 15px; font-size:11px; background:var(--blue); color:white;">
-              <i class="fas fa-file-invoice"></i> สรุปรายสาขา
-            </button>
           </div>
         </div>
         <div style="height:260px;"><canvas id="bC"></canvas></div>
@@ -297,16 +294,19 @@
 
 <div id="receiptModal" class="overlay">
   <div class="receipt-card">
+    
     <div id="pdf-content">
       <div style="text-align:center; margin-bottom:10px;">
         <h3 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:1px;">ORDER RECEIPT</h3>
       </div>
       <div id="receiptBody"></div>
+      
       <div style="margin-top: 30px; text-align: center; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #888;">
         <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
         <p>วันที่พิมพ์: <span id="printDate"></span></p>
       </div>
     </div>
+    
     <button id="dlBtn" class="btn" style="width:100%; margin-top:25px; padding:15px; background:var(--green); color:white;" onclick="downloadPDF()">
       <i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF
     </button>
@@ -491,7 +491,9 @@
   function viewOrderDetail(id) {
     const o = allOrders.find(x => x.id === id);
     if(!o) return;
+    
     currentViewingOrderId = id;
+
     let tableRows = '';
     const items = o.items.split('\n');
     items.forEach(line => {
@@ -515,110 +517,25 @@
         <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>`;
+      
     document.getElementById('receiptBody').innerHTML = bodyHtml;
     document.getElementById('printDate').innerText = new Date().toLocaleString("th-TH");
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
   /**
-   * ✅ ฟังก์ชันอัปเกรด: ดาวน์โหลด PDF สรุปยอดรายสาขา (ฉบับสมบูรณ์)
-   * แก้ไข: ตัวหนังสือตก, เพิ่มคอลัมน์ยอดคงเหลือ, ชิดขอบบน, ขนาดตัวอักษรพอดี
-   */
-  function downloadSummaryReport() {
-    if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
-    const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> คำนวณ...';
-    btn.disabled = true;
-
-    const branchSummary = {};
-    const startDate = document.getElementById('sDate').value || "จุดเริ่มต้น";
-    const endDate = document.getElementById('eDate').value || "ปัจจุบัน";
-
-    allOrders.forEach(order => {
-      const branchName = order.branch || "อื่นๆ";
-      if (!branchSummary[branchName]) branchSummary[branchName] = {};
-
-      order.items.split('\n').forEach(line => {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
-        if (match) {
-          const itemName = match[1].trim();
-          const stockVal = match[2].trim();
-          const qtyOrdered = parseFloat(match[3]);
-          if(!branchSummary[branchName][itemName]) {
-            branchSummary[branchName][itemName] = { total: 0, stock: stockVal };
-          }
-          branchSummary[branchName][itemName].total += qtyOrdered;
-          branchSummary[branchName][itemName].stock = stockVal;
-        }
-      });
-    });
-
-    let branchTablesHTML = "";
-    Object.keys(branchSummary).sort().forEach(branch => {
-      let itemRows = "";
-      Object.entries(branchSummary[branch]).forEach(([item, data]) => {
-        itemRows += `
-          <tr>
-            <td style="padding: 5px 8px; border-bottom: 1px solid #EEE; font-size: 10px; white-space: nowrap;">${item}</td>
-            <td style="padding: 5px 8px; border-bottom: 1px solid #EEE; text-align: center; font-size: 10px; color: #666;">${data.stock}</td>
-            <td style="padding: 5px 8px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 11px; color: #A91D3A;">${data.total}</td>
-          </tr>`;
-      });
-
-      branchTablesHTML += `
-        <div style="page-break-inside: avoid; margin-bottom: 15px; border: 1px solid #EEE; border-radius: 8px; overflow: hidden; background: #FFF;">
-          <h2 style="background: #F8F9FA; padding: 10px; color: #A91D3A; border-left: 6px solid #A91D3A; font-size: 14px; margin: 0;">สาขา: ${branch}</h2>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background: #FAFAFA; font-size: 9px;">
-                <th style="padding: 8px 10px; text-align: left; border-bottom: 2px solid #EEE; width: 55%; font-weight: 600;">รายการสินค้า</th>
-                <th style="padding: 8px 10px; text-align: center; border-bottom: 2px solid #EEE; font-weight: 600;">ยอดคงเหลือ</th>
-                <th style="padding: 8px 10px; text-align: center; border-bottom: 2px solid #EEE; font-weight: 600;">ยอดรวมสั่งซื้อ</th>
-              </tr>
-            </thead>
-            <tbody>${itemRows}</tbody>
-          </table>
-        </div>
-      `;
-    });
-
-    // 💡 แก้ไข: ฟอนต์ขนาดพอดี, ชิดขอบบน, แก้บั๊กภาษาไทยโดยการส่ง HTML ตรงๆ
-    const reportHTML = `
-      <div style="font-family: sans-serif; padding: 5px 20px; background: #FFF; color: #333; width: 100%; box-sizing: border-box;">
-        <h1 style="text-align: center; color: #A91D3A; margin: 0 0 2px 0; font-size: 20px; font-weight: bold;">CoffeeToday Summary Report</h1>
-        <p style="text-align: center; color: #888; font-size: 11px; margin: 0 0 12px 0;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
-        <hr style="border: 0; border-top: 1px solid #F0F0F0; margin-bottom: 15px;">
-        ${branchTablesHTML}
-        <div style="text-align: center; font-size: 8px; color: #BBB; margin-top: 25px; padding-bottom: 15px;">
-          พิมพ์เอกสารเมื่อ: ${new Date().toLocaleString("th-TH")}
-        </div>
-      </div>
-    `;
-
-    const opt = {
-      margin:       [5, 5], 
-      filename:     `Summary_${startDate}_${endDate}.pdf`,
-      image:        { type: 'jpeg', quality: 1 },
-      html2canvas:  { scale: 3, useCORS: true, letterRendering: true, windowWidth: 800 }, // เพิ่ม Scale เพื่อความคมชัด
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-    };
-
-    html2pdf().set(opt).from(reportHTML).save().then(() => {
-      btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
-      btn.disabled = false;
-    });
-  }
-
-  /**
-   * ✅ แก้ไข: กลับไปใช้ระบบ HTML String เพื่อป้องกัน PDF ขาวจั๊วะ 100%
+   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF แก้ปัญหาจอขาว 100% 
+   * โดยใช้วิธีส่งโครงสร้าง HTML ให้เครื่องพิมพ์ PDF ตรงๆ ไม่ง้อการแคปหน้าจอ
    */
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
+
     const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> เตรียมไฟล์...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมไฟล์...';
     btn.disabled = true;
 
+    // 1. สร้างโครงสร้างแบบเดียวกับหน้า Print เปี๊ยบ เป็นข้อความ String โยนให้ html2pdf ไปวาดเอง
     const htmlString = `
       <div style="font-family: sans-serif; padding: 40px; background: #FFFFFF; width: 100%; box-sizing: border-box; color: #333;">
         <div style="border: 3px solid #EEEEEE; padding: 50px; border-radius: 30px; background: #FFFFFF;">
@@ -634,14 +551,16 @@
       </div>
     `;
 
+    // 2. ตั้งค่า PDF ให้เป็นขนาด A4 แนวตั้ง
     const opt = {
       margin:       10,
       filename:     `Receipt_${o.id}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+      html2canvas:  { scale: 2, useCORS: true },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
 
+    // 3. ป้อน String ให้ html2pdf ปั้นไฟล์ รับรองไม่ขาวจั๊วะแน่นอน!
     html2pdf().set(opt).from(htmlString).save().then(() => {
       btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
       btn.disabled = false;
@@ -649,6 +568,7 @@
       console.error(err);
       btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
       btn.disabled = false;
+      alert('เกิดข้อผิดพลาดในการสร้าง PDF');
     });
   }
 
@@ -659,41 +579,28 @@
   
   function renderCharts(c) {
     if(bcObj) bcObj.destroy(); if(pcObj) pcObj.destroy(); if(scObj) scObj.destroy();
-    
-    // ✅ เพิ่มข้อความไกด์: จำนวนสั่งซื้อ (ชิ้น)
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
-      data: { labels: c.pL, datasets: [{ label: 'จำนวนสั่งซื้อ (ชิ้น)', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] }, 
-      options: { 
-        maintainAspectRatio: false, indexAxis: 'y', 
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `สั่ง: ${ctx.raw} ชิ้น` } } },
-        scales: { x: { title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
-      } 
+      data: { labels: c.pL, datasets: [{ label: 'จำนวนสั่ง', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] }, 
+      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } } 
     });
-    
     pcObj = new Chart(document.getElementById('pC_Chart'), { 
       type: 'doughnut', 
       data: { labels: c.bL, datasets: [{ data: c.bV, backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] }] }, 
-      options: { maintainAspectRatio: false, cutout: '78%', plugins: { tooltip: { callbacks: { label: (ctx) => `ออเดอร์: ${ctx.raw} รายการ` } } } } 
+      options: { maintainAspectRatio: false, cutout: '78%' } 
     });
-    
-    // ✅ เพิ่มข้อความไกด์: จำนวนคงเหลือ (ชิ้น)
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar',
       data: {
         labels: c.sL ? c.sL.slice(0, 15) : [], 
         datasets: [{
-          label: 'คงเหลือล่าสุด (ชิ้น)',
+          label: 'คงเหลือล่าสุด',
           data: c.sV ? c.sV.slice(0, 15) : [],
           backgroundColor: '#f39c12',
           borderRadius: 10, barThickness: 20 
         }]
       },
-      options: { 
-        maintainAspectRatio: false, indexAxis: 'y', 
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `คงเหลือ: ${ctx.raw} ชิ้น` } } },
-        scales: { x: { title: { display: true, text: 'จำนวนคงเหลือ (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
-      }
+      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
     });
   }
 
@@ -702,10 +609,12 @@
     menuObj = d; 
     let chipsHtml = '', itemsHtml = '', opts = '';
     if(!currentCat && d.categories.length > 0) currentCat = d.categories[0];
+
     d.categories.forEach(cat => {
       opts += `<option value="${cat}">${cat}</option>`;
       chipsHtml += `<div class="chip ${cat === currentCat ? 'active' : ''}" onclick="selectCat('${cat}')">${cat} (${d.grouped[cat] ? d.grouped[cat].length : 0})</div>`;
     });
+
     if(currentCat && d.grouped[currentCat]) {
       d.grouped[currentCat].forEach(i => { 
         itemsHtml += `<div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">
@@ -726,32 +635,45 @@
   }
 
   function selectCat(cat) { currentCat = cat; renderMenuAccordion(menuObj); }
+
   function toggleItem(id, n, c, el) { 
     const token = localStorage.getItem(TOKEN_KEY);
     const status = el.checked ? 'Active' : 'Inactive';
     fetch(`${GAS_URL}?action=updateProduct&id=${id}&name=${n}&cat=${c}&status=${status}&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast(el.checked ? "✅ เปิดการใช้งาน!" : "🌑 ปิดการใช้งาน"); });
+      .then(res => res.json())
+      .then(d => {
+        renderMenuAccordion(d);
+        showToast(el.checked ? "✅ เปิดการใช้งาน!" : "🌑 ปิดการใช้งาน");
+      });
   }
+
   function openCatModal() { document.getElementById('cN').value = ''; document.getElementById('cM').style.display = 'flex'; }
   function closeM(id) { document.getElementById(id).style.display='none'; }
+  
   function showToast(msg) {
     const t = document.createElement('div'); t.innerText = msg;
     t.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:12px 25px; border-radius:50px; z-index:10000; box-shadow:0 5px 15px rgba(0,0,0,0.2); font-family:'Prompt'; animation: fadeInOut 2s forwards;";
     document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
   }
+
   function saveCat() { 
     const n = document.getElementById('cN').value; if(!n) return; closeM('cM'); 
     const token = localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=addCategory&catName=${n}&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); });
+      .then(res => res.json())
+      .then(d => { renderMenuAccordion(d); showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); });
   }
+
   function openProdModal(id=null, n='', c='') { editTargetId=id; document.getElementById('pN').value=n; document.getElementById('pCatSelect').value=c||(menuObj.categories ? menuObj.categories[0] : ''); document.getElementById('pM').style.display='flex'; }
+  
   function saveP() { 
     const name = document.getElementById('pN').value; const cat = document.getElementById('pCatSelect').value; if(!name) return; closeM('pM'); 
     const token = localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=updateProduct&id=${editTargetId}&name=${name}&cat=${cat}&status=Active&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("✅ บันทึกสินค้าเรียบร้อย!"); });
+      .then(res => res.json())
+      .then(d => { renderMenuAccordion(d); showToast("✅ บันทึกสินค้าเรียบร้อย!"); });
   }
+
   function changeLimit() { pgLim = parseInt(document.getElementById('rowSel').value); pgNum = 1; renderTable(); }
   function next() { if(pgNum * pgLim < allOrders.length){ pgNum++; renderTable(); } }
   function prev() { if(pgNum > 1){ pgNum--; renderTable(); } }
