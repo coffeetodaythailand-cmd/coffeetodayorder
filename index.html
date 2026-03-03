@@ -397,13 +397,13 @@
     <img src="./emailLogo2025-09-11-03-46-29-029.png" style="width:110px; height:auto;">
   </div>
 
-  <h2></i> CoffeeToday Order</h2>
+  <h2>CoffeeToday Order</h2>
   
   <label>ชื่อผู้สั่ง</label>
   <input type="text" id="cN" class="main-in" placeholder="ระบุชื่อของคุณ">
   
   <label>เบอร์โทรศัพท์</label>
-  <input type="tel" id="cP" class="main-in" placeholder="08x-xxx-xxxx">
+  <input type="tel" id="cP" class="main-in" placeholder="08x-xxx-xxxx" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
   
   <label>อีเมลติดต่อ (บังคับ)</label>
   <input type="email" id="cE" class="main-in" placeholder="example@email.com">
@@ -606,6 +606,14 @@
       document.getElementById(name ? (phone ? (email ? 'cB' : 'cE') : 'cP') : 'cN').focus();
       return showError("ระบุข้อมูลส่วนตัวให้ครบถ้วน");
     }
+
+    // ✅ เพิ่มการตรวจสอบเบอร์โทรศัพท์ 9-10 หลัก
+    if(phone.length < 9 || phone.length > 10) {
+      window.scrollTo(0, 0);
+      document.getElementById('cP').focus();
+      return showError("กรุณาระบุเบอร์โทรศัพท์ให้ถูกต้อง (จำนวน 9-10 หลัก)");
+    }
+
     const qis = document.querySelectorAll('.qi');
     const sis = document.querySelectorAll('.si');
     const tabBtns = document.querySelectorAll('.tbtn');
@@ -679,4 +687,3 @@
 </script>
 </body>
 </html>
-
