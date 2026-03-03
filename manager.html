@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    :root { 
+      --red: #A91D3A; 
+      --dark: #2D3133; 
+      --green: #22c55e; 
+      --white: #FFFFFF;
+      --light-gray: #F8F9FA;
+      --blue: #3498db;
+      --orange: #f39c12;
+    }
+    
+    body { 
+      font-family: 'Sarabun', sans-serif; 
+      background: var(--light-gray); 
+      margin: 0; 
+      padding-bottom: 50px; 
+    }
+    
+    #login-overlay { 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+      z-index: 9999; display: flex; align-items: center; justify-content: center; 
+    }
+    
+    .login-box { 
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(15px);
+      padding: 60px 40px; border-radius: 40px; 
+      width: 90%; max-width: 420px; text-align: center; 
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5); 
+    }
+    
+    .login-box i.fa-shield-alt {
+      font-size: 80px; background: linear-gradient(to bottom, #A91D3A, #7a152a);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 20px; filter: drop-shadow(0 10px 15px rgba(169,29,58,0.3));
+    }
+
+    .login-input { 
+      width: 100%; padding: 22px; border: 2px solid #EEE; 
+      border-radius: 20px; margin-bottom: 30px; text-align: center; 
+      font-size: 28px; outline: none; box-sizing: border-box; 
+      background: #FFF; transition: all 0.3s;
+    }
+    
+    .login-input:focus { border-color: var(--red); box-shadow: 0 0 20px rgba(169,29,58,0.1); }
+    
+    #main-app { display: none; }
+    
+    .nav { 
+      background: var(--white); padding: 20px 40px; 
+      border-bottom: 1px solid #EEE; position: sticky; top: 0; 
+      z-index: 100; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+      display: flex; justify-content: space-between; align-items: center; 
+    }
+    
+    .container { max-width: 1300px; margin: 35px auto; padding: 0 25px; }
+    
+    .card { 
+      background: var(--white); padding: 40px; border-radius: 30px; 
+      border: 1px solid #EEE; margin-bottom: 35px; 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.04); transition: 0.4s ease; 
+    }
+
+    .search-row {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 12px 25px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border: 1px solid #EEE;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+    .search-input { border: none; outline: none; width: 100%; font-family: 'Prompt'; font-size: 14px; color: var(--dark); }
+
+    .chips-container {
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      padding: 10px 5px 25px;
+    }
+    .chip {
+      background: var(--white); 
+      padding: 10px 22px; 
+      border-radius: 50px;
+      border: 1px solid #EEE; 
+      font-family: 'Prompt'; 
+      font-size: 14px;
+      cursor: pointer; 
+      transition: 0.3s; 
+      white-space: nowrap; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+      margin-bottom: 5px;
+    }
+    .chip:hover { border-color: var(--red); color: var(--red); }
+    .chip.active { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 8px 20px rgba(169,29,58,0.2); }
+
+    .receipt-card {
+      background: white; border-radius: 25px; width: 95%; max-width: 450px;
+      padding: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      max-height: 85vh; overflow-y: auto; border-top: 10px solid var(--red);
+    }
+    .receipt-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; background: #f9f9f9; padding: 15px; border-radius: 12px; }
+    .receipt-label { font-size: 11px; color: #999; text-transform: uppercase; }
+    .receipt-value { font-size: 14px; font-weight: 600; color: #333; }
+    .receipt-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .receipt-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f0f0f0; color: #2D3133; font-size: 12px; }
+    .receipt-table td { padding: 12px 10px; border-bottom: 1px solid #f9f9f9; font-size: 13px; color: #555; }
+
+    .approve-card { border-top: 8px solid var(--green); padding: 25px 40px; }
+    .approve-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 15px; }
+    .approve-item { 
+      background: #f0fdf4; border: 1px solid #dcfce7; padding: 15px 20px; border-radius: 20px;
+      display: flex; justify-content: space-between; align-items: center; transition: 0.2s;
+    }
+    .approve-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(34,197,94,0.1); }
+    .btn-approve { 
+      background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: 12px;
+      font-family: 'Prompt'; font-weight: 600; cursor: pointer; font-size: 14px;
+    }
+    
+    .overlay {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; 
+      width: 100%; height: 100%; background: rgba(0,0,0,0.7); 
+      backdrop-filter: blur(8px); align-items: center; justify-content: center; 
+    }
+
+    .modal-card {
+      background: #FFF; padding: 50px; border-radius: 35px;
+      width: 90%; max-width: 450px; text-align: left;
+      border-top: 12px solid var(--red); box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+    }
+
+    .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e5e7eb; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    input:checked + .slider { background-color: var(--green); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    .loading-pulse { position: relative; overflow: hidden; background: #f6f7f8 !important; }
+    .loading-pulse::after { 
+      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); 
+      animation: skeletonMove 1.5s infinite; 
+    }
+    @keyframes skeletonMove { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 20px; background: #F9FAFB; text-align: left; color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid #F3F4F6; }
+    td { padding: 20px; border-bottom: 1px solid #F3F4F6; font-size: 14px; vertical-align: middle; }
+    
+    .row-ready { background: #f0fdf4 !important; transition: 0.5s; }
+    
+    .pagination-footer { 
+      display: flex; justify-content: flex-end; align-items: center; 
+      gap: 15px; margin-top: 30px; font-size: 14px; padding-top: 25px; border-top: 2px solid #F3F4F6;
+    }
+
+    .page-btn { background: #F3F4F6; border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .page-btn:hover { background: var(--red); color: white; }
+
+    .styled-select { background: #FFF; border: 1px solid #DDD; padding: 8px 15px; border-radius: 10px; font-family: 'Prompt'; outline: none; cursor: pointer; }
+
+    .btn { padding: 12px 28px; border-radius: 16px; border: none; font-family: 'Prompt'; font-weight: 600; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+    .btn-red { background: var(--red); color: white; box-shadow: 0 10px 20px rgba(169,29,58,0.2); }
+    .btn-red:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(169,29,58,0.3); }
+
+    @keyframes fadeInOut { 0% { opacity: 0; bottom: 0; } 20% { opacity: 1; bottom: 20px; } 80% { opacity: 1; bottom: 20px; } 100% { opacity: 0; bottom: 0; } }
+    @keyframes blinkPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+<div id="login-overlay">
+  <div class="login-box">
+    <i class="fas fa-shield-alt"></i>
+    <h2 style="margin-bottom:10px; font-family:'Prompt'; font-weight: 600; color: #333;">Security Access</h2>
+    <p style="color: #666; margin-bottom: 40px;">CoffeeToday Administrator Dashboard</p>
+    <form onsubmit="event.preventDefault(); handleLogin();">
+      <input type="password" id="passInput" class="login-input" placeholder="••••" autofocus>
+      <button type="submit" id="loginBtn" class="btn btn-red" style="width:100%; padding:22px; font-size:20px; justify-content: center;">Unlock Database</button>
+    </form>
+  </div>
+</div>
+
+<div id="main-app">
+  <div class="nav">
+    <span><i class="fas fa-coffee" style="color:var(--red); margin-right:12px;"></i> CoffeeToday Management</span>
+    <div style="display:flex; align-items:center; gap:15px;">
+      <div class="sync-status" style="display:flex; align-items:center; gap:10px; background:#f0fdf4; padding:8px 15px; border-radius:50px; color:#15803d; font-size:12px; font-weight:600;">
+        <span class="dot" style="width:8px; height:8px; background:var(--green); border-radius:50%; animation:blinkPulse 2s infinite;"></span> 
+        <span id="syncText">Live Sync (3 นาที)</span>
+      </div>
+      <button onclick="handleLogout()" style="background:none; border:none; color:#AAA; cursor:pointer; font-size:18px;" title="ออกจากระบบ"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card approve-card" id="approveCard" style="display:none;">
+      <h4 style="margin:0; font-family:'Prompt'; color:var(--green);"><i class="fas fa-clipboard-check"></i> อนุมัติการส่งมอบสินค้า (Approve Orders)</h4>
+      <div id="approveList" class="approve-list"></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:35px; margin-bottom:35px;">
+      <div class="card" id="mainChartCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+          <h4 style="margin:0;"><i class="fas fa-chart-bar"></i> สินค้าเมนูขายดี</h4>
+          <div class="filter-panel" style="display:flex; gap:10px; background:#f8f9fa; padding:8px 15px; border-radius:15px;">
+            <input type="date" id="sDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
+            <input type="date" id="eDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
+            <button class="btn btn-red btn-sm" onclick="loadDashboardData(true)" style="padding:5px 15px; font-size:11px;">กรอง</button>
+          </div>
+        </div>
+        <div style="height:260px;"><canvas id="bC"></canvas></div>
+      </div>
+      <div class="card" id="doughnutCard">
+        <h4 style="margin:0 0 25px;"><i class="fas fa-chart-pie"></i> ออเดอร์รายสาขา</h4>
+        <div style="height:260px;"><canvas id="pC_Chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" id="stockChartCard">
+      <h4 style="margin:0 0 25px;"><i class="fas fa-layer-group" style="color:var(--orange);"></i> สถานะคงเหลือล่าสุด (วิเคราะห์จากรายงาน)</h4>
+      <p style="font-size:12px; color:#999; margin-top:-15px; margin-bottom:20px;">* กราฟจะแสดงสินค้าที่เหลือน้อยที่สุด 15 อันดับแรก</p>
+      <div style="height:260px;"><canvas id="sC"></canvas></div>
+    </div>
+
+    <div class="search-row">
+      <i class="fas fa-search" style="color:#BBB; font-size:16px;"></i>
+      <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหาออเดอร์ (เช่น พิมพ์ 4 หา ORD-0004)..." oninput="pgNum=1; renderTable();">
+    </div>
+
+    <div class="card" id="tableCard">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+        <h3 style="margin:0; font-family:'Prompt'; font-size:22px;"><i class="fas fa-history"></i> Recent Orders</h3>
+        <div id="lastUpd" style="font-size:12px; color:#AAA;">Update: -</div>
+      </div>
+      <div style="overflow-x:auto;"><table width="100%" id="oT">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>วันที่/เวลา</th>
+              <th>สาขา</th>
+              <th>ผู้สั่ง</th>
+              <th>เบอร์โทร</th>
+              <th>รายการสินค้า</th>
+              <th align="center" style="width:150px;">สถานะ / Print</th>
+            </tr>
+          </thead>
+          <tbody id="oB"></tbody>
+      </table></div>
+      <div class="pagination-footer">
+        <span>Rows per page:</span>
+        <select id="rowSel" class="styled-select" onchange="changeLimit()">
+          <option value="8">8 รายการ</option>
+          <option value="15">15 รายการ</option>
+          <option value="30">30 รายการ</option>
+        </select>
+        <button class="page-btn" onclick="prev()"><i class="fas fa-chevron-left"></i></button> 
+        <span id="pI" style="font-weight:600; min-width:40px; text-align:center;">1 / 1</span> 
+        <button class="page-btn" onclick="next()"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:60px 0 30px;">
+      <h2 style="margin:0; font-family:'Prompt';"><i class="fas fa-tools"></i> บริหารจัดการเมนู</h2>
+      <div style="display:flex; gap:15px;">
+        <button class="btn btn-dark btn-sm" onclick="openCatModal()" style="background:#333; color:white;">+ เพิ่มหมวดหมู่</button>
+        <button class="btn btn-red btn-sm" onclick="openProdModal()">+ เพิ่มสินค้าใหม่</button>
+      </div>
+    </div>
+
+    <div id="catChips" class="chips-container"></div>
+    <div id="menuItems" class="card" style="padding: 10px 40px; min-height: 100px;"></div>
+
+  </div>
+</div>
+
+<div id="receiptModal" class="overlay">
+  <div class="receipt-card">
+    <div style="text-align:center; margin-bottom:10px;">
+      <h3 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:1px;">ORDER RECEIPT</h3>
+    </div>
+    <div id="receiptBody"></div>
+    <button class="btn btn-red" style="width:100%; margin-top:25px; padding:15px;" onclick="closeM('receiptModal')">Close View</button>
+  </div>
+</div>
+
+<div id="cM" class="overlay">
+  <div class="modal-card">
+    <h3 style="margin-top:0;">เพิ่มหมวดหมู่ใหม่</h3>
+    <input type="text" id="cN" class="login-input" style="font-size:18px; text-align:left;" placeholder="ชื่อหมวดหมู่...">
+    <div style="display:flex; gap:20px;"><button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('cM')">ยกเลิก</button><button class="btn btn-red" style="flex:1;" onclick="saveCat()">ยืนยัน</button></div>
+  </div>
+</div>
+
+<div id="pM" class="overlay">
+  <div class="modal-card">
+    <h3 style="margin-top:0;">จัดการรายการสินค้า</h3>
+    <label style="font-size:12px; color:#999;">หมวดหมู่</label>
+    <select id="pCatSelect" class="login-input" style="font-size:16px; margin-bottom:15px;"></select>
+    <label style="font-size:12px; color:#999;">ชื่อสินค้า</label>
+    <input type="text" id="pN" class="login-input" style="font-size:16px; text-align:left;" placeholder="ระบุชื่อสินค้า...">
+    <div style="display:flex; gap:20px;"><button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('pM')">ยกเลิก</button><button class="btn btn-red" style="flex:1;" onclick="saveP()">บันทึกข้อมูล</button></div>
+  </div>
+</div>
+
+<script>
+  let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null;
+  
+  // 🚩 แก้ไขจุดที่ 1: ใส่ลิงก์ Web App ของคุณเบลล์ที่นี่
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
+  const TOKEN_KEY = "coffee_today_admin_token";
+
+  /**
+   * ✅ อัปเกรด: ระบบ Auto-Login (Warp) 100%
+   */
+  window.onload = () => {
+    const savedToken = localStorage.getItem(TOKEN_KEY);
+    if (savedToken) {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      initApp(savedToken);
+    }
+  };
+
+  /**
+   * ✅ อัปเกรด: ระบบ Login แบบ API (Nitro Speed) - ยิงผ่าน fetch แทน google.script.run
+   */
+  function handleLogin() { 
+    const lBtn = document.getElementById('loginBtn');
+    const pInput = document.getElementById('passInput');
+    lBtn.disabled = true; 
+    lBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking PIN...';
+
+    fetch(`${GAS_URL}?action=verifyLogin&pass=${pInput.value}`)
+      .then(res => res.json())
+      .then(res => {
+        if(res.status === 'success'){
+          localStorage.setItem(TOKEN_KEY, res.token);
+          document.getElementById('login-overlay').style.display = 'none';
+          document.getElementById('main-app').style.display = 'block';
+          initApp(res.token);
+        } else {
+          alert(res.message);
+          lBtn.disabled = false; lBtn.innerHTML = 'Unlock Database';
+          pInput.value = ''; pInput.focus();
+        }
+      })
+      .catch(err => {
+        alert("ไม่สามารถเชื่อมต่อ Server ได้");
+        lBtn.disabled = false; lBtn.innerHTML = 'Unlock Database';
+      });
+  }
+
+  function handleLogout() {
+    localStorage.removeItem(TOKEN_KEY);
+    location.reload();
+  }
+
+  function initApp(token) { 
+    loadDashboardData(false, token); 
+    loadApproveList(token); 
+    // ตั้งค่า Live Sync ทุก 3 นาที
+    setInterval(() => {
+      loadDashboardData(false, token);
+      loadApproveList(token);
+    }, 180000); 
+  }
+
+  /**
+   * ✅ โหลดข้อมูล Dashboard: เปลี่ยนจาก google.script.run เป็น fetch API
+   */
+  function loadDashboardData(smooth = false, token) { 
+    const currentToken = token || localStorage.getItem(TOKEN_KEY);
+    if(smooth) document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
+    
+    const s = document.getElementById('sDate').value;
+    const e = document.getElementById('eDate').value;
+
+    fetch(`${GAS_URL}?action=managerGetData&token=${currentToken}&s=${s}&e=${e}`)
+      .then(res => res.json())
+      .then(d => {
+        if(d.status === 'success') {
+          allOrders = d.analytics.history;
+          renderTable();
+          renderCharts(d.analytics.charts);
+          renderMenuAccordion(d.menu); 
+          document.getElementById('lastUpd').innerText = "Update: " + new Date().toLocaleTimeString();
+        } else {
+          handleLogout(); // ตั๋วหมดอายุหรือ Token ผิด ให้ล็อกเอาท์
+        }
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
+      })
+      .catch(err => {
+        console.error("Dashboard Load Error:", err);
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
+      });
+  }
+
+  function loadApproveList(token) {
+    const currentToken = token || localStorage.getItem(TOKEN_KEY);
+    // ใช้ฟังก์ชันพิเศษเพื่อดึงเฉพาะรายการที่ต้องอนุมัติ
+    fetch(`${GAS_URL}?action=getOrdersByStatus&status=Packed&token=${currentToken}`)
+      .then(res => res.json())
+      .then(data => {
+        const card = document.getElementById('approveCard');
+        const div = document.getElementById('approveList');
+        if(!data || data.length === 0) { card.style.display = 'none'; return; }
+        card.style.display = 'block';
+        div.innerHTML = data.map(o => `
+          <div class="approve-item">
+            <div class="approve-info">
+              <b style="color:var(--red); cursor:pointer; text-decoration:underline;" onclick="viewOrderDetail('${o.id}')">${o.id}</b> - ${o.branch}<br>
+              <small style="color:#666">${o.items.replace(/\n/g, ', ').substring(0, 40)}...</small>
+            </div>
+            <button class="btn-approve" onclick="approveOrder('${o.id}')">อนุมัติส่งของ</button>
+          </div>
+        `).join('');
+      });
+  }
+
+  function approveOrder(id) {
+    if(!confirm('ยืนยันความถูกต้องและอนุมัติส่งมอบออเดอร์ ' + id + '?')) return;
+    const token = localStorage.getItem(TOKEN_KEY);
+    fetch(`${GAS_URL}?action=setOrderStatus&id=${id}&status=Success&token=${token}`)
+      .then(res => res.json())
+      .then(res => {
+        if(res.status === 'success') {
+          loadApproveList(token); 
+          loadDashboardData(false, token); 
+          showToast("✅ อนุมัติสำเร็จ!");
+        }
+      });
+  }
+  
+  /**
+   * ✅ ฟังชั่นแสดงตารางและค้นหา (คงเดิม 100%)
+   */
+  function renderTable() {
+    const query = document.getElementById('orderSearch').value.trim().toLowerCase();
+    let filtered = allOrders.filter(o => {
+      if(!query) return true;
+      const orderNum = o.id.replace(/\D/g, ''); 
+      return o.id.toLowerCase().includes(query) || 
+             orderNum.includes(query) || 
+             parseInt(orderNum) == parseInt(query);
+    });
+
+    const data = filtered.slice((pgNum - 1) * pgLim, pgNum * pgLim);
+    let html = '';
+    data.forEach(o => {
+      const isPacked = o.status === 'Packed';
+      const isSuccess = o.status === 'Success';
+      html += `<tr class="${isSuccess ? 'row-ready' : ''}">
+        <td><b style="color:var(--red); cursor:pointer; text-decoration:underline;" onclick="viewOrderDetail('${o.id}')">${o.id}</b></td>
+        <td>${o.date}</td>
+        <td><b>${o.branch}</b></td>
+        <td>${o.customer}</td>
+        <td style="font-weight:600; color:var(--blue);">${o.phone || '-'}</td>
+        <td style="font-size:12px; color:#555;">${o.items.replace(/\n/g,'<br>')}</td>
+        <td align="center">
+          <div style="display:flex; gap:10px; justify-content:center; align-items:center;">
+            <span style="font-size:11px; font-weight:600; color:${isSuccess?'var(--green)': (isPacked?'#3498db':'#AAA')}">${o.status}</span>
+            <button class="page-btn" style="width:30px; height:30px;" onclick="printOrder('${encodeURIComponent(JSON.stringify(o))}')">
+              <i class="fas fa-print" style="font-size:12px;"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    });
+    document.getElementById('oB').innerHTML = html || '<tr><td colspan="7" align="center" style="padding:60px;">ไม่พบข้อมูลสั่งซื้อ</td></tr>';
+    document.getElementById('pI').innerText = pgNum + " / " + (Math.ceil(filtered.length/pgLim) || 1);
+  }
+
+  function viewOrderDetail(id) {
+    const o = allOrders.find(x => x.id === id);
+    if(!o) return;
+    let tableRows = '';
+    const items = o.items.split('\n');
+    items.forEach(line => {
+      if(line.trim() !== "") {
+        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(match) {
+          tableRows += `<tr><td>${match[1]}</td><td align="center">${match[2]}</td><td align="center"><b>${match[3]}</b></td></tr>`;
+        } else {
+          tableRows += `<tr><td colspan="3">${line}</td></tr>`;
+        }
+      }
+    });
+    const bodyHtml = `
+      <div class="receipt-info-grid">
+        <div><div class="receipt-label">Order ID</div><div class="receipt-value">${o.id}</div></div>
+        <div style="text-align:right;"><div class="receipt-label">Date</div><div class="receipt-value">${o.date}</div></div>
+        <div><div class="receipt-label">Branch</div><div class="receipt-value">${o.branch}</div></div>
+        <div style="text-align:right;"><div class="receipt-label">Phone</div><div class="receipt-value">${o.phone || '-'}</div></div>
+      </div>
+      <table class="receipt-table">
+        <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>`;
+    document.getElementById('receiptBody').innerHTML = bodyHtml;
+    document.getElementById('receiptModal').style.display = 'flex';
+  }
+
+  function printOrder(data) { 
+    const o = JSON.parse(decodeURIComponent(data)), win = window.open('','','width=650,height=800'); 
+    win.document.write(`<html><head><style>body{font-family:sans-serif;padding:40px;} .box{border:3px solid #EEE;padding:50px;border-radius:30px;} h1{color:#A91D3A;text-align:center;}</style></head><body><div class="box"><h1>COFFEETODAY</h1><hr><p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p><div style=\"background:#FAFAFA;padding:30px;white-space:pre-wrap;\">${o.items}</div></div><script>window.print();<\/script></body></html>`); win.document.close(); 
+  }
+  
+  function renderCharts(c) {
+    if(bcObj) bcObj.destroy(); if(pcObj) pcObj.destroy(); if(scObj) scObj.destroy();
+    bcObj = new Chart(document.getElementById('bC'), { 
+      type: 'bar', 
+      data: { labels: c.pL, datasets: [{ label: 'จำนวนสั่ง', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] }, 
+      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } } 
+    });
+    pcObj = new Chart(document.getElementById('pC_Chart'), { 
+      type: 'doughnut', 
+      data: { labels: c.bL, datasets: [{ data: c.bV, backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] }] }, 
+      options: { maintainAspectRatio: false, cutout: '78%' } 
+    });
+    scObj = new Chart(document.getElementById('sC'), {
+      type: 'bar',
+      data: {
+        labels: c.sL ? c.sL.slice(0, 15) : [], 
+        datasets: [{
+          label: 'คงเหลือล่าสุด',
+          data: c.sV ? c.sV.slice(0, 15) : [],
+          backgroundColor: '#f39c12',
+          borderRadius: 10, barThickness: 20 
+        }]
+      },
+      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+  }
+
+  /**
+   * ✅ การจัดการเมนู: ใช้ระบบ fetch API แทนการเรียก GS ตรงๆ
+   */
+  function renderMenuAccordion(d) {
+    if(!d || !d.categories) return;
+    menuObj = d; 
+    let chipsHtml = '', itemsHtml = '', opts = '';
+    if(!currentCat && d.categories.length > 0) currentCat = d.categories[0];
+
+    d.categories.forEach(cat => {
+      opts += `<option value="${cat}">${cat}</option>`;
+      chipsHtml += `<div class="chip ${cat === currentCat ? 'active' : ''}" onclick="selectCat('${cat}')">${cat} (${d.grouped[cat] ? d.grouped[cat].length : 0})</div>`;
+    });
+
+    if(currentCat && d.grouped[currentCat]) {
+      d.grouped[currentCat].forEach(i => { 
+        itemsHtml += `<div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">
+          <span style="font-weight:600; color:#444;">${i.name}</span>
+          <div style="display:flex; gap:25px; align-items:center;">
+            <label class="switch">
+              <input type="checkbox" ${i.status==='Active'?'checked':''} onchange="toggleItem('${i.rowId}', '${i.name}', '${currentCat}', this)">
+              <span class="slider"></span>
+            </label>
+            <i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${i.rowId}, '${i.name}', '${currentCat}')"></i>
+          </div>
+        </div>`; 
+      });
+    }
+    document.getElementById('catChips').innerHTML = chipsHtml;
+    document.getElementById('menuItems').innerHTML = itemsHtml;
+    document.getElementById('pCatSelect').innerHTML = opts;
+  }
+
+  function selectCat(cat) { currentCat = cat; renderMenuAccordion(menuObj); }
+
+  function toggleItem(id, n, c, el) { 
+    const token = localStorage.getItem(TOKEN_KEY);
+    const status = el.checked ? 'Active' : 'Inactive';
+    fetch(`${GAS_URL}?action=updateProduct&id=${id}&name=${n}&cat=${c}&status=${status}&token=${token}`)
+      .then(res => res.json())
+      .then(d => {
+        renderMenuAccordion(d);
+        showToast(el.checked ? "✅ เปิดการใช้งาน!" : "🌑 ปิดการใช้งาน");
+      });
+  }
+
+  function openCatModal() { document.getElementById('cN').value = ''; document.getElementById('cM').style.display = 'flex'; }
+  function closeM(id) { document.getElementById(id).style.display='none'; }
+  
+  function showToast(msg) {
+    const t = document.createElement('div'); t.innerText = msg;
+    t.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:12px 25px; border-radius:50px; z-index:10000; box-shadow:0 5px 15px rgba(0,0,0,0.2); font-family:'Prompt'; animation: fadeInOut 2s forwards;";
+    document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+  }
+
+  function saveCat() { 
+    const n = document.getElementById('cN').value; if(!n) return; closeM('cM'); 
+    const token = localStorage.getItem(TOKEN_KEY);
+    fetch(`${GAS_URL}?action=addCategory&catName=${n}&token=${token}`)
+      .then(res => res.json())
+      .then(d => { renderMenuAccordion(d); showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); });
+  }
+
+  function openProdModal(id=null, n='', c='') { editTargetId=id; document.getElementById('pN').value=n; document.getElementById('pCatSelect').value=c||(menuObj.categories ? menuObj.categories[0] : ''); document.getElementById('pM').style.display='flex'; }
+  
+  function saveP() { 
+    const name = document.getElementById('pN').value; const cat = document.getElementById('pCatSelect').value; if(!name) return; closeM('pM'); 
+    const token = localStorage.getItem(TOKEN_KEY);
+    fetch(`${GAS_URL}?action=updateProduct&id=${editTargetId}&name=${name}&cat=${cat}&status=Active&token=${token}`)
+      .then(res => res.json())
+      .then(d => { renderMenuAccordion(d); showToast("✅ บันทึกสินค้าเรียบร้อย!"); });
+  }
+
+  function changeLimit() { pgLim = parseInt(document.getElementById('rowSel').value); pgNum = 1; renderTable(); }
+  function next() { if(pgNum * pgLim < allOrders.length){ pgNum++; renderTable(); } }
+  function prev() { if(pgNum > 1){ pgNum--; renderTable(); } }
+</script>
+</body>
+</html>
