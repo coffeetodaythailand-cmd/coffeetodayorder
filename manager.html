@@ -115,6 +115,8 @@
       max-height: 85vh; overflow-y: auto; border-top: 10px solid var(--red);
     }
     
+    #pdf-content { padding: 15px; background: white; }
+    
     .receipt-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; background: #f9f9f9; padding: 15px; border-radius: 12px; }
     .receipt-label { font-size: 11px; color: #999; text-transform: uppercase; }
     .receipt-value { font-size: 14px; font-weight: 600; color: #333; }
@@ -225,6 +227,10 @@
             <input type="date" id="sDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
             <input type="date" id="eDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
             <button class="btn btn-red btn-sm" onclick="loadDashboardData(true)" style="padding:5px 15px; font-size:11px;">กรอง</button>
+            
+            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="padding:5px 15px; font-size:11px; background:var(--blue); color:white;">
+              <i class="fas fa-file-invoice"></i> สรุปรายสาขา
+            </button>
           </div>
         </div>
         <div style="height:260px;"><canvas id="bC"></canvas></div>
@@ -524,9 +530,91 @@
   }
 
   /**
-   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF แก้ปัญหาจอขาว 100% 
-   * โดยใช้วิธีส่งโครงสร้าง HTML ให้เครื่องพิมพ์ PDF ตรงๆ ไม่ง้อการแคปหน้าจอ
+   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF สรุปยอดรายสาขาตามช่วงเวลา
+   * ใช้ข้อมูลสรุป (Group by Branch) เพื่อสร้างตารางรายงาน
    */
+  function downloadSummaryReport() {
+    if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
+    
+    const btn = document.getElementById('summaryBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังคำนวณ...';
+    btn.disabled = true;
+
+    // 1. ประมวลผลข้อมูล: จัดกลุ่มสินค้าตามสาขา
+    const branchSummary = {};
+    const startDate = document.getElementById('sDate').value || "จุดเริ่มต้น";
+    const endDate = document.getElementById('eDate').value || "ปัจจุบัน";
+
+    allOrders.forEach(order => {
+      const branchName = order.branch || "อื่นๆ";
+      if (!branchSummary[branchName]) branchSummary[branchName] = {};
+
+      order.items.split('\n').forEach(line => {
+        const match = line.match(/(.+) \(เหลือ:.+, สั่ง:([\d.]+)\)/);
+        if (match) {
+          const itemName = match[1].trim();
+          const qtyOrdered = parseFloat(match[2]);
+          branchSummary[branchName][itemName] = (branchSummary[branchName][itemName] || 0) + qtyOrdered;
+        }
+      });
+    });
+
+    // 2. สร้างโครงสร้าง HTML สำหรับ PDF สรุปยอด
+    let branchTablesHTML = "";
+    // เรียงลำดับสาขาตามตัวอักษร
+    Object.keys(branchSummary).sort().forEach(branch => {
+      let itemRows = "";
+      Object.entries(branchSummary[branch]).forEach(([item, total]) => {
+        itemRows += `
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #EEE;">${item}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold;">${total}</td>
+          </tr>`;
+      });
+
+      branchTablesHTML += `
+        <div style="margin-bottom: 30px;">
+          <h2 style="background: #F8F9FA; padding: 10px; color: #A91D3A; border-left: 5px solid #A91D3A; font-size: 18px; margin-bottom: 10px;">สาขา: ${branch}</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #EEE; font-size: 12px; text-transform: uppercase;">
+                <th style="padding: 10px; text-align: left;">รายการสินค้า</th>
+                <th style="padding: 10px; text-align: center;">ยอดรวมสั่งซื้อ</th>
+              </tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+        </div>
+      `;
+    });
+
+    const reportHTML = `
+      <div style="font-family: sans-serif; padding: 40px; background: #FFF; color: #333;">
+        <h1 style="text-align: center; color: #A91D3A; margin-bottom: 5px;">CoffeeToday Summary Report</h1>
+        <p style="text-align: center; color: #888; font-size: 14px; margin-bottom: 30px;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
+        <hr style="border: 0; border-top: 2px solid #EEE; margin-bottom: 30px;">
+        ${branchTablesHTML}
+        <div style="text-align: center; font-size: 10px; color: #CCC; margin-top: 50px;">
+          พิมพ์เมื่อ: ${new Date().toLocaleString("th-TH")}
+        </div>
+      </div>
+    `;
+
+    // 3. ปั้นเป็นไฟล์ PDF และดาวน์โหลด
+    const opt = {
+      margin:       10,
+      filename:     `Summary_Report_${startDate}_${endDate}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+    };
+
+    html2pdf().set(opt).from(reportHTML).save().then(() => {
+      btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
+      btn.disabled = false;
+    });
+  }
+
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
@@ -535,7 +623,6 @@
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมไฟล์...';
     btn.disabled = true;
 
-    // 1. สร้างโครงสร้างแบบเดียวกับหน้า Print เปี๊ยบ เป็นข้อความ String โยนให้ html2pdf ไปวาดเอง
     const htmlString = `
       <div style="font-family: sans-serif; padding: 40px; background: #FFFFFF; width: 100%; box-sizing: border-box; color: #333;">
         <div style="border: 3px solid #EEEEEE; padding: 50px; border-radius: 30px; background: #FFFFFF;">
@@ -551,7 +638,6 @@
       </div>
     `;
 
-    // 2. ตั้งค่า PDF ให้เป็นขนาด A4 แนวตั้ง
     const opt = {
       margin:       10,
       filename:     `Receipt_${o.id}.pdf`,
@@ -560,7 +646,6 @@
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
 
-    // 3. ป้อน String ให้ html2pdf ปั้นไฟล์ รับรองไม่ขาวจั๊วะแน่นอน!
     html2pdf().set(opt).from(htmlString).save().then(() => {
       btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
       btn.disabled = false;
