@@ -527,12 +527,13 @@
   }
 
   /**
-   * ✅ ฟังก์ชันสรุปยอดรายสาขา (ใช้วิธีเดียวกับหน้าออเดอร์เพื่อกันจอขาวและเร็วขึ้น)
+   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF สรุปยอดรายสาขา 
+   * แก้อาการจอขาว 100% ด้วย position: fixed และ scrollY: 0
    */
   function downloadSummaryReport() {
     if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
     const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ประมวลผล...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> คำนวณ...';
     btn.disabled = true;
 
     const startDate = document.getElementById('sDate').value || "จุดเริ่มต้น";
@@ -559,18 +560,18 @@
       });
     });
 
-    // สร้างกล่องกระดาษจำลองแปะในหน้าจอ (แต่ซ่อนไว้)
+    // สร้างกล่องกระดาษจำลองแปะในหน้าจอ (ใช้ fixed เพื่อล็อกตำแหน่งหน้ากล้อง)
     const container = document.createElement('div');
-    container.style.position = 'absolute';
+    container.style.position = 'fixed'; // สำคัญมาก: กันบั๊กเลื่อนหน้าจอแล้ว PDF ขาว
     container.style.top = '0';
     container.style.left = '0';
     container.style.width = '750px'; 
-    container.style.padding = '10px 20px'; 
+    container.style.padding = '20px 30px'; 
     container.style.background = '#FFFFFF';
     container.style.zIndex = '-9999';
     container.style.color = '#333';
-    // 💡 ใช้ฟอนต์ Tahoma เพื่อป้องกันตัวหนังสือตกใน HTML2Canvas 100%
-    container.style.fontFamily = 'Tahoma, "Sarabun", sans-serif'; 
+    // ใช้ฟอนต์ Tahoma เพื่อป้องกันตัวหนังสือตกใน HTML2Canvas 100%
+    container.style.fontFamily = 'Tahoma, sans-serif'; 
 
     let branchTablesHTML = "";
     Object.keys(branchSummary).sort().forEach(branch => {
@@ -578,21 +579,21 @@
       Object.entries(branchSummary[branch]).forEach(([item, data]) => {
         itemRows += `
           <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #EEE; font-size: 12px;">${item}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #EEE; text-align: center; font-size: 12px;">${data.stock}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 12px; color: #A91D3A;">${data.total}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #EEE; font-size: 13px;">${item}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #EEE; text-align: center; font-size: 13px;">${data.stock}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 13px; color: #A91D3A;">${data.total}</td>
           </tr>`;
       });
 
       branchTablesHTML += `
-        <div style="page-break-inside: avoid; margin-bottom: 20px; border: 1px solid #DDD; border-radius: 8px; padding: 10px;">
-          <h2 style="color: #A91D3A; border-left: 4px solid #A91D3A; padding-left: 10px; font-size: 16px; margin: 0 0 10px 0;">สาขา: ${branch}</h2>
+        <div style="page-break-inside: avoid; margin-bottom: 20px; border: 1px solid #DDD; border-radius: 8px; padding: 15px;">
+          <h2 style="color: #A91D3A; border-left: 5px solid #A91D3A; padding-left: 10px; font-size: 16px; margin: 0 0 10px 0;">สาขา: ${branch}</h2>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
               <tr style="background: #FAFAFA;">
-                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #DDD; font-size: 12px; font-weight: bold; white-space: nowrap;">รายการสินค้า</th>
-                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #DDD; font-size: 12px; font-weight: bold; white-space: nowrap;">ยอดคงเหลือ</th>
-                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #DDD; font-size: 12px; font-weight: bold; white-space: nowrap;">ยอดรวมสั่งซื้อ</th>
+                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #DDD; font-size: 13px; font-weight: bold;">รายการสินค้า</th>
+                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #DDD; font-size: 13px; font-weight: bold;">ยอดคงเหลือล่าสุด</th>
+                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #DDD; font-size: 13px; font-weight: bold;">ยอดรวมสั่งซื้อ</th>
               </tr>
             </thead>
             <tbody>${itemRows}</tbody>
@@ -607,7 +608,7 @@
         <p style="color: #666; margin: 0; font-size: 14px;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
       </div>
       ${branchTablesHTML}
-      <div style="text-align: center; font-size: 10px; color: #999; margin-top: 20px;">
+      <div style="text-align: center; font-size: 11px; color: #999; margin-top: 20px;">
         พิมพ์เมื่อ: ${new Date().toLocaleString("th-TH")}
       </div>
     `;
@@ -615,14 +616,15 @@
     document.body.appendChild(container);
 
     const opt = {
-      margin:       5, 
+      margin:       10, 
       filename:     `Summary_${startDate}_${endDate}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false }, // คืนค่า Scale ให้ทำงานไว 1-2 วิ
+      // เพิ่ม scrollY: 0 เพื่อล็อกกล้องไว้ที่กระดาษเสมอ ป้องกันภาพขาว
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
 
-    // ⏳ หน่วงเวลาเสี้ยววิให้บราวเซอร์วาดตัวหนังสือลงจอก่อนแคป (แก้จอขาว)
+    // หน่วงเวลาเสี้ยววิให้บราวเซอร์วาดตัวหนังสือลงจอก่อนแคป 
     setTimeout(() => {
       html2pdf().set(opt).from(container).save().then(() => {
         document.body.removeChild(container);
@@ -634,11 +636,11 @@
         btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
         btn.disabled = false;
       });
-    }, 100); 
+    }, 300); 
   }
 
   /**
-   * ✅ โค้ดต้นฉบับโหลดใบเสร็จ 100% (ที่คุณเบลล์บอกว่าใช้ได้ ไม่ขาว)
+   * ✅ โค้ดต้นฉบับโหลดใบเสร็จ + อัปเกรดล็อกกล้องกันจอขาว
    */
   function downloadPDF() {
     const btn = document.getElementById('dlBtn');
@@ -646,9 +648,10 @@
     btn.disabled = true;
 
     const sourceContent = document.getElementById('pdf-content');
-    
     const clone = sourceContent.cloneNode(true);
-    clone.style.position = 'absolute';
+    
+    clone.style.fontFamily = 'Tahoma, sans-serif'; // แก้ตัวหนังสือตก
+    clone.style.position = 'fixed'; // ล็อกพิกัดกันจอขาว
     clone.style.top = '0';
     clone.style.left = '0';
     clone.style.width = '350px'; 
@@ -661,15 +664,21 @@
       margin:       5,
       filename:     `Receipt_${currentViewingOrderId}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, // ล็อกพิกัดกล้อง
       jsPDF:        { unit: 'mm', format: [80, 200], orientation: 'portrait' } 
     };
 
-    html2pdf().set(opt).from(clone).save().then(() => {
-      document.body.removeChild(clone);
-      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
-      btn.disabled = false;
-    });
+    setTimeout(() => {
+      html2pdf().set(opt).from(clone).save().then(() => {
+        document.body.removeChild(clone);
+        btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
+        btn.disabled = false;
+      }).catch(e => {
+        document.body.removeChild(clone);
+        btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
+        btn.disabled = false;
+      });
+    }, 300);
   }
 
   function printOrder(data) { 
@@ -688,7 +697,7 @@
         maintainAspectRatio: false, 
         indexAxis: 'y', 
         plugins: { legend: { display: false } },
-        scales: { x: { title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 12 } } } }
+        scales: { x: { title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
       } 
     });
     
@@ -714,7 +723,7 @@
         maintainAspectRatio: false, 
         indexAxis: 'y', 
         plugins: { legend: { display: false } },
-        scales: { x: { title: { display: true, text: 'จำนวนคงเหลือ (ชิ้น)', font: { family: 'Prompt', size: 12 } } } }
+        scales: { x: { title: { display: true, text: 'จำนวนคงเหลือ (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
       }
     });
   }
