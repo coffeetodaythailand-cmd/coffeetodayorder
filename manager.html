@@ -7,8 +7,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
   <style>
     :root { 
       --red: #A91D3A; 
@@ -527,42 +525,41 @@
   }
 
   /**
-   * ✅ ฟังก์ชันอัปเกรด: แก้บั๊ก PDF ขาว โดยการสร้างกระดาษจำลองแบบ Clone
+   * ✅ ฟังก์ชันดาวน์โหลด PDF: ใช้โครงสร้างเดียวกับการกด Print เพื่อความสมบูรณ์และลดปัญหาขอบขาว
    */
   function downloadPDF() {
-    const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมไฟล์...';
-    btn.disabled = true;
-
-    // 1. คัดลอกข้อมูลในใบเสร็จออกมา
-    const sourceContent = document.getElementById('pdf-content');
+    const o = allOrders.find(x => x.id === currentViewingOrderId);
+    if(!o) return;
     
-    // 2. สร้างกระดาษจำลอง (Clone) แปะไว้บนสุดชั่วคราวเพื่อป้องกันการแคปเพี้ยนจาก CSS Modal
-    const clone = sourceContent.cloneNode(true);
-    clone.style.position = 'absolute';
-    clone.style.top = '0';
-    clone.style.left = '0';
-    clone.style.width = '350px'; // ล็อกความกว้างจำลอง
-    clone.style.padding = '20px';
-    clone.style.background = '#FFFFFF';
-    clone.style.zIndex = '-9999'; // ซ่อนไว้ข้างหลังไม่ให้เห็น
-    document.body.appendChild(clone);
-
-    const opt = {
-      margin:       5,
-      filename:     `Receipt_${currentViewingOrderId}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
-      jsPDF:        { unit: 'mm', format: [80, 200], orientation: 'portrait' } 
-    };
-
-    // 3. สั่งแคปภาพจากกระดาษจำลอง
-    html2pdf().set(opt).from(clone).save().then(() => {
-      // 4. เมื่อแคปเสร็จ ลบกระดาษจำลองทิ้ง และคืนค่าปุ่ม
-      document.body.removeChild(clone);
-      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
-      btn.disabled = false;
-    });
+    // สร้างหน้าต่างใหม่ที่มีรูปแบบเหมือนหน้าพิมพ์
+    const win = window.open('','','width=650,height=800'); 
+    win.document.write(`
+      <html>
+        <head>
+          <title>${o.id}</title>
+          <style>
+            body{font-family:sans-serif;padding:40px;} 
+            .box{border:3px solid #EEE;padding:50px;border-radius:30px;} 
+            h1{color:#A91D3A;text-align:center;}
+          </style>
+        </head>
+        <body>
+          <div class="box">
+            <h1>COFFEETODAY</h1>
+            <hr>
+            <p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p>
+            <div style=\"background:#FAFAFA;padding:30px;white-space:pre-wrap;\">${o.items}</div>
+          </div>
+          <script>
+            // สั่งให้เมื่อโหลดหน้าเสร็จ เปิดหน้าต่างพิมพ์ทันที (สามารถเลือก Save as PDF ได้)
+            window.onload = function() {
+                window.print();
+            }
+          <\/script>
+        </body>
+      </html>
+    `); 
+    win.document.close(); 
   }
 
   function printOrder(data) { 
