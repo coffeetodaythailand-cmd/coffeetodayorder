@@ -254,7 +254,8 @@
         <h3 style="margin:0; font-family:'Prompt'; font-size:22px;"><i class="fas fa-history"></i> Recent Orders</h3>
         <div id="lastUpd" style="font-size:12px; color:#AAA;">Update: -</div>
       </div>
-      <div style="overflow-x:auto;"><table width="100%" id="oT">
+      <div style="overflow-x:auto;">
+        <table width="100%" id="oT">
           <thead>
             <tr>
               <th>Order ID</th>
@@ -267,7 +268,8 @@
             </tr>
           </thead>
           <tbody id="oB"></tbody>
-      </table></div>
+        </table>
+      </div>
       <div class="pagination-footer">
         <span>Rows per page:</span>
         <select id="rowSel" class="styled-select" onchange="changeLimit()">
@@ -318,7 +320,10 @@
   <div class="modal-card">
     <h3 style="margin-top:0;">เพิ่มหมวดหมู่ใหม่</h3>
     <input type="text" id="cN" class="login-input" style="font-size:18px; text-align:left;" placeholder="ชื่อหมวดหมู่...">
-    <div style="display:flex; gap:20px;"><button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('cM')">ยกเลิก</button><button class="btn btn-red" style="flex:1;" onclick="saveCat()">ยืนยัน</button></div>
+    <div style="display:flex; gap:20px;">
+      <button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('cM')">ยกเลิก</button>
+      <button class="btn btn-red" style="flex:1;" onclick="saveCat()">ยืนยัน</button>
+    </div>
   </div>
 </div>
 
@@ -329,7 +334,10 @@
     <select id="pCatSelect" class="login-input" style="font-size:16px; margin-bottom:15px;"></select>
     <label style="font-size:12px; color:#999;">ชื่อสินค้า</label>
     <input type="text" id="pN" class="login-input" style="font-size:16px; text-align:left;" placeholder="ระบุชื่อสินค้า...">
-    <div style="display:flex; gap:20px;"><button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('pM')">ยกเลิก</button><button class="btn btn-red" style="flex:1;" onclick="saveP()">บันทึกข้อมูล</button></div>
+    <div style="display:flex; gap:20px;">
+      <button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('pM')">ยกเลิก</button>
+      <button class="btn btn-red" style="flex:1;" onclick="saveP()">บันทึกข้อมูล</button>
+    </div>
   </div>
 </div>
 
@@ -364,13 +372,16 @@
           initApp(res.token);
         } else {
           alert(res.message);
-          lBtn.disabled = false; lBtn.innerHTML = 'Unlock Database';
-          pInput.value = ''; pInput.focus();
+          lBtn.disabled = false;
+          lBtn.innerHTML = 'Unlock Database';
+          pInput.value = '';
+          pInput.focus();
         }
       })
       .catch(err => {
         alert("ไม่สามารถเชื่อมต่อ Server ได้");
-        lBtn.disabled = false; lBtn.innerHTML = 'Unlock Database';
+        lBtn.disabled = false;
+        lBtn.innerHTML = 'Unlock Database';
       });
   }
 
@@ -390,7 +401,9 @@
 
   function loadDashboardData(smooth = false, token) { 
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
-    if(smooth) document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
+    if(smooth) {
+      document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
+    }
     
     const s = document.getElementById('sDate').value;
     const e = document.getElementById('eDate').value;
@@ -422,7 +435,11 @@
       .then(data => {
         const card = document.getElementById('approveCard');
         const div = document.getElementById('approveList');
-        if(!data || data.length === 0) { card.style.display = 'none'; return; }
+        if(!data || data.length === 0) { 
+          card.style.display = 'none'; 
+          return; 
+        }
+        
         card.style.display = 'block';
         div.innerHTML = data.map(o => `
           <div class="approve-item">
@@ -438,6 +455,7 @@
 
   function approveOrder(id) {
     if(!confirm('ยืนยันความถูกต้องและอนุมัติส่งมอบออเดอร์ ' + id + '?')) return;
+    
     const token = localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=setOrderStatus&id=${id}&status=Success&token=${token}`)
       .then(res => res.json())
@@ -452,6 +470,7 @@
   
   function renderTable() {
     const query = document.getElementById('orderSearch').value.trim().toLowerCase();
+    
     let filtered = allOrders.filter(o => {
       if(!query) return true;
       const orderNum = o.id.replace(/\D/g, ''); 
@@ -462,10 +481,13 @@
 
     const data = filtered.slice((pgNum - 1) * pgLim, pgNum * pgLim);
     let html = '';
+    
     data.forEach(o => {
       const isPacked = o.status === 'Packed';
       const isSuccess = o.status === 'Success';
-      html += `<tr class="${isSuccess ? 'row-ready' : ''}">
+      
+      html += `
+      <tr class="${isSuccess ? 'row-ready' : ''}">
         <td><b style="color:var(--red); cursor:pointer; text-decoration:underline;" onclick="viewOrderDetail('${o.id}')">${o.id}</b></td>
         <td>${o.date}</td>
         <td><b>${o.branch}</b></td>
@@ -482,6 +504,7 @@
         </td>
       </tr>`;
     });
+    
     document.getElementById('oB').innerHTML = html || '<tr><td colspan="7" align="center" style="padding:60px;">ไม่พบข้อมูลสั่งซื้อ</td></tr>';
     document.getElementById('pI').innerText = pgNum + " / " + (Math.ceil(filtered.length/pgLim) || 1);
   }
@@ -491,9 +514,12 @@
   function viewOrderDetail(id) {
     const o = allOrders.find(x => x.id === id);
     if(!o) return;
+    
     currentViewingOrderId = id;
+
     let tableRows = '';
     const items = o.items.split('\n');
+    
     items.forEach(line => {
       if(line.trim() !== "") {
         const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
@@ -504,6 +530,7 @@
         }
       }
     });
+    
     const bodyHtml = `
       <div class="receipt-info-grid">
         <div><div class="receipt-label">Order ID</div><div class="receipt-value">${o.id}</div></div>
@@ -512,56 +539,80 @@
         <div style="text-align:right;"><div class="receipt-label">Phone</div><div class="receipt-value">${o.phone || '-'}</div></div>
       </div>
       <table class="receipt-table">
-        <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th style="text-align:center;">Stock</th>
+            <th style="text-align:center;">QTY</th>
+          </tr>
+        </thead>
         <tbody>${tableRows}</tbody>
       </table>`;
+      
     document.getElementById('receiptBody').innerHTML = bodyHtml;
     document.getElementById('printDate').innerText = new Date().toLocaleString("th-TH");
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
   /**
-   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF ออเดอร์ (กันจอขาว 100%)
+   * ✅ อัปเกรด: ดาวน์โหลด PDF ออเดอร์ (กระดาษ A4)
+   * แก้ไข: กระดาษ A4 ตามสั่ง, ซ่อนเนียนตา (Stealth), แก้อาการหน้าขาว, แก้ฟอนต์ตก
    */
   function downloadPDF() {
     const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing A4...';
     btn.disabled = true;
 
-    // สร้าง Invisible Box ล็อกพิกัดบนสุดเพื่อกันจอขาว
-    const wrapper = document.createElement('div');
-    wrapper.style = "position:fixed; top:0; left:-5000px; width:400px; background:#FFFFFF; padding:20px; z-index:-9999;";
-    
-    // ดึงเนื้อหาจาก Modal และเปลี่ยนฟอนต์เป็น Tahoma เพื่อกันสระตก
     const sourceContent = document.getElementById('pdf-content');
+    
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.top = '0';
+    wrapper.style.left = '-9999px'; // ล่องหนนอกจอ ป้องกันหลอน
+    wrapper.style.width = '794px';  // ความกว้าง A4
+    wrapper.style.background = '#FFFFFF';
+    wrapper.style.padding = '40px'; 
+    wrapper.style.boxSizing = 'border-box';
+    wrapper.style.zIndex = '-9999';
+
     const clone = sourceContent.cloneNode(true);
-    clone.style.fontFamily = 'Tahoma, sans-serif'; 
+    clone.style.fontFamily = 'Tahoma, sans-serif'; // บังคับฟอนต์แก้สระตก
+    
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
 
     const opt = {
-      margin: 5,
+      margin: 10,
       filename: `Receipt_${currentViewingOrderId}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
+      // 💡 scrollY: 0 สำคัญที่สุด! กันหน้าขาวเวลากดดาวน์โหลดแล้วเลื่อนจออยู่
       html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
-      jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' } 
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } // ปรับเป็น A4 ตามสั่ง
     };
 
-    // หน่วงเวลาเล็กน้อยให้บราวเซอร์วาดตัวหนังสือลงจอล่องหนเสร็จก่อน
     setTimeout(() => {
-      html2pdf().set(opt).from(clone).save().then(() => {
+      html2pdf().set(opt).from(wrapper).save().then(() => {
+        document.body.removeChild(wrapper);
+        btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
+        btn.disabled = false;
+      }).catch(err => {
+        console.error(err);
         document.body.removeChild(wrapper);
         btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
         btn.disabled = false;
       });
-    }, 500);
+    }, 500); 
   }
 
   /**
-   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลดรายงานสรุป (แก้สระตก + เพิ่มคอลัมน์ยอดคงเหลือ + กันขาว)
+   * ✅ อัปเกรด: ดาวน์โหลดรายงานสรุปรายสาขา
+   * แก้ไข: ฟอนต์ไม่ตก, ไม่โผล่หลัง UI (Stealth), ชิดขอบบน, กันหน้าขาว
    */
   function downloadSummaryReport() {
-    if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
+    if(allOrders.length === 0) {
+      return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
+    }
+    
     const btn = document.getElementById('summaryBtn');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     btn.disabled = true;
@@ -571,16 +622,22 @@
 
     // จัดกลุ่มข้อมูลตามสาขา
     const branchSummary = {};
+    
     allOrders.forEach(order => {
       const branchName = order.branch || "อื่นๆ";
-      if (!branchSummary[branchName]) branchSummary[branchName] = {};
+      
+      if (!branchSummary[branchName]) {
+        branchSummary[branchName] = {};
+      }
 
-      order.items.split('\n').forEach(line => {
+      const lines = order.items.split('\n');
+      lines.forEach(line => {
         const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
         if (match) {
           const itemName = match[1].trim();
           const stockVal = match[2].trim();
           const qtyOrdered = parseFloat(match[3]);
+          
           if(!branchSummary[branchName][itemName]) {
             branchSummary[branchName][itemName] = { total: 0, stock: stockVal };
           }
@@ -590,68 +647,87 @@
       });
     });
 
-    // สร้างกระดาษรายงานล่องหน (Stealth Box)
-    const reportWrapper = document.createElement('div');
-    reportWrapper.style = "position:fixed; top:0; left:-5000px; width:750px; background:#FFFFFF; padding:10px 30px; z-index:-9999; color:#333;";
-    
-    let branchTablesHTML = "";
-    Object.keys(branchSummary).sort().forEach(branch => {
-      let itemRows = "";
-      Object.entries(branchSummary[branch]).forEach(([item, data]) => {
-        itemRows += `
-          <tr>
-            <td style="padding:6px 10px; border-bottom:1px solid #EEE; font-size:11px; font-family:Tahoma;">${item}</td>
-            <td style="padding:6px 10px; border-bottom:1px solid #EEE; text-align:center; font-size:11px; font-family:Tahoma; color:#666;">${data.stock}</td>
-            <td style="padding:6px 10px; border-bottom:1px solid #EEE; text-align:center; font-weight:bold; font-size:11px; color:#A91D3A; font-family:Tahoma;">${data.total}</td>
-          </tr>`;
-      });
+    // สร้างกล่องล่องหน (Stealth Box) กันภาพผีโผล่หลัง UI
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.top = '0';
+    wrapper.style.left = '-9999px'; // ล่องหนนอกจอซ้ายสุด
+    wrapper.style.width = '794px'; 
+    wrapper.style.background = '#FFFFFF';
+    wrapper.style.padding = '10px 40px'; 
+    wrapper.style.boxSizing = 'border-box';
+    wrapper.style.zIndex = '-9999';
 
-      branchTablesHTML += `
-        <div style="page-break-inside:avoid; margin-bottom:20px; border:1px solid #EEE; border-radius:8px; overflow:hidden;">
-          <h2 style="background:#F8F9FA; padding:10px; color:#A91D3A; border-left:5px solid #A91D3A; font-size:14px; margin:0; font-family:Tahoma; font-weight:bold;">สาขา: ${branch}</h2>
-          <table style="width:100%; border-collapse:collapse;">
+    const reportDiv = document.createElement('div');
+    reportDiv.style.width = '100%';
+    reportDiv.style.color = '#333';
+    reportDiv.style.fontFamily = 'Tahoma, sans-serif'; // ล็อกฟอนต์แก้สระตก 100%
+
+    let tables = "";
+    
+    const sortedBranches = Object.keys(branchSummary).sort();
+    sortedBranches.forEach(b => {
+      let rs = "";
+      
+      const items = Object.entries(branchSummary[b]);
+      items.forEach(([it, d]) => {
+        rs += `
+          <tr>
+            <td style="padding: 6px; border-bottom: 1px solid #EEE; font-size: 11px;">${it}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #EEE; text-align: center; font-size: 11px; color: #666;">${d.stock}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 11px; color: #A91D3A;">${d.total}</td>
+          </tr>
+        `;
+      });
+      
+      // page-break-inside: avoid เพื่อกันตารางฉีกครึ่งหน้า
+      tables += `
+        <div style="page-break-inside: avoid; margin-bottom: 20px; border: 1px solid #EEE; border-radius: 8px; overflow: hidden;">
+          <h2 style="background: #F8F9FA; padding: 10px; color: #A91D3A; border-left: 5px solid #A91D3A; font-size: 14px; margin: 0; font-weight: bold;">สาขา: ${b}</h2>
+          <table style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr style="background:#FAFAFA; font-size:10px;">
-                <th style="padding:8px 10px; text-align:left; border-bottom:2px solid #EEE; width:50%; font-family:Tahoma;">รายการสินค้า</th>
-                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE; font-family:Tahoma;">ยอดคงเหลือล่าสุด</th>
-                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE; font-family:Tahoma;">ยอดรวมสั่งซื้อ</th>
+              <tr style="background: #FAFAFA; font-size: 10px;">
+                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #EEE; width: 50%;">รายการสินค้า</th>
+                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #EEE;">ยอดคงเหลือล่าสุด</th>
+                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #EEE;">ยอดรวมสั่งซื้อ</th>
               </tr>
             </thead>
-            <tbody>${itemRows}</tbody>
+            <tbody>${rs}</tbody>
           </table>
         </div>
       `;
     });
 
-    reportWrapper.innerHTML = `
-      <div style="text-align:center; margin-bottom:20px; padding-top:0;">
-        <h1 style="color:#A91D3A; margin:0 0 5px 0; font-size:22px; font-family:Tahoma; font-weight:bold;">CoffeeToday Summary Report</h1>
-        <p style="color:#888; font-size:12px; margin:0; font-family:Tahoma;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
+    reportDiv.innerHTML = `
+      <div style="text-align: center; margin-bottom: 20px; padding-top: 0;">
+        <h1 style="color: #A91D3A; margin: 0 0 5px 0; font-size: 22px; font-weight: bold;">CoffeeToday Summary Report</h1>
+        <p style="color: #888; font-size: 12px; margin: 0;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
       </div>
-      ${branchTablesHTML}
-      <div style="text-align:center; font-size:10px; color:#BBB; margin-top:20px; font-family:Tahoma;">
+      ${tables}
+      <div style="text-align: center; font-size: 10px; color: #BBB; margin-top: 20px;">
         พิมพ์เอกสารเมื่อ: ${new Date().toLocaleString("th-TH")}
       </div>
     `;
 
-    document.body.appendChild(reportWrapper);
+    wrapper.appendChild(reportDiv);
+    document.body.appendChild(wrapper);
 
-    const opt = {
-      margin: 5,
-      filename: `Summary_${startDate}_${endDate}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+    const opt = { 
+      margin: 10, 
+      filename: `Summary_${startDate}_${endDate}.pdf`, 
+      image: { type: 'jpeg', quality: 0.98 }, 
       html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
 
     setTimeout(() => {
-      html2pdf().set(opt).from(reportWrapper).save().then(() => {
-        document.body.removeChild(reportWrapper);
+      html2pdf().set(opt).from(wrapper).save().then(() => {
+        document.body.removeChild(wrapper);
         btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
         btn.disabled = false;
       }).catch(err => {
         console.error(err);
-        document.body.removeChild(reportWrapper);
+        document.body.removeChild(wrapper);
         btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
         btn.disabled = false;
       });
@@ -659,108 +735,214 @@
   }
 
   function printOrder(data) { 
-    const o = JSON.parse(decodeURIComponent(data)), win = window.open('','','width=650,height=800'); 
-    win.document.write(`<html><head><style>body{font-family:sans-serif;padding:40px;} .box{border:3px solid #EEE;padding:50px;border-radius:30px;} h1{color:#A91D3A;text-align:center;}</style></head><body><div class="box"><h1>COFFEETODAY</h1><hr><p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p><div style=\"background:#FAFAFA;padding:30px;white-space:pre-wrap;\">${o.items}</div></div><script>window.print();<\/script></body></html>`); win.document.close(); 
+    const o = JSON.parse(decodeURIComponent(data));
+    const win = window.open('','','width=650,height=800'); 
+    win.document.write(`
+      <html>
+        <head>
+          <style>
+            body{font-family:sans-serif;padding:40px;} 
+            .box{border:3px solid #EEE;padding:50px;border-radius:30px;} 
+            h1{color:#A91D3A;text-align:center;}
+          </style>
+        </head>
+        <body>
+          <div class="box">
+            <h1>COFFEETODAY</h1>
+            <hr>
+            <p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p>
+            <div style="background:#FAFAFA;padding:30px;white-space:pre-wrap;">${o.items}</div>
+          </div>
+          <script>window.print();<\/script>
+        </body>
+      </html>
+    `); 
+    win.document.close(); 
   }
   
   function renderCharts(c) {
-    if(bcObj) bcObj.destroy(); if(pcObj) pcObj.destroy(); if(scObj) scObj.destroy();
+    if(bcObj) bcObj.destroy(); 
+    if(pcObj) pcObj.destroy(); 
+    if(scObj) scObj.destroy();
     
-    // ✅ เพิ่มแกนไกด์: จำนวนที่สั่ง (ชิ้น)
+    // ✅ เพิ่มข้อความไกด์แกน X (จำนวนที่สั่ง)
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
-      data: { labels: c.pL, datasets: [{ label: 'จำนวนสั่ง', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] }, 
+      data: { 
+        labels: c.pL, 
+        datasets: [{ label: 'จำนวนสั่ง', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] 
+      }, 
       options: { 
-        maintainAspectRatio: false, indexAxis: 'y', 
-        plugins: { legend: { display: false } },
-        scales: { x: { title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
+        maintainAspectRatio: false, 
+        indexAxis: 'y', 
+        plugins: { legend: { display: false } }, 
+        scales: { 
+          x: { 
+            title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 10 } } 
+          } 
+        } 
       } 
     });
     
     pcObj = new Chart(document.getElementById('pC_Chart'), { 
       type: 'doughnut', 
-      data: { labels: c.bL, datasets: [{ data: c.bV, backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] }] }, 
-      options: { maintainAspectRatio: false, cutout: '78%' } 
+      data: { 
+        labels: c.bL, 
+        datasets: [{ data: c.bV, backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] }] 
+      }, 
+      options: { 
+        maintainAspectRatio: false, 
+        cutout: '78%' 
+      } 
     });
     
-    // ✅ เพิ่มแกนไกด์: จำนวนคงเหลือล่าสุด (ชิ้น)
+    // ✅ เพิ่มข้อความไกด์แกน X (จำนวนคงเหลือ)
     scObj = new Chart(document.getElementById('sC'), {
-      type: 'bar',
-      data: {
+      type: 'bar', 
+      data: { 
         labels: c.sL ? c.sL.slice(0, 15) : [], 
-        datasets: [{
-          label: 'คงเหลือล่าสุด',
-          data: c.sV ? c.sV.slice(0, 15) : [],
-          backgroundColor: '#f39c12',
-          borderRadius: 10, barThickness: 20 
-        }]
+        datasets: [{ label: 'คงเหลือล่าสุด', data: c.sV ? c.sV.slice(0, 15) : [], backgroundColor: '#f39c12', borderRadius: 10, barThickness: 20 }] 
       },
       options: { 
-        maintainAspectRatio: false, indexAxis: 'y', 
-        plugins: { legend: { display: false } },
-        scales: { x: { title: { display: true, text: 'จำนวนคงเหลือล่าสุด (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
+        maintainAspectRatio: false, 
+        indexAxis: 'y', 
+        plugins: { legend: { display: false } }, 
+        scales: { 
+          x: { 
+            title: { display: true, text: 'จำนวนคงเหลือล่าสุด (ชิ้น)', font: { family: 'Prompt', size: 10 } } 
+          } 
+        } 
       }
     });
   }
 
   function renderMenuAccordion(d) {
     if(!d || !d.categories) return;
+    
     menuObj = d; 
-    let chipsHtml = '', itemsHtml = '', opts = '';
-    if(!currentCat && d.categories.length > 0) currentCat = d.categories[0];
+    let chipsHtml = '';
+    let itemsHtml = '';
+    let opts = '';
+    
+    if(!currentCat && d.categories.length > 0) {
+      currentCat = d.categories[0];
+    }
+    
     d.categories.forEach(cat => {
       opts += `<option value="${cat}">${cat}</option>`;
       chipsHtml += `<div class="chip ${cat === currentCat ? 'active' : ''}" onclick="selectCat('${cat}')">${cat} (${d.grouped[cat] ? d.grouped[cat].length : 0})</div>`;
     });
+    
     if(currentCat && d.grouped[currentCat]) {
       d.grouped[currentCat].forEach(i => { 
-        itemsHtml += `<div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">
-          <span style="font-weight:600; color:#444;">${i.name}</span>
-          <div style="display:flex; gap:25px; align-items:center;">
-            <label class="switch">
-              <input type="checkbox" ${i.status==='Active'?'checked':''} onchange="toggleItem('${i.rowId}', '${i.name}', '${currentCat}', this)">
-              <span class="slider"></span>
-            </label>
-            <i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${i.rowId}, '${i.name}', '${currentCat}')"></i>
+        itemsHtml += `
+          <div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">
+            <span style="font-weight:600; color:#444;">${i.name}</span>
+            <div style="display:flex; gap:25px; align-items:center;">
+              <label class="switch">
+                <input type="checkbox" ${i.status==='Active'?'checked':''} onchange="toggleItem('${i.rowId}', '${i.name}', '${currentCat}', this)">
+                <span class="slider"></span>
+              </label>
+              <i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${i.rowId}, '${i.name}', '${currentCat}')"></i>
+            </div>
           </div>
-        </div>`; 
+        `; 
       });
     }
-    document.getElementById('catChips').innerHTML = chipsHtml;
-    document.getElementById('menuItems').innerHTML = itemsHtml;
+    
+    document.getElementById('catChips').innerHTML = chipsHtml; 
+    document.getElementById('menuItems').innerHTML = itemsHtml; 
     document.getElementById('pCatSelect').innerHTML = opts;
   }
 
-  function selectCat(cat) { currentCat = cat; renderMenuAccordion(menuObj); }
+  function selectCat(cat) { 
+    currentCat = cat; 
+    renderMenuAccordion(menuObj); 
+  }
+
   function toggleItem(id, n, c, el) { 
     const token = localStorage.getItem(TOKEN_KEY);
     const status = el.checked ? 'Active' : 'Inactive';
     fetch(`${GAS_URL}?action=updateProduct&id=${id}&name=${n}&cat=${c}&status=${status}&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast(el.checked ? "✅ เปิดการใช้งาน!" : "🌑 ปิดการใช้งาน"); });
+      .then(res => res.json())
+      .then(d => { 
+        renderMenuAccordion(d); 
+        showToast(el.checked ? "✅ เปิดการใช้งาน!" : "🌑 ปิดการใช้งาน"); 
+      });
   }
-  function openCatModal() { document.getElementById('cN').value = ''; document.getElementById('cM').style.display = 'flex'; }
-  function closeM(id) { document.getElementById(id).style.display='none'; }
+
+  function openCatModal() { 
+    document.getElementById('cN').value = ''; 
+    document.getElementById('cM').style.display = 'flex'; 
+  }
+
+  function closeM(id) { 
+    document.getElementById(id).style.display='none'; 
+  }
+
   function showToast(msg) {
-    const t = document.createElement('div'); t.innerText = msg;
+    const t = document.createElement('div'); 
+    t.innerText = msg;
     t.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:12px 25px; border-radius:50px; z-index:10000; box-shadow:0 5px 15px rgba(0,0,0,0.2); font-family:'Prompt'; animation: fadeInOut 2s forwards;";
-    document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+    document.body.appendChild(t); 
+    setTimeout(() => t.remove(), 2000);
   }
+
   function saveCat() { 
-    const n = document.getElementById('cN').value; if(!n) return; closeM('cM'); 
+    const n = document.getElementById('cN').value; 
+    if(!n) return; 
+    closeM('cM'); 
+    
     const token = localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=addCategory&catName=${n}&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); });
+      .then(res => res.json())
+      .then(d => { 
+        renderMenuAccordion(d); 
+        showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); 
+      });
   }
-  function openProdModal(id=null, n='', c='') { editTargetId=id; document.getElementById('pN').value=n; document.getElementById('pCatSelect').value=c||(menuObj.categories ? menuObj.categories[0] : ''); document.getElementById('pM').style.display='flex'; }
+
+  function openProdModal(id=null, n='', c='') { 
+    editTargetId = id; 
+    document.getElementById('pN').value = n; 
+    document.getElementById('pCatSelect').value = c || (menuObj.categories ? menuObj.categories[0] : ''); 
+    document.getElementById('pM').style.display = 'flex'; 
+  }
+
   function saveP() { 
-    const name = document.getElementById('pN').value; const cat = document.getElementById('pCatSelect').value; if(!name) return; closeM('pM'); 
+    const name = document.getElementById('pN').value; 
+    const cat = document.getElementById('pCatSelect').value; 
+    if(!name) return; 
+    closeM('pM'); 
+    
     const token = localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=updateProduct&id=${editTargetId}&name=${name}&cat=${cat}&status=Active&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("✅ บันทึกสินค้าเรียบร้อย!"); });
+      .then(res => res.json())
+      .then(d => { 
+        renderMenuAccordion(d); 
+        showToast("✅ บันทึกสินค้าเรียบร้อย!"); 
+      });
   }
-  function changeLimit() { pgLim = parseInt(document.getElementById('rowSel').value); pgNum = 1; renderTable(); }
-  function next() { if(pgNum * pgLim < allOrders.length){ pgNum++; renderTable(); } }
-  function prev() { if(pgNum > 1){ pgNum--; renderTable(); } }
+
+  function changeLimit() { 
+    pgLim = parseInt(document.getElementById('rowSel').value); 
+    pgNum = 1; 
+    renderTable(); 
+  }
+
+  function next() { 
+    if(pgNum * pgLim < allOrders.length){ 
+      pgNum++; 
+      renderTable(); 
+    } 
+  }
+
+  function prev() { 
+    if(pgNum > 1){ 
+      pgNum--; 
+      renderTable(); 
+    } 
+  }
 </script>
 </body>
 </html>
