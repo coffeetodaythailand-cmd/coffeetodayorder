@@ -524,13 +524,13 @@
   }
 
   /**
-   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF สรุปยอดรายสาขา (ฉบับสมบูรณ์ที่สุด)
-   * แก้ปัญหา: ชิดขอบบน, ตารางไม่ขาดครึ่งหน้า, เพิ่มยอดคงเหลือ, ลดขนาดฟอนต์
+   * ✅ อัปเกรด: ฟังก์ชันดาวน์โหลด PDF สรุปยอดรายสาขา (ฉบับ Final)
+   * แก้ไข: บั๊กตัวหนังสือตก, เพิ่มคอลัมน์คงเหลือ, ชิดขอบบน, ลดขนาดตัวอักษร
    */
   function downloadSummaryReport() {
     if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
     const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ประมวลผล...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> คำนวณ...';
     btn.disabled = true;
 
     const branchSummary = {};
@@ -551,7 +551,6 @@
             branchSummary[branchName][itemName] = { total: 0, stock: stockVal };
           }
           branchSummary[branchName][itemName].total += qtyOrdered;
-          // เก็บยอดคงเหลือล่าสุดไว้
           branchSummary[branchName][itemName].stock = stockVal;
         }
       });
@@ -563,22 +562,22 @@
       Object.entries(branchSummary[branch]).forEach(([item, data]) => {
         itemRows += `
           <tr>
-            <td style="padding: 6px 10px; border-bottom: 1px solid #EEE; font-size: 11px;">${item}</td>
-            <td style="padding: 6px 10px; border-bottom: 1px solid #EEE; text-align: center; font-size: 11px; color: #666;">${data.stock}</td>
-            <td style="padding: 6px 10px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 12px; color: #A91D3A;">${data.total}</td>
+            <td style="padding: 5px 8px; border-bottom: 1px solid #EEE; font-size: 10px; white-space: nowrap;">${item}</td>
+            <td style="padding: 5px 8px; border-bottom: 1px solid #EEE; text-align: center; font-size: 10px; color: #777;">${data.stock}</td>
+            <td style="padding: 5px 8px; border-bottom: 1px solid #EEE; text-align: center; font-weight: bold; font-size: 11px; color: #A91D3A;">${data.total}</td>
           </tr>`;
       });
 
-      // 💡 ใช้ page-break-inside: avoid เพื่อให้ย้ายไปหน้าใหม่ทั้งสาขาถ้าเนื้อหาเกิน
+      // 💡 ใช้ page-break-inside: avoid เพื่อเลื่อนสาขาไปหน้าใหม่ทั้งก้อนถ้าเนื้อหาเกิน
       branchTablesHTML += `
-        <div style="page-break-inside: avoid; margin-bottom: 20px; border: 1px solid #EEE; border-radius: 8px; overflow: hidden; background: #FFF;">
-          <h2 style="background: #F8F9FA; padding: 10px; color: #A91D3A; border-left: 5px solid #A91D3A; font-size: 14px; margin: 0;">สาขา: ${branch}</h2>
+        <div style="page-break-inside: avoid; margin-bottom: 15px; border: 1px solid #EEE; border-radius: 6px; overflow: hidden; background: #FFF;">
+          <h2 style="background: #F8F9FA; padding: 8px; color: #A91D3A; border-left: 5px solid #A91D3A; font-size: 13px; margin: 0;">สาขา: ${branch}</h2>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr style="background: #FAFAFA; font-size: 10px;">
-                <th style="padding: 8px 10px; text-align: left; border-bottom: 2px solid #EEE; width: 50%;">รายการสินค้า</th>
-                <th style="padding: 8px 10px; text-align: center; border-bottom: 2px solid #EEE;">ยอดคงเหลือ</th>
-                <th style="padding: 8px 10px; text-align: center; border-bottom: 2px solid #EEE;">ยอดรวมสั่งซื้อ</th>
+              <tr style="background: #FAFAFA; font-size: 9px;">
+                <th style="padding: 6px 8px; text-align: left; border-bottom: 2px solid #EEE; width: 55%; font-weight: 600;">รายการสินค้า</th>
+                <th style="padding: 6px 8px; text-align: center; border-bottom: 2px solid #EEE; font-weight: 600;">ยอดคงเหลือ</th>
+                <th style="padding: 6px 8px; text-align: center; border-bottom: 2px solid #EEE; font-weight: 600;">ยอดรวมสั่งซื้อ</th>
               </tr>
             </thead>
             <tbody>${itemRows}</tbody>
@@ -587,14 +586,14 @@
       `;
     });
 
-    // 💡 แก้ปัญหา: ลด Padding ด้านบนเหลือ 5px ให้ชิดขอบที่สุด และลดฟอนต์ลง
+    // 💡 แก้ไข: ปรับ Padding ด้านบนให้เหลือน้อยที่สุด (5px) และลดขนาดหัวข้อลง
     const reportHTML = `
-      <div style="font-family: sans-serif; padding: 5px 25px; background: #FFF; color: #333; width: 100%;">
-        <h1 style="text-align: center; color: #A91D3A; margin: 0 0 3px 0; font-size: 22px;">CoffeeToday Summary Report</h1>
-        <p style="text-align: center; color: #888; font-size: 12px; margin: 0 0 15px 0;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
-        <hr style="border: 0; border-top: 1px solid #F0F0F0; margin-bottom: 20px;">
+      <div style="font-family: sans-serif; padding: 5px 20px; background: #FFF; color: #333; width: 100%; box-sizing: border-box;">
+        <h1 style="text-align: center; color: #A91D3A; margin: 0 0 2px 0; font-size: 20px; font-weight: bold;">CoffeeToday Summary Report</h1>
+        <p style="text-align: center; color: #888; font-size: 11px; margin: 0 0 12px 0;">ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
+        <hr style="border: 0; border-top: 1px solid #F0F0F0; margin-bottom: 15px;">
         ${branchTablesHTML}
-        <div style="text-align: center; font-size: 9px; color: #BBB; margin-top: 30px; padding-bottom: 10px;">
+        <div style="text-align: center; font-size: 8px; color: #BBB; margin-top: 25px; padding-bottom: 15px;">
           พิมพ์เอกสารเมื่อ: ${new Date().toLocaleString("th-TH")}
         </div>
       </div>
@@ -604,7 +603,7 @@
       margin:       [5, 5], 
       filename:     `Summary_${startDate}_${endDate}.pdf`,
       image:        { type: 'jpeg', quality: 1 },
-      html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+      html2canvas:  { scale: 2.5, useCORS: true, letterRendering: true, windowWidth: 800 },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
 
@@ -618,7 +617,7 @@
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
     const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมไฟล์...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> เตรียมไฟล์...';
     btn.disabled = true;
 
     const htmlString = `
@@ -658,20 +657,24 @@
   function renderCharts(c) {
     if(bcObj) bcObj.destroy(); if(pcObj) pcObj.destroy(); if(scObj) scObj.destroy();
     
-    // ✅ เพิ่มตัวหนังสือไกด์: จำนวนสั่งซื้อ
+    // ✅ เพิ่มข้อความไกด์แกนตัวเลข: จำนวนที่สั่ง (ชิ้น)
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
-      data: { labels: c.pL, datasets: [{ label: 'จำนวนที่สั่ง (ชิ้น)', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] }, 
-      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `สั่ง: ${ctx.raw} ชิ้น` } } } } 
+      data: { labels: c.pL, datasets: [{ label: 'จำนวนสั่งซื้อ (ชิ้น)', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] }, 
+      options: { 
+        maintainAspectRatio: false, indexAxis: 'y', 
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `สั่งซื้อ: ${ctx.raw} ชิ้น` } } },
+        scales: { x: { title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
+      } 
     });
     
     pcObj = new Chart(document.getElementById('pC_Chart'), { 
       type: 'doughnut', 
       data: { labels: c.bL, datasets: [{ data: c.bV, backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] }] }, 
-      options: { maintainAspectRatio: false, cutout: '78%', plugins: { tooltip: { callbacks: { label: (ctx) => `สัดส่วนออเดอร์: ${ctx.raw} รายการ` } } } } 
+      options: { maintainAspectRatio: false, cutout: '78%', plugins: { tooltip: { callbacks: { label: (ctx) => `สัดส่วน: ${ctx.raw} ออเดอร์` } } } } 
     });
     
-    // ✅ เพิ่มตัวหนังสือไกด์: ยอดคงเหลือล่าสุด
+    // ✅ เพิ่มข้อความไกด์แกนตัวเลข: จำนวนคงเหลือ (ชิ้น)
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar',
       data: {
@@ -683,7 +686,11 @@
           borderRadius: 10, barThickness: 20 
         }]
       },
-      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `คงเหลือ: ${ctx.raw} ชิ้น` } } } }
+      options: { 
+        maintainAspectRatio: false, indexAxis: 'y', 
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `คงเหลือ: ${ctx.raw} ชิ้น` } } },
+        scales: { x: { title: { display: true, text: 'จำนวนคงเหลือล่าสุด (ชิ้น)', font: { family: 'Prompt', size: 10 } } } }
+      }
     });
   }
 
