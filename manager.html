@@ -7,6 +7,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
   <style>
     :root { 
       --red: #A91D3A; 
@@ -112,6 +114,10 @@
       padding: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.15);
       max-height: 85vh; overflow-y: auto; border-top: 10px solid var(--red);
     }
+    
+    /* เลย์เอาต์ PDF แบบสลิป A */
+    #pdf-content { padding: 15px; background: white; }
+    
     .receipt-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; background: #f9f9f9; padding: 15px; border-radius: 12px; }
     .receipt-label { font-size: 11px; color: #999; text-transform: uppercase; }
     .receipt-value { font-size: 14px; font-weight: 600; color: #333; }
@@ -174,7 +180,7 @@
 
     .styled-select { background: #FFF; border: 1px solid #DDD; padding: 8px 15px; border-radius: 10px; font-family: 'Prompt'; outline: none; cursor: pointer; }
 
-    .btn { padding: 12px 28px; border-radius: 16px; border: none; font-family: 'Prompt'; font-weight: 600; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+    .btn { padding: 12px 28px; border-radius: 16px; border: none; font-family: 'Prompt'; font-weight: 600; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; justify-content: center;}
     .btn-red { background: var(--red); color: white; box-shadow: 0 10px 20px rgba(169,29,58,0.2); }
     .btn-red:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(169,29,58,0.3); }
 
@@ -291,11 +297,23 @@
 
 <div id="receiptModal" class="overlay">
   <div class="receipt-card">
-    <div style="text-align:center; margin-bottom:10px;">
-      <h3 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:1px;">ORDER RECEIPT</h3>
+    
+    <div id="pdf-content">
+      <div style="text-align:center; margin-bottom:10px;">
+        <h3 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:1px;">ORDER RECEIPT</h3>
+      </div>
+      <div id="receiptBody"></div>
+      
+      <div style="margin-top: 30px; text-align: center; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #888;">
+        <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
+        <p>วันที่พิมพ์: <span id="printDate"></span></p>
+      </div>
     </div>
-    <div id="receiptBody"></div>
-    <button class="btn btn-red" style="width:100%; margin-top:25px; padding:15px;" onclick="closeM('receiptModal')">Close View</button>
+    
+    <button class="btn" style="width:100%; margin-top:25px; padding:15px; background:var(--green); color:white;" onclick="downloadPDF()">
+      <i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF (แบบ A)
+    </button>
+    <button class="btn btn-red" style="width:100%; margin-top:10px; padding:15px;" onclick="closeM('receiptModal')">Close View</button>
   </div>
 </div>
 
@@ -321,13 +339,10 @@
 <script>
   let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null;
   
-  // 🚩 แก้ไขจุดที่ 1: ใส่ลิงก์ Web App ของคุณเบลล์ที่นี่
+  // 🚩 ใส่ลิงก์ Web App
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
 
-  /**
-   * ✅ อัปเกรด: ระบบ Auto-Login (Warp) 100%
-   */
   window.onload = () => {
     const savedToken = localStorage.getItem(TOKEN_KEY);
     if (savedToken) {
@@ -337,9 +352,6 @@
     }
   };
 
-  /**
-   * ✅ อัปเกรด: ระบบ Login แบบ API (Nitro Speed) - ยิงผ่าน fetch แทน google.script.run
-   */
   function handleLogin() { 
     const lBtn = document.getElementById('loginBtn');
     const pInput = document.getElementById('passInput');
@@ -374,16 +386,12 @@
   function initApp(token) { 
     loadDashboardData(false, token); 
     loadApproveList(token); 
-    // ตั้งค่า Live Sync ทุก 3 นาที
     setInterval(() => {
       loadDashboardData(false, token);
       loadApproveList(token);
     }, 180000); 
   }
 
-  /**
-   * ✅ โหลดข้อมูล Dashboard: เปลี่ยนจาก google.script.run เป็น fetch API
-   */
   function loadDashboardData(smooth = false, token) { 
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
     if(smooth) document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
@@ -401,7 +409,7 @@
           renderMenuAccordion(d.menu); 
           document.getElementById('lastUpd').innerText = "Update: " + new Date().toLocaleTimeString();
         } else {
-          handleLogout(); // ตั๋วหมดอายุหรือ Token ผิด ให้ล็อกเอาท์
+          handleLogout();
         }
         document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
       })
@@ -413,7 +421,6 @@
 
   function loadApproveList(token) {
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
-    // ใช้ฟังก์ชันพิเศษเพื่อดึงเฉพาะรายการที่ต้องอนุมัติ
     fetch(`${GAS_URL}?action=getOrdersByStatus&status=Packed&token=${currentToken}`)
       .then(res => res.json())
       .then(data => {
@@ -447,9 +454,6 @@
       });
   }
   
-  /**
-   * ✅ ฟังชั่นแสดงตารางและค้นหา (คงเดิม 100%)
-   */
   function renderTable() {
     const query = document.getElementById('orderSearch').value.trim().toLowerCase();
     let filtered = allOrders.filter(o => {
@@ -486,9 +490,15 @@
     document.getElementById('pI').innerText = pgNum + " / " + (Math.ceil(filtered.length/pgLim) || 1);
   }
 
+  // ✅ ตัวแปรเก็บ ID ออเดอร์ที่กำลังดูอยู่ เอาไว้ตั้งชื่อไฟล์ PDF
+  let currentViewingOrderId = "";
+
   function viewOrderDetail(id) {
     const o = allOrders.find(x => x.id === id);
     if(!o) return;
+    
+    currentViewingOrderId = id; // เก็บ ID ไว้ใช้ตอนโหลดไฟล์
+
     let tableRows = '';
     const items = o.items.split('\n');
     items.forEach(line => {
@@ -512,8 +522,31 @@
         <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>`;
+      
     document.getElementById('receiptBody').innerHTML = bodyHtml;
+    // อัปเดตวันที่พิมพ์ในท้ายบิล
+    document.getElementById('printDate').innerText = new Date().toLocaleString("th-TH");
     document.getElementById('receiptModal').style.display = 'flex';
+  }
+
+  /**
+   * ✅ ฟังก์ชันสำหรับสร้างและดาวน์โหลด PDF แบบหน้าแคบ (แบบ A)
+   */
+  function downloadPDF() {
+    const element = document.getElementById('pdf-content');
+    
+    // ตั้งค่าหน้ากระดาษแบบสลิป (กว้าง 80mm ยาวตามเนื้อหา)
+    const opt = {
+      margin:       5,
+      filename:     `Receipt_${currentViewingOrderId}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      // ปรับหน้ากระดาษเป็นม้วนกระดาษความร้อน (Slip width 80mm)
+      jsPDF:        { unit: 'mm', format: [80, 200], orientation: 'portrait' } 
+    };
+
+    // เรียกใช้ html2pdf
+    html2pdf().set(opt).from(element).save();
   }
 
   function printOrder(data) { 
@@ -548,9 +581,6 @@
     });
   }
 
-  /**
-   * ✅ การจัดการเมนู: ใช้ระบบ fetch API แทนการเรียก GS ตรงๆ
-   */
   function renderMenuAccordion(d) {
     if(!d || !d.categories) return;
     menuObj = d; 
