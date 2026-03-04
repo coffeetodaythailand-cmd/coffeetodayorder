@@ -22,7 +22,6 @@
       padding-bottom: 50px; 
     }
     
-    /* ✅ เพิ่ม CSS ส่วน Login Overlay ให้เหมือนหน้า Manager */
     #login-overlay { 
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
       background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
@@ -137,7 +136,7 @@
     .check-row.checked { background: #F9FAFB; opacity: 0.6; }
     .check-row.checked span { text-decoration: line-through; }
     
-    .action-btn { width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 12px; background: var(--primary); color: #FFF; font-family: 'Prompt'; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+    .action-btn { width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 12px; background: var(--primary); color: #FFF; font-family: 'Prompt'; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; cursor: pointer;}
     .action-btn:disabled { background: #CCC; cursor: not-allowed; }
     
     .pagination-footer { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; font-size: 13px; padding: 15px; background: #FFF; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
@@ -148,6 +147,20 @@
     .empty-state { text-align: center; padding: 60px 20px; color: #AAA; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes blink { 50% { opacity: 0.5; } }
+
+    /* ✅ เพิ่ม CSS สำหรับ Modal ของหน้า Stock */
+    .overlay {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; 
+      width: 100%; height: 100%; background: rgba(0,0,0,0.7); 
+      backdrop-filter: blur(8px); align-items: center; justify-content: center; 
+    }
+
+    .modal-card {
+      background: #FFF; padding: 40px; border-radius: 30px;
+      width: 90%; max-width: 400px; text-align: center;
+      border-top: 10px solid var(--primary); box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+      animation: slideIn 0.3s ease-out;
+    }
   </style>
 </head>
 <body>
@@ -205,8 +218,22 @@
   </div>
 </div>
 
+<div id="confirmStockModal" class="overlay">
+  <div class="modal-card">
+    <i class="fas fa-box-open" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
+    <h2 style="margin-top: 0; font-family: 'Prompt'; color: var(--dark);">ยืนยันแพ็คของเสร็จสิ้น</h2>
+    <p style="color: #666; margin-bottom: 30px; font-size: 15px;">
+      ออเดอร์ <b id="confirmStockId" style="color: var(--primary); font-size: 18px;"></b><br> ถูกจัดเตรียมครบถ้วนแล้วใช่หรือไม่?
+    </p>
+    <div style="display: flex; gap: 15px;">
+      <button class="action-btn" style="background: #F5F5F5; color: #333; margin-top: 0;" onclick="closeM('confirmStockModal')">ยกเลิก</button>
+      <button class="action-btn" style="background: var(--primary); color: white; margin-top: 0;" onclick="executeMarkPacked()">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  let tasks = [], currentPage = 1, pageLimit = 5;
+  let tasks = [], currentPage = 1, pageLimit = 5, pendingStockId = "";
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
 
@@ -220,13 +247,12 @@
     }
   };
 
-  /** ✅ อัปเกรด: ระบบ Login แบบ API */
   function handleLogin() { 
     const lBtn = document.getElementById('loginBtn');
     const pInput = document.getElementById('passInput');
     lBtn.disabled = true; lBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
 
-    fetch(`${GAS_URL}?action=verifyLogin&pass=${pInput.value}`)
+    fetch(`${GAS_URL}?action=verifyLogin&pass=${pInput.value}&role=stock`)
       .then(res => res.json())
       .then(res => {
         if(res.status === 'success'){
@@ -242,7 +268,6 @@
 
   function handleLogout() { localStorage.removeItem(TOKEN_KEY); location.reload(); }
 
-  /** ✅ อัปเกรด: ดึงข้อมูลผ่าน fetch API */
   function refreshTasks(token) {
     const t = token || localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=getOrdersByStatus&status=Pending&token=${t}`)
@@ -289,7 +314,7 @@
       }).join('');
 
       h += `
-      <div class="task-card">
+      <div class="task-card" id="taskCard-${t.id}">
         <div class="task-header">
           <div>
             <div class="order-id">${t.id}</div>
@@ -301,7 +326,7 @@
           <div class="task-time">${t.time}</div>
         </div>
         <div class="item-checklist">${itemsHtml}</div>
-        <button class="action-btn" id="btn-${t.id}" disabled onclick="markPacked('${t.id}', this)">
+        <button class="action-btn" id="btn-${t.id}" disabled onclick="openStockModal('${t.id}')">
           <i class="fas fa-check-circle"></i> แพ็คของครบแล้ว
         </button>
       </div>`;
@@ -326,18 +351,37 @@
     btn.disabled = (checkedCount !== allChecks.length);
   }
 
-  /** ✅ อัปเกรด: บันทึกสถานะผ่าน fetch API */
-  function markPacked(id, btn) {
-    if(!confirm('ยืนยันออเดอร์ ' + id + ' พร้อมส่ง?')) return;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> บันทึก...';
-    btn.disabled = true;
-    const token = localStorage.getItem(TOKEN_KEY);
+  function closeM(id) { document.getElementById(id).style.display = 'none'; }
+
+  /** ✅ เปิดป๊อปอัป Modal สวยๆ */
+  function openStockModal(id) {
+    pendingStockId = id;
+    document.getElementById('confirmStockId').innerText = id;
+    document.getElementById('confirmStockModal').style.display = 'flex';
+  }
+
+  /** ✅ ฟังก์ชันทำงานหลังจากกดยืนยันในป๊อปอัป (ลดดีเลย์) */
+  function executeMarkPacked() {
+    closeM('confirmStockModal');
+    if(!pendingStockId) return;
     
+    const id = pendingStockId;
+    const btn = document.getElementById(`btn-${id}`);
+    
+    // ✅ Optimistic Update: ทำให้ปุ่มเปลี่ยนเป็นกำลังโหลด และลบกล่องออกทันที ไม่ต้องรอเซิร์ฟ
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่งข้อมูล...';
+    btn.disabled = true;
+
+    // ทำการกรอง (Filter) ลบออเดอร์ออกจากหน้าจอทันที แล้ววาดหน้าจอใหม่ ให้พนักงานรู้สึกว่าระบบไวปรู๊ดปร๊าด
+    setTimeout(() => {
+      tasks = tasks.filter(t => t.id !== id);
+      renderTasks();
+    }, 500); // ดีเลย์ 0.5 วิให้พอเห็นว่ากดติดแล้วค่อยซ่อน
+
+    // ส่งข้อมูลไปเซฟเงียบๆ หลังบ้าน
+    const token = localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=setOrderStatus&id=${id}&status=Packed&token=${token}`)
-      .then(res => res.json())
-      .then(res => {
-        if(res.status === 'success') refreshTasks(token);
-      });
+      .catch(err => console.error("Update failed:", err));
   }
 </script>
 </body>
