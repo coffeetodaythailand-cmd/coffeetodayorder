@@ -411,7 +411,7 @@
 
 <div class="card">
   <div style="text-align:center; margin-bottom:15px;">
-    <img src="https://drive.google.com/uc?export=view&id=1uqmd0oHZPwD4TPh5C6MVa_vt7gQzJFEc" style="width:110px; height:auto;">
+    <img src="https://raw.githubusercontent.com/coffeetodaythailand-cmd/coffeetodayorder/main/emailLogo2025-09-11-03-46-29-029.png" style="width:110px; height:auto;">
   </div>
 
   <h2>CoffeeToday Order</h2>
@@ -682,19 +682,33 @@
     document.getElementById('rM').style.display = 'flex';
   }
 
-  // ✅ แก้ไข confirmSubmit ให้ทำงานบน GitHub Pages โดยใช้ fetch แทน google.script.run
+  // ✅ แก้ไขระบบ confirmSubmit ให้เชื่อมต่อ ORD-XXXX และ Firebase อย่างสมบูรณ์
   async function confirmSubmit() {
     const cBtn = document.getElementById('cBtn');
-    cBtn.innerText = "กำลังสั่ง...";
+    cBtn.innerText = "กำลังส่ง...";
     cBtn.disabled = true;
 
     try {
-      const now = new Date();
-      const timeId = "CT-" + now.getTime(); 
+      // ⚡ 1. จองเลขออเดอร์ ORD-XXXX จริงจาก Google Sheets ก่อน
+      const response = await fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+          action: "submitOrderBackupOnly", 
+          formData: pD 
+        })
+      });
+      
+      const resData = await response.json();
+      
+      if(resData.status !== 'success') {
+          throw new Error(resData.message || "ไม่สามารถจองเลขออเดอร์ได้");
+      }
+      
+      const realOrderId = resData.data; // ได้เลข ORD-XXXX มาแล้ว
 
-      // 🚀 1. ยิงตรงเข้า Firebase (ภูมิภาคสิงคโปร์ ไวแสง!)
-      await db.collection("orders").doc(timeId).set({
-        orderId: timeId,
+      // 🚀 2. นำเลข ORD-XXXX มาบันทึกลง Firebase (เพื่อความเร็วและแม่นยำ)
+      await db.collection("orders").doc(realOrderId).set({
+        orderId: realOrderId,
         name: pD.name,
         phone: pD.phone,
         email: pD.email,
@@ -704,27 +718,16 @@
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // ✅ 2. โชว์ความสำเร็จทันที! (เร็วระดับ 0.5 วินาที)
+      // ✅ 3. แสดงผลความสำเร็จพร้อมเลขออเดอร์ที่ถูกต้อง
       document.getElementById('rM').style.display = 'none'; 
-      document.getElementById('showOrderId').innerText = timeId; 
+      document.getElementById('showOrderId').innerText = realOrderId; 
       document.getElementById('successModal').style.display = 'flex'; 
       
       cBtn.innerText = "ยืนยันสั่ง";
       cBtn.disabled = false;
 
-      // 🕵️‍♂️ 3. แอบส่งข้อมูลสำรองไป Google Sheets ผ่าน fetch (แก้ปัญหา google is not defined)
-      fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors", // ใช้ no-cors เพื่อให้ยิงผ่านได้โดยไม่ติดนโยบายความปลอดภัย
-        body: JSON.stringify({ 
-          action: "submitOrderBackupOnly", 
-          formData: pD, 
-          orderId: timeId 
-        })
-      }).then(() => console.log("Backup process triggered."));
-
     } catch (error) {
-      showError("ระบบ Firebase ขัดข้อง: " + error.message);
+      showError("ระบบขัดข้อง: " + error.message);
       cBtn.innerText = "ยืนยันสั่ง";
       cBtn.disabled = false;
     }
