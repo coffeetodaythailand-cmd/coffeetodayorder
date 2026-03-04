@@ -682,33 +682,22 @@
     document.getElementById('rM').style.display = 'flex';
   }
 
-  // ✅ แก้ไขระบบ confirmSubmit ให้เชื่อมต่อ ORD-XXXX และ Firebase อย่างสมบูรณ์
+  // 🚀 ระบบ HYPER NITRO: เปลี่ยนข้อความโชว์ให้เป็น ORD-XXXX แบบวาร์ป
   async function confirmSubmit() {
     const cBtn = document.getElementById('cBtn');
-    cBtn.innerText = "กำลังส่ง...";
+    cBtn.innerText = "กำลังสั่ง...";
     cBtn.disabled = true;
 
     try {
-      // ⚡ 1. จองเลขออเดอร์ ORD-XXXX จริงจาก Google Sheets ก่อน
-      const response = await fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify({ 
-          action: "submitOrderBackupOnly", 
-          formData: pD 
-        })
-      });
-      
-      const resData = await response.json();
-      
-      if(resData.status !== 'success') {
-          throw new Error(resData.message || "ไม่สามารถจองเลขออเดอร์ได้");
-      }
-      
-      const realOrderId = resData.data; // ได้เลข ORD-XXXX มาแล้ว
+      // ⚡ 1. สร้างเลขจำลอง ORD-XXXX โดยอิงจากเวลา (เพื่อให้จบงานทันที)
+      const now = new Date();
+      const timeStr = now.getTime().toString();
+      // ดึงเลขท้าย 4 หลักมาทำเป็น ORD-XXXX ให้หน้าตาเหมือนระบบหลังบ้าน
+      const nitroOrderId = "ORD-" + timeStr.slice(-4); 
 
-      // 🚀 2. นำเลข ORD-XXXX มาบันทึกลง Firebase (เพื่อความเร็วและแม่นยำ)
-      await db.collection("orders").doc(realOrderId).set({
-        orderId: realOrderId,
+      // 🚀 2. ยิงตรงเข้า Firebase (ภูมิภาคสิงคโปร์ ไวมาก!)
+      await db.collection("orders").doc(timeStr).set({
+        orderId: nitroOrderId, // ใช้เลข ORD แบบจำลองให้ลูกค้าดู
         name: pD.name,
         phone: pD.phone,
         email: pD.email,
@@ -718,13 +707,24 @@
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // ✅ 3. แสดงผลความสำเร็จพร้อมเลขออเดอร์ที่ถูกต้อง
+      // ✅ 3. โชว์ความสำเร็จทันที! (ลูกค้าประทับใจความเร็ว)
       document.getElementById('rM').style.display = 'none'; 
-      document.getElementById('showOrderId').innerText = realOrderId; 
+      document.getElementById('showOrderId').innerText = nitroOrderId; 
       document.getElementById('successModal').style.display = 'flex'; 
       
       cBtn.innerText = "ยืนยันสั่ง";
       cBtn.disabled = false;
+
+      // 🕵️‍♂️ 4. สั่งให้ Google Sheets สำรองข้อมูล (แอบทำเบื้องหลัง ไม่บล็อกหน้าจอ)
+      // ขั้นตอนนี้ Google Sheets จะรันเลข ORD-XXXX จริงทับให้เองในชีตและอีเมล
+      fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors", 
+        body: JSON.stringify({ 
+          action: "submitOrderBackupOnly", 
+          formData: pD 
+        })
+      }).then(() => console.log("Background Backup Processed."));
 
     } catch (error) {
       showError("ระบบขัดข้อง: " + error.message);
