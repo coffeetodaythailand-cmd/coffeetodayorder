@@ -387,6 +387,25 @@
       color: var(--primary); 
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // 🗝️ กุญแจบ้านที่คุณเบลล์ดึงมา
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9p-JEXH95pjW6H5IkkHR3O7hkJuxg7v8",
+      authDomain: "coffeetoday-db.firebaseapp.com",
+      projectId: "coffeetoday-db",
+      storageBucket: "coffeetoday-db.firebasestorage.app",
+      messagingSenderId: "949270145151",
+      appId: "1:949270145151:web:ae6cbc6c5c5d54a502b74a"
+    };
+
+    // เริ่มต้นระบบ Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 </head>
 <body>
 
@@ -394,7 +413,7 @@
 
 <div class="card">
   <div style="text-align:center; margin-bottom:15px;">
-    <img src="./emailLogo2025-09-11-03-46-29-029.png" style="width:110px; height:auto;">
+    <img src="https://drive.google.com/uc?export=view&id=1uqmd0oHZPwD4TPh5C6MVa_vt7gQzJFEc" style="width:110px; height:auto;">
   </div>
 
   <h2>CoffeeToday Order</h2>
@@ -607,7 +626,6 @@
       return showError("ระบุข้อมูลส่วนตัวให้ครบถ้วน");
     }
 
-    // ✅ เพิ่มการตรวจสอบเบอร์โทรศัพท์ 9-10 หลัก
     if(phone.length < 9 || phone.length > 10) {
       window.scrollTo(0, 0);
       document.getElementById('cP').focus();
@@ -659,30 +677,45 @@
     document.getElementById('rM').style.display = 'flex';
   }
 
-  function confirmSubmit() {
-    document.getElementById('cBtn').innerText = "กำลังส่ง...";
-    document.getElementById('cBtn').disabled = true;
-    fetch(GAS_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "submitOrder", formData: pD })
-    })
-    .then(res => res.json())
-    .then(res => {
-      if(res.status === 'success') {
-        document.getElementById('rM').style.display='none'; 
-        document.getElementById('showOrderId').innerText = res.data; 
-        document.getElementById('successModal').style.display='flex'; 
-      } else {
-        showError("เกิดข้อผิดพลาด: " + res.message);
-      }
-      document.getElementById('cBtn').innerText = "ยืนยันสั่ง";
-      document.getElementById('cBtn').disabled = false;
-    })
-    .catch(err => {
-      showError("ไม่สามารถเชื่อมต่อกับ Server ได้");
-      document.getElementById('cBtn').innerText = "ยืนยันสั่ง";
-      document.getElementById('cBtn').disabled = false;
-    });
+  // 🚀 HYPER NITRO: ระบบส่งข้อมูลตรงเข้า Firebase
+  async function confirmSubmit() {
+    const cBtn = document.getElementById('cBtn');
+    cBtn.innerText = "กำลังสั่ง...";
+    cBtn.disabled = true;
+
+    try {
+      // ⚡ 1. สร้างเลขบิลทันทีจากเวลา (CT + Timestamp)
+      const now = new Date();
+      const timeId = "CT-" + now.getTime(); 
+
+      // 🚀 2. ยิงตรงเข้า Firebase (ภูมิภาคสิงคโปร์ ไวมาก!)
+      await db.collection("orders").doc(timeId).set({
+        orderId: timeId,
+        name: pD.name,
+        phone: pD.phone,
+        email: pD.email,
+        branch: pD.branch,
+        details: pD.details,
+        status: "Pending",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // ✅ 3. โชว์ความสำเร็จทันที! (ลูกค้าไม่รู้สึกว่ารอ)
+      document.getElementById('rM').style.display='none'; 
+      document.getElementById('showOrderId').innerText = timeId; 
+      document.getElementById('successModal').style.display='flex'; 
+      
+      cBtn.innerText = "ยืนยันสั่ง";
+      cBtn.disabled = false;
+
+      // 🕵️‍♂️ 4. แอบส่งเข้า Google Sheets ในเบื้องหลัง (Backup)
+      google.script.run.submitOrderBackupOnly(pD, timeId);
+
+    } catch (error) {
+      showError("ระบบ Firebase ขัดข้อง: " + error.message);
+      cBtn.innerText = "ยืนยันสั่ง";
+      cBtn.disabled = false;
+    }
   }
 </script>
 </body>
