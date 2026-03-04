@@ -599,7 +599,7 @@
     let pTime = formatPackedTime(o.packedTime);
     let packedAlert = (o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-" 
       ? `<div style="grid-column: 1 / -1; background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 10px; border-radius: 10px; text-align: center; margin-top: 5px;">
-           <span style="font-size: 11px; color: #166534; font-weight: 600;"><i class="fas fa-check-circle"></i> จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
+           <span style="font-size: 11px; color: #166534; font-weight: 600;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
          </div>` : '';
     
     const bodyHtml = `
@@ -626,7 +626,7 @@
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
-  // ✅ เพิ่มเวลา PackedTime ลงในไฟล์ PDF A4 ที่โหลดออกมา
+  // ✅ ฝังเวลา PackedTime ลงในไฟล์ PDF A4 อย่างชัดเจน
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
@@ -650,8 +650,8 @@
 
     let pTime = formatPackedTime(o.packedTime);
     let packedAlert = (o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-" 
-      ? `<div style="background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-           <span style="font-size: 12px; color: #166534; font-weight: bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
+      ? `<div style="background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+           <span style="font-size: 13px; color: #166534; font-weight: bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
          </div>` : '';
 
     const win = window.open('', '', 'width=800,height=600');
@@ -666,9 +666,9 @@
           .box { padding: 40px; border: 2px solid #EEE; border-radius: 20px; max-width: 600px; margin: 0 auto; }
           .header { text-align: center; color: #A91D3A; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
           .grid { display: flex; justify-content: space-between; margin-bottom: 20px; background: #F9F9F9; padding: 15px; border-radius: 10px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
           th { text-align: left; padding: 10px; border-bottom: 2px solid #DDD; font-size: 14px; color: #2D3133; }
-          .footer { text-align: center; margin-top: 40px; border-top: 1px dashed #CCC; padding-top: 20px; font-size: 12px; color: #888; }
+          .footer { text-align: center; margin-top: 20px; border-top: 1px dashed #CCC; padding-top: 20px; font-size: 12px; color: #888; }
         </style>
       </head>
       <body>
@@ -834,31 +834,69 @@
     }, 1000);
   }
 
-  // ✅ เพิ่มเวลา PackedTime ลงในหน้าต่างสั่งปริ้นท์ (Print)
+  // ✅ อัปเกรดหน้า Print ให้เป็นตารางสวยงามเหมือนใน PDF และฝังเวลาแพ็ค
   function printOrder(data) { 
     const o = JSON.parse(decodeURIComponent(data));
     
-    let ptStr = formatPackedTime(o.packedTime);
-    let timeHtml = (o.status === 'Packed' || o.status === 'Success') && ptStr !== "-" 
-      ? `<br><span style="color:#166534; font-size:14px;"><b>✓ จัดเตรียมของเสร็จสิ้นเมื่อ:</b> ${ptStr}</span>` 
+    let tableRows = '';
+    const items = o.items.split('\n');
+    items.forEach(line => {
+      if(line.trim() !== "") {
+        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(match) {
+          tableRows += `<tr><td style="padding:10px; border-bottom:1px solid #EEE;">${match[1]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;">${match[2]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;"><b>${match[3]}</b></td></tr>`;
+        } else {
+          tableRows += `<tr><td colspan="3" style="padding:10px; border-bottom:1px solid #EEE;">${line}</td></tr>`;
+        }
+      }
+    });
+
+    let pTime = formatPackedTime(o.packedTime);
+    let timeHtml = (o.status === 'Packed' || o.status === 'Success') && pTime !== "-" 
+      ? `<div style="background:#f0fdf4; border:1px dashed #bbf7d0; padding:15px; border-radius:10px; text-align:center; margin-bottom:20px;">
+           <span style="color:#166534; font-size:14px; font-weight:bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
+         </div>` 
       : '';
 
-    const win = window.open('','','width=650,height=800'); 
+    const win = window.open('','','width=800,height=800'); 
     win.document.write(`
       <html>
         <head>
           <style>
-            body{font-family:sans-serif;padding:40px;} 
-            .box{border:3px solid #EEE;padding:50px;border-radius:30px;} 
-            h1{color:#A91D3A;text-align:center;}
+            body{font-family:Tahoma, sans-serif; padding:40px; color:#333;} 
+            .box{border:3px solid #EEE; padding:40px; border-radius:20px; max-width:600px; margin:0 auto;} 
+            h1{color:#A91D3A; text-align:center; font-size:24px; margin-bottom:20px;}
+            .grid { display: flex; justify-content: space-between; margin-bottom: 20px; background: #F9F9F9; padding: 15px; border-radius: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { text-align: left; padding: 10px; border-bottom: 2px solid #DDD; font-size: 14px; color: #2D3133; }
           </style>
         </head>
         <body>
           <div class="box">
-            <h1>COFFEETODAY</h1>
-            <hr>
-            <p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b>${timeHtml}</p>
-            <div style="background:#FAFAFA;padding:30px;white-space:pre-wrap;">${o.items}</div>
+            <h1>ORDER RECEIPT</h1>
+            ${timeHtml}
+            <div class="grid">
+              <div>
+                <div style="font-size:11px; color:#999;">ORDER ID</div>
+                <div style="font-size:14px; font-weight:bold;">${o.id}</div>
+                <div style="font-size:11px; color:#999; margin-top:10px;">BRANCH</div>
+                <div style="font-size:14px; font-weight:bold;">${o.branch}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px; color:#999;">DATE</div>
+                <div style="font-size:14px; font-weight:bold;">${o.date}</div>
+                <div style="font-size:11px; color:#999; margin-top:10px;">PHONE</div>
+                <div style="font-size:14px; font-weight:bold;">${o.phone || '-'}</div>
+              </div>
+            </div>
+            <table>
+              <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+            <div style="text-align: center; margin-top: 40px; border-top: 1px dashed #CCC; padding-top: 20px; font-size: 12px; color: #888;">
+              <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
+              <p>วันที่พิมพ์: ${new Date().toLocaleString("th-TH")}</p>
+            </div>
           </div>
           <script>window.print();<\/script>
         </body>
