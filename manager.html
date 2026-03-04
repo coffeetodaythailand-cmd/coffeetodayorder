@@ -336,6 +336,20 @@
   </div>
 </div>
 
+<div id="confirmModal" class="overlay">
+  <div class="modal-card" style="text-align: center; max-width: 400px;">
+    <i class="fas fa-check-circle" style="font-size: 60px; color: var(--green); margin-bottom: 20px;"></i>
+    <h2 style="margin-top: 0; font-family: 'Prompt'; color: var(--dark);">ยืนยันการส่งออเดอร์</h2>
+    <p style="color: #666; margin-bottom: 30px; font-size: 16px;">
+      ต้องการอนุมัติส่งมอบออเดอร์ <br><b id="confirmOrderId" style="color: var(--red); font-size: 20px;"></b><br> ใช่หรือไม่?
+    </p>
+    <div style="display: flex; gap: 20px;">
+      <button class="btn" style="flex: 1; background: #F5F5F5; color: #333;" onclick="closeM('confirmModal')">ยกเลิก</button>
+      <button class="btn" style="flex: 1; background: var(--green); color: white;" onclick="executeApproveOrder()">ยืนยันอนุมัติ</button>
+    </div>
+  </div>
+</div>
+
 <div id="cM" class="overlay">
   <div class="modal-card">
     <h3 style="margin-top:0;">เพิ่มหมวดหมู่ใหม่</h3>
@@ -362,7 +376,8 @@
 </div>
 
 <script>
-  let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null;
+  // ✅ เพิ่มตัวแปร pendingApproveId สำหรับเก็บ ID ที่รอกดยืนยัน
+  let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null, pendingApproveId = "";
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
@@ -473,11 +488,24 @@
       });
   }
 
+  /**
+   * ✅ เปลี่ยนจาก confirm() ธรรมดา มาเป็นการเรียก Modal สวยๆ
+   */
   function approveOrder(id) {
-    if(!confirm('ยืนยันความถูกต้องและอนุมัติส่งมอบออเดอร์ ' + id + '?')) return;
+    pendingApproveId = id;
+    document.getElementById('confirmOrderId').innerText = id;
+    document.getElementById('confirmModal').style.display = 'flex';
+  }
+
+  /**
+   * ✅ ฟังก์ชันที่จะทำงานเมื่อกดปุ่ม "ยืนยันอนุมัติ" ใน Modal
+   */
+  function executeApproveOrder() {
+    closeM('confirmModal'); // ปิดป๊อปอัป
+    if(!pendingApproveId) return;
     
     const token = localStorage.getItem(TOKEN_KEY);
-    fetch(`${GAS_URL}?action=setOrderStatus&id=${id}&status=Success&token=${token}`)
+    fetch(`${GAS_URL}?action=setOrderStatus&id=${pendingApproveId}&status=Success&token=${token}`)
       .then(res => res.json())
       .then(res => {
         if(res.status === 'success') {
@@ -574,9 +602,6 @@
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
-  /**
-   * ✅ แยกหน้าโหลด PDF ออเดอร์ (A4) และปิดหน้าต่างอัตโนมัติ
-   */
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
@@ -666,9 +691,6 @@
     }, 1000);
   }
 
-  /**
-   * ✅ แยกหน้าโหลดรายงานสรุป และปิดหน้าต่างอัตโนมัติ
-   */
   function downloadSummaryReport() {
     if(allOrders.length === 0) return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก");
     
