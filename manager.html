@@ -460,9 +460,6 @@
       });
   }
 
-  /**
-   * ✅ ฟังก์ชันช่วยแปลงเวลาที่มีตัว T หรือ Z (ISO String) ให้เป็นเวลาไทยสวยๆ
-   */
   function formatPackedTime(pt) {
     if (!pt || pt === "-") return "-";
     if (typeof pt === 'string' && pt.includes('T') && pt.includes('Z')) {
@@ -486,7 +483,6 @@
         
         card.style.display = 'block';
         div.innerHTML = data.map(o => {
-          // ✅ ดึงเวลา PackedTime มาโชว์เหนือ Order ID ในหน้า Approve
           let matchOrder = allOrders.find(x => x.id === o.id);
           let ptStr = matchOrder && matchOrder.packedTime ? matchOrder.packedTime : "-";
           let pTime = formatPackedTime(ptStr);
@@ -545,7 +541,6 @@
       const isPacked = o.status === 'Packed';
       const isSuccess = o.status === 'Success';
       
-      // ✅ แปลงและดึงเวลา PackedTime มาแสดงใต้สถานะ ในตาราง Recent Orders
       let pTime = formatPackedTime(o.packedTime);
       let timeHtml = (isPacked || isSuccess) && pTime && pTime !== "-" 
         ? `<div style="font-size:10px; color:#888; margin-top:5px; background:#f3f4f6; padding:3px 8px; border-radius:10px; display:inline-block;"><i class="fas fa-box"></i> แพ็คเมื่อ ${pTime}</div>` 
@@ -601,7 +596,6 @@
       }
     });
 
-    // ✅ แปลงและดึงเวลาโชว์ในใบเสร็จ
     let pTime = formatPackedTime(o.packedTime);
     let packedAlert = (o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-" 
       ? `<div style="grid-column: 1 / -1; background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 10px; border-radius: 10px; text-align: center; margin-top: 5px;">
@@ -632,6 +626,7 @@
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
+  // ✅ เพิ่มเวลา PackedTime ลงในไฟล์ PDF A4 ที่โหลดออกมา
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
@@ -653,6 +648,12 @@
       }
     });
 
+    let pTime = formatPackedTime(o.packedTime);
+    let packedAlert = (o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-" 
+      ? `<div style="background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+           <span style="font-size: 12px; color: #166534; font-weight: bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
+         </div>` : '';
+
     const win = window.open('', '', 'width=800,height=600');
     win.document.write(`
       <!DOCTYPE html>
@@ -673,6 +674,7 @@
       <body>
         <div id="pdf-content" class="box">
           <div class="header">ORDER RECEIPT</div>
+          ${packedAlert}
           <div class="grid">
             <div>
               <div style="font-size:11px; color:#999;">ORDER ID</div>
@@ -832,8 +834,15 @@
     }, 1000);
   }
 
+  // ✅ เพิ่มเวลา PackedTime ลงในหน้าต่างสั่งปริ้นท์ (Print)
   function printOrder(data) { 
     const o = JSON.parse(decodeURIComponent(data));
+    
+    let ptStr = formatPackedTime(o.packedTime);
+    let timeHtml = (o.status === 'Packed' || o.status === 'Success') && ptStr !== "-" 
+      ? `<br><span style="color:#166534; font-size:14px;"><b>✓ จัดเตรียมของเสร็จสิ้นเมื่อ:</b> ${ptStr}</span>` 
+      : '';
+
     const win = window.open('','','width=650,height=800'); 
     win.document.write(`
       <html>
@@ -848,7 +857,7 @@
           <div class="box">
             <h1>COFFEETODAY</h1>
             <hr>
-            <p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b></p>
+            <p>Order: <b>${o.id}</b><br>Branch: <b>${o.branch}</b>${timeHtml}</p>
             <div style="background:#FAFAFA;padding:30px;white-space:pre-wrap;">${o.items}</div>
           </div>
           <script>window.print();<\/script>
@@ -863,7 +872,6 @@
     if(pcObj) pcObj.destroy(); 
     if(scObj) scObj.destroy();
     
-    // ✅ เพิ่มระยะห่างให้กราฟไม่ติดกันเป็นแพ
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
       data: { 
@@ -901,7 +909,6 @@
       } 
     });
     
-    // ✅ แยกกราฟแท่งสต๊อกให้เว้นช่องไฟสวยงาม
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar', 
       data: { 
