@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
   <base target="_top">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <style>
     /**
-     * CoffeeToday System - Master UI Styling
-     * โดย คุณเบลล์ (Khun Bell)
-     * เวอร์ชั่น: Full Nitro Speed + Global Logs (Strict Version)
+     * CoffeeToday System - Master UI Styling (Version Final 1671+)
+     * ออกแบบโดย: คุณเบลล์ (Khun Bell)
+     * การจัดรูปแบบ: Full Expansion + Drag & Drop System
      */
     
     :root { 
@@ -23,83 +26,125 @@
       --green: #22c55e; 
       --white: #FFFFFF;
       --light-gray: #F8F9FA;
+      --border-color: #EEEEEE;
       --blue: #3498db;
       --orange: #f39c12;
+      --shadow-soft: 0 4px 15px rgba(0,0,0,0.02);
+      --shadow-md: 0 8px 25px rgba(0,0,0,0.06);
+      --card-radius: 30px;
     }
     
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body { 
       font-family: 'Sarabun', sans-serif; 
-      background: var(--light-gray); 
+      background-color: var(--light-gray); 
       margin: 0; 
+      padding: 0;
       padding-bottom: 50px; 
+      color: var(--dark);
+      overflow-x: hidden;
     }
-    
-    /* 🛡️ Login Access Styling */
+
+    /* 🛡️ Login Overlay Section */
     #login-overlay { 
       position: fixed; 
       top: 0; 
       left: 0; 
       width: 100%; 
       height: 100%; 
-      background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+      background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
       z-index: 9999; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
+      transition: opacity 0.5s ease;
     }
     
     .login-box { 
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(15px);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       padding: 60px 40px; 
       border-radius: 40px; 
       width: 90%; 
       max-width: 420px; 
       text-align: center; 
-      border: 1px solid rgba(255,255,255,0.3);
-      box-shadow: 0 40px 100px rgba(0,0,0,0.5); 
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: var(--shadow-deep); 
+      animation: fadeInScale 0.6s ease-out;
+    }
+    
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
     
     .login-box i.fa-shield-alt {
-      font-size: 80px; 
+      font-size: 85px; 
       background: linear-gradient(to bottom, #A91D3A, #7a152a);
       -webkit-background-clip: text; 
       -webkit-text-fill-color: transparent;
-      margin-bottom: 20px; 
+      margin-bottom: 25px; 
       filter: drop-shadow(0 10px 15px rgba(169,29,58,0.3));
+    }
+
+    .login-header {
+      font-family: 'Prompt';
+      font-weight: 600;
+      font-size: 24px;
+      color: #333333;
+      margin-bottom: 10px;
+    }
+
+    .login-sub {
+      color: #666666;
+      font-size: 14px;
+      margin-bottom: 40px;
     }
 
     .login-input { 
       width: 100%; 
       padding: 22px; 
-      border: 2px solid #EEE; 
+      border: 2px solid #EEEEEE; 
       border-radius: 20px; 
       margin-bottom: 30px; 
       text-align: center; 
-      font-size: 28px; 
+      font-size: 32px; 
+      font-weight: bold;
       outline: none; 
       box-sizing: border-box; 
-      background: #FFF; 
-      transition: all 0.3s;
+      background-color: #FFFFFF; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .login-input:focus { 
       border-color: var(--red); 
-      box-shadow: 0 0 20px rgba(169,29,58,0.1); 
+      box-shadow: 0 0 25px rgba(169,29,58,0.15); 
+      transform: translateY(-2px);
     }
     
-    /* 📱 Layout Elements */
+    /* 📱 Main App Structure */
     #main-app { 
       display: none; 
+      animation: fadeIn 0.8s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     
     .nav { 
-      background: var(--white); 
+      background-color: var(--white); 
       padding: 20px 40px; 
-      border-bottom: 1px solid #EEE; 
+      border-bottom: 1px solid var(--border-color); 
       position: sticky; 
       top: 0; 
-      z-index: 100; 
+      z-index: 1000; 
       font-weight: 600; 
       box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
       display: flex; 
@@ -107,25 +152,36 @@
       align-items: center; 
     }
     
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+    }
+    
     .container { 
-      max-width: 1300px; 
+      max-width: 1350px; 
       margin: 35px auto; 
-      padding: 0 25px; 
+      padding: 0 30px; 
     }
     
     .card { 
-      background: var(--white); 
+      background-color: var(--white); 
       padding: 40px; 
-      border-radius: 30px; 
-      border: 1px solid #EEE; 
+      border-radius: var(--card-radius); 
+      border: 1px solid var(--border-color); 
       margin-bottom: 35px; 
       box-shadow: 0 8px 25px rgba(0,0,0,0.04); 
-      transition: 0.4s ease; 
+      transition: transform 0.4s ease, box-shadow 0.4s ease; 
+    }
+    
+    .card:hover {
+      box-shadow: 0 12px 35px rgba(0,0,0,0.06);
     }
 
     .chart-grid { 
       display: grid; 
-      grid-template-columns: 1.6fr 1fr; 
+      grid-template-columns: 1.65fr 1fr; 
       gap: 35px; 
       margin-bottom: 35px; 
     }
@@ -134,21 +190,38 @@
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 25px; 
+      margin-bottom: 30px; 
     }
-
-    /* ✅ แก้ไขช่องค้นหาให้เล็กลง ทันสมัย (Compact Design) สำหรับวัยรุ่น */
-    .search-row {
-      background: var(--white);
-      border-radius: 12px;
-      padding: 8px 18px;
-      margin-bottom: 25px;
+    
+    .section-title {
+      font-family: 'Prompt';
+      font-weight: 600;
+      font-size: 20px;
+      margin: 0;
       display: flex;
       align-items: center;
       gap: 12px;
-      border: 1px solid #EEE;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-      max-width: 500px; /* จำกัดความกว้างเพื่อความเพรียวบาง */
+    }
+
+    /* ✅ ปรับปรุงช่องค้นหา: Slim & Modern Design */
+    .search-row {
+      background-color: var(--white);
+      border-radius: 14px;
+      padding: 10px 22px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border: 1px solid #EEEEEE;
+      box-shadow: var(--shadow-soft);
+      max-width: 480px; 
+      transition: all 0.3s;
+    }
+    
+    .search-row:focus-within {
+      border-color: var(--red);
+      box-shadow: 0 4px 20px rgba(169,29,58,0.08);
+      max-width: 520px;
     }
     
     .search-input { 
@@ -156,167 +229,257 @@
       outline: none; 
       width: 100%; 
       font-family: 'Prompt'; 
-      font-size: 13px; /* ขนาดฟอนต์กะทัดรัด */
+      font-size: 13px; 
       color: var(--dark); 
+      background: transparent;
     }
 
-    /* 📊 Analytics Chips */
-    .chips-container {
+    /* 📊 Filter Panel Styling */
+    .filter-panel {
       display: flex; 
-      gap: 10px; 
-      flex-wrap: wrap; 
-      padding: 10px 5px 25px;
+      gap: 12px; 
+      background-color: #F8F9FA; 
+      padding: 10px 20px; 
+      border-radius: 18px;
     }
     
-    .chip {
-      background: var(--white); 
-      padding: 10px 22px; 
-      border-radius: 50px;
-      border: 1px solid #EEE; 
-      font-family: 'Prompt'; 
-      font-size: 14px;
-      cursor: pointer; 
-      transition: 0.3s; 
-      white-space: nowrap; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-      margin-bottom: 5px;
-    }
-    
-    .chip:hover { 
-      border-color: var(--red); 
-      color: var(--red); 
-    }
-    
-    .chip.active { 
-      background: var(--red); 
-      color: white; 
-      border-color: var(--red); 
-      box-shadow: 0 8px 20px rgba(169,29,58,0.2); 
+    .filter-input {
+      border: none;
+      background: transparent;
+      font-family: 'Sarabun';
+      font-size: 13px;
+      color: #444;
+      outline: none;
     }
 
-    /* 📄 Receipt Components */
+    /* 📄 Receipt UI Elements */
     .receipt-card {
-      background: white; 
+      background-color: #FFFFFF; 
       border-radius: 25px; 
       width: 95%; 
-      max-width: 450px;
-      padding: 35px; 
-      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-      max-height: 85vh; 
+      max-width: 460px;
+      padding: 40px; 
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      max-height: 88vh; 
       overflow-y: auto; 
-      border-top: 10px solid var(--red);
+      border-top: 12px solid var(--red);
+      position: relative;
     }
     
     .receipt-info-grid { 
       display: grid; 
       grid-template-columns: 1fr 1fr; 
-      gap: 15px; 
-      margin: 20px 0; 
-      background: #f9f9f9; 
-      padding: 15px; 
-      border-radius: 12px; 
+      gap: 18px; 
+      margin: 25px 0; 
+      background-color: #F9F9F9; 
+      padding: 20px; 
+      border-radius: 15px; 
     }
     
     .receipt-label { 
-      font-size: 11px; 
-      color: #999; 
+      font-size: 10px; 
+      color: #AAAAAA; 
       text-transform: uppercase; 
+      letter-spacing: 0.5px;
     }
     
     .receipt-value { 
       font-size: 14px; 
       font-weight: 600; 
-      color: #333; 
-    }
-    
-    .receipt-table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      margin-top: 10px; 
-    }
-    
-    .receipt-table th { 
-      text-align: left; 
-      padding: 10px; 
-      border-bottom: 2px solid #f0f0f0; 
-      color: #2D3133; 
-      font-size: 12px; 
-    }
-    
-    .receipt-table td { 
-      padding: 12px 10px; 
-      border-bottom: 1px solid #f9f9f9; 
-      font-size: 13px; 
-      color: #555; 
+      color: #333333; 
     }
 
-    /* 📦 Approval UI */
+    /* 📦 Approval Board Components */
     .approve-card { 
-      border-top: 8px solid var(--green); 
-      padding: 25px 40px; 
+      border-top: 10px solid var(--green); 
+      padding: 30px 45px; 
     }
     
     .approve-list { 
       display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-      gap: 20px; 
-      margin-top: 15px; 
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+      gap: 25px; 
+      margin-top: 20px; 
     }
     
     .approve-item { 
-      background: #f0fdf4; 
+      background-color: #f0fdf4; 
       border: 1px solid #dcfce7; 
-      padding: 20px; 
-      border-radius: 25px;
+      padding: 22px; 
+      border-radius: 28px;
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      transition: 0.3s;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     
     .approve-item:hover { 
-      transform: translateY(-3px); 
-      box-shadow: 0 5px 15px rgba(34,197,94,0.1); 
+      transform: translateY(-5px); 
+      box-shadow: 0 10px 25px rgba(34,197,94,0.12); 
+    }
+
+    /* 📄 โครงสร้าง Modal Windows */
+    .overlay {
+      display: none; 
+      position: fixed; 
+      z-index: 9999; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(0, 0, 0, 0.75); 
+      backdrop-filter: blur(10px); 
+      -webkit-backdrop-filter: blur(10px);
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px;
+    }
+
+    .modal-card {
+      background-color: #FFFFFF; 
+      padding: 55px; 
+      border-radius: 40px;
+      width: 100%; 
+      max-width: 480px; 
+      text-align: left;
+      border-top: 15px solid var(--red); 
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: modalSlideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    @keyframes modalSlideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 📊 การจัดการตารางข้อมูล */
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+    }
+    
+    th { 
+      padding: 22px 20px; 
+      background-color: #F9FAFB; 
+      text-align: left; 
+      color: #6B7280; 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1.2px; 
+      border-bottom: 3px solid #F3F4F6; 
+    }
+    
+    td { 
+      padding: 22px 20px; 
+      border-bottom: 1px solid #F3F4F6; 
+      font-size: 14px; 
+      vertical-align: middle; 
+      transition: background 0.2s;
+    }
+    
+    tr:hover td {
+      background-color: #FAFAFA;
+    }
+    
+    .row-ready { 
+      background-color: #f0fdf4 !important; 
+    }
+
+    /* 🔘 ส่วนควบคุมปุ่มกด */
+    .btn { 
+      padding: 14px 32px; 
+      border-radius: 18px; 
+      border: none; 
+      font-family: 'Prompt'; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 12px; 
+      justify-content: center;
+      outline: none;
+    }
+    
+    .btn-red { 
+      background-color: var(--red); 
+      color: var(--white); 
+      box-shadow: 0 10px 25px rgba(169, 29, 58, 0.2); 
+    }
+    
+    .btn-red:hover { 
+      transform: translateY(-4px); 
+      box-shadow: 0 15px 35px rgba(169, 29, 58, 0.3); 
+      background-color: #8a172f;
     }
     
     .btn-approve { 
-      background: var(--green); 
+      background-color: var(--green); 
       color: white; 
       border: none; 
-      padding: 12px 25px; 
-      border-radius: 14px;
+      padding: 12px 28px; 
+      border-radius: 15px;
       font-family: 'Prompt'; 
       font-weight: 600; 
       cursor: pointer; 
       font-size: 14px;
     }
     
-    /* 🔘 Overlay & Modals */
-    .overlay {
-      display: none; 
-      position: fixed; 
-      z-index: 1000; 
-      left: 0; 
-      top: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: rgba(0,0,0,0.7); 
-      backdrop-filter: blur(8px); 
-      align-items: center; 
-      justify-content: center; 
+    .btn-sm {
+      padding: 8px 18px;
+      font-size: 12px;
+      border-radius: 12px;
     }
 
-    .modal-card {
-      background: #FFF; 
-      padding: 50px; 
-      border-radius: 35px;
-      width: 90%; 
-      max-width: 450px; 
-      text-align: left;
-      border-top: 12px solid var(--red); 
-      box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+    /* 🔘 ปุ่ม Drag & Drop */
+    .chips-container {
+      display: flex; 
+      gap: 12px; 
+      flex-wrap: wrap; 
+      padding: 10px 5px 30px;
+    }
+    
+    .chip {
+      background-color: var(--white); 
+      padding: 10px 22px; 
+      border-radius: 50px;
+      border: 1px solid var(--border); 
+      font-family: 'Prompt'; 
+      font-size: 14px;
+      cursor: grab; /* เปลี่ยนเป็นมือจับ */
+      transition: all 0.3s; 
+      white-space: nowrap; 
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .chip:active {
+      cursor: grabbing;
+    }
+    
+    .chip.active { 
+      background-color: var(--red); 
+      color: var(--white); 
+      border-color: var(--red); 
+      box-shadow: 0 8px 25px rgba(169, 29, 58, 0.25); 
+    }
+    
+    .cat-item.dragging {
+      opacity: 0.5;
+      background: #FAFAFA;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transform: scale(0.98);
+    }
+    
+    .chip.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
     }
 
+    /* Switch ควบคุมเมนู */
     .switch { 
       position: relative; 
       display: inline-block; 
@@ -363,10 +526,11 @@
       transform: translateX(22px); 
     }
 
+    /* 🌫️ Skeleton Loading Pulse */
     .loading-pulse { 
       position: relative; 
       overflow: hidden; 
-      background: #f6f7f8 !important; 
+      background-color: #f6f7f8 !important; 
     }
     
     .loading-pulse::after { 
@@ -376,42 +540,13 @@
       left: 0; 
       width: 100%; 
       height: 100%; 
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); 
-      animation: skeletonMove 1.5s infinite; 
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent); 
+      animation: skeletonMove 1.6s infinite; 
     }
     
     @keyframes skeletonMove { 
       0% { transform: translateX(-100%); } 
       100% { transform: translateX(100%); } 
-    }
-
-    /* 📊 Data Display Table */
-    table { 
-      width: 100%; 
-      border-collapse: collapse; 
-    }
-    
-    th { 
-      padding: 20px; 
-      background: #F9FAFB; 
-      text-align: left; 
-      color: #6B7280; 
-      font-size: 12px; 
-      text-transform: uppercase; 
-      letter-spacing: 1px; 
-      border-bottom: 3px solid #F3F4F6; 
-    }
-    
-    td { 
-      padding: 20px; 
-      border-bottom: 1px solid #F3F4F6; 
-      font-size: 14px; 
-      vertical-align: middle; 
-    }
-    
-    .row-ready { 
-      background: #f0fdf4 !important; 
-      transition: 0.5s; 
     }
     
     /* 📄 Pagination Footer */
@@ -454,55 +589,34 @@
       cursor: pointer; 
     }
 
-    .btn { 
-      padding: 12px 28px; 
-      border-radius: 16px; 
-      border: none; 
-      font-family: 'Prompt'; 
-      font-weight: 600; 
-      cursor: pointer; 
-      transition: 0.3s; 
-      display: inline-flex; 
-      align-items: center; 
-      gap: 10px; 
-      justify-content: center;
-    }
-    
-    .btn-red { 
-      background: var(--red); 
-      color: white; 
-      box-shadow: 0 10px 20px rgba(169,29,58,0.2); 
-    }
-    
-    .btn-red:hover { 
-      transform: translateY(-3px); 
-      box-shadow: 0 15px 25px rgba(169,29,58,0.3); 
-    }
-
-    @keyframes fadeInOut { 
-      0% { opacity: 0; bottom: 0; } 
-      20% { opacity: 1; bottom: 20px; } 
-      80% { opacity: 1; bottom: 20px; } 
-      100% { opacity: 0; bottom: 0; } 
-    }
-    
-    @keyframes blinkPulse { 
-      0% { opacity: 1; } 
-      50% { opacity: 0.4; } 
-      100% { opacity: 1; } 
+    /* 📱 สื่อสารแบบตอบสนอง (Responsive Design) */
+    @media (max-width: 1024px) {
+      .chart-grid { grid-template-columns: 1fr; }
+      .container { padding: 0 20px; }
     }
 
     @media (max-width: 768px) {
-      .container { padding: 0 10px; margin: 15px auto; }
-      .card { padding: 25px; border-radius: 20px; margin-bottom: 20px; }
-      .nav { padding: 15px 20px; flex-wrap: wrap; gap: 10px; justify-content: center; }
-      .nav span { font-size: 16px; }
-      .chart-grid { grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; } 
-      .section-header { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 15px; } 
-      .search-row { max-width: 100%; padding: 8px 15px; }
-      th, td { padding: 15px 10px; font-size: 13px; }
-      .btn { padding: 10px 15px; font-size: 13px; flex: 1; text-align: center; }
-      .pagination-footer { flex-wrap: wrap; justify-content: center; gap: 10px; }
+      .nav { padding: 15px 30px; }
+      .card { padding: 25px; border-radius: 25px; }
+      .section-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .search-row { max-width: 100%; }
+      th, td { padding: 15px 12px; font-size: 13px; }
+      .btn { padding: 12px 20px; font-size: 13px; flex: 1; }
+    }
+    
+    /* 🌫️ Animations */
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+    
+    .dot-pulse {
+      width: 8px; 
+      height: 8px; 
+      background-color: var(--green); 
+      border-radius: 50%; 
+      animation: blink 2s infinite;
     }
   </style>
 </head>
@@ -510,12 +624,28 @@
 
 <div id="login-overlay">
   <div class="login-box">
-    <i class="fas fa-shield-alt"></i>
-    <h2 style="margin-bottom:10px; font-family:'Prompt'; font-weight: 600; color: #333;">Security Access</h2>
-    <p style="color: #666; margin-bottom: 40px;">CoffeeToday Administrator Dashboard</p>
+    <div style="margin-bottom: 15px;">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <div class="login-header">Database Unlocked</div>
+    <div class="login-sub">CoffeeToday Management System Terminal</div>
     <form onsubmit="event.preventDefault(); handleLogin();">
-      <input type="password" id="passInput" class="login-input" placeholder="••••" autofocus>
-      <button type="submit" id="loginBtn" class="btn btn-red" style="width:100%; padding:22px; font-size:20px; justify-content: center;">Unlock Database</button>
+      <input 
+        type="password" 
+        id="passInput" 
+        class="login-input" 
+        placeholder="••••" 
+        maxlength="4"
+        autofocus
+      >
+      <button 
+        type="submit" 
+        id="loginBtn" 
+        class="btn btn-red" 
+        style="width:100%; padding:22px; font-size:18px; border-radius: 22px;"
+      >
+        <i class="fas fa-key"></i> UNLOCK SYSTEM
+      </button>
     </form>
   </div>
 </div>
@@ -523,20 +653,35 @@
 <div id="main-app">
   
   <div class="nav">
-    <span><i class="fas fa-coffee" style="color:var(--red); margin-right:12px;"></i> CoffeeToday Management</span>
-    <div style="display:flex; align-items:center; gap:15px;">
-      <div class="sync-status" style="display:flex; align-items:center; gap:10px; background:#f0fdf4; padding:8px 15px; border-radius:50px; color:#15803d; font-size:12px; font-weight:600;">
-        <span class="dot" style="width:8px; height:8px; background:var(--green); border-radius:50%; animation:blinkPulse 2s infinite;"></span> 
-        <span id="syncText">Live Sync (3 นาที)</span>
+    <div class="nav-brand">
+      <i class="fas fa-coffee" style="color:var(--red); font-size: 22px;"></i> 
+      <span style="font-family: 'Prompt';">CoffeeToday Manager</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:20px;">
+      <div style="display:flex; align-items:center; gap:10px; background:#f0fdf4; padding:10px 20px; border-radius:50px; color:#15803d; font-size:12px; font-weight:600; border: 1px solid #dcfce7;">
+        <div class="dot-pulse"></div> 
+        <span id="syncText">Network Active (Live)</span>
       </div>
-      <button onclick="handleLogout()" style="background:none; border:none; color:#AAA; cursor:pointer; font-size:18px;" title="ออกจากระบบ"><i class="fas fa-sign-out-alt"></i></button>
+      <button 
+        onclick="handleLogout()" 
+        style="background:none; border:none; color:#BBBBBB; cursor:pointer; font-size:20px; transition:0.3s;"
+        onmouseover="this.style.color='var(--red)'"
+        onmouseout="this.style.color='#BBBBBB'"
+        title="ออกจากระบบ"
+      >
+        <i class="fas fa-power-off"></i>
+      </button>
     </div>
   </div>
 
   <div class="container">
     
     <div class="card approve-card" id="approveCard" style="display:none;">
-      <h4 style="margin:0; font-family:'Prompt'; color:var(--green);"><i class="fas fa-clipboard-check"></i> อนุมัติการส่งมอบสินค้า (Approve Orders)</h4>
+      <div class="section-header" style="margin-bottom: 15px;">
+        <h4 class="section-title" style="color: var(--green);">
+          <i class="fas fa-check-double"></i> อนุมัติการส่งมอบ (Approve Queue)
+        </h4>
+      </div>
       <div id="approveList" class="approve-list"></div>
     </div>
 
@@ -544,24 +689,29 @@
       
       <div class="card" id="mainChartCard">
         <div class="section-header">
-          <h4 style="margin:0;"><i class="fas fa-chart-bar"></i> สินค้าเมนูขายดี</h4>
-          <div class="filter-panel" style="display:flex; gap:10px; background:#f8f9fa; padding:8px 15px; border-radius:15px;">
-            <input type="date" id="sDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
-            <input type="date" id="eDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
-            <button class="btn btn-red btn-sm" onclick="applyDateFilter()" style="padding:5px 15px; font-size:11px;">กรอง</button>
-            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="padding:5px 15px; font-size:11px; background:var(--blue); color:white;">
-              <i class="fas fa-file-invoice"></i> สรุปรายสาขา
+          <h4 class="section-title"><i class="fas fa-chart-line" style="color:var(--red);"></i> สินค้าขายดี 10 อันดับ</h4>
+          <div class="filter-panel">
+            <input type="date" id="sDate" class="filter-input">
+            <span style="color:#CCC;">-</span>
+            <input type="date" id="eDate" class="filter-input">
+            <button class="btn btn-red btn-sm" onclick="applyDateFilter()">
+              <i class="fas fa-filter"></i> กรอง
+            </button>
+            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="background-color:var(--blue); color:white;">
+              <i class="fas fa-file-invoice"></i> รายงานสาขา
             </button>
           </div>
         </div>
-        <div style="height:260px;">
+        <div style="height:280px; position: relative;">
           <canvas id="bC"></canvas>
         </div>
       </div>
       
       <div class="card" id="doughnutCard">
-        <h4 style="margin:0 0 25px;"><i class="fas fa-chart-pie"></i> ออเดอร์รายสาขา</h4>
-        <div style="height:260px;">
+        <h4 class="section-title" style="margin-bottom: 30px;">
+          <i class="fas fa-pie-chart"></i> สัดส่วนสาขา
+        </h4>
+        <div style="height:280px; position: relative;">
           <canvas id="pC_Chart"></canvas>
         </div>
       </div>
@@ -569,72 +719,110 @@
     </div>
 
     <div class="card" id="stockChartCard">
-      <h4 style="margin:0 0 25px;"><i class="fas fa-layer-group" style="color:var(--orange);"></i> สถานะคงเหลือล่าสุด (วิเคราะห์จากรายงาน)</h4>
-      <p style="font-size:12px; color:#999; margin-top:-15px; margin-bottom:20px;">* กราฟจะแสดงสินค้าที่เหลือน้อยที่สุด 15 อันดับแรก</p>
-      <div style="height:260px;">
+      <div class="section-header">
+        <h4 class="section-title" style="color: var(--orange);">
+          <i class="fas fa-boxes-stacked"></i> วิเคราะห์สต๊อกสินค้า (ใกล้หมด)
+        </h4>
+      </div>
+      <p style="font-size:12px; color:#999999; margin-top:-20px; margin-bottom:25px;">
+        * แสดงรายการที่เหลือน้อยที่สุด 15 อันดับแรกจากการแจ้งงาน
+      </p>
+      <div style="height:280px; position: relative;">
         <canvas id="sC"></canvas>
       </div>
     </div>
 
     <div class="search-row">
       <div style="flex:1; display:flex; align-items:center; gap:12px;">
-        <i class="fas fa-search" style="color:#BBB; font-size:14px;"></i>
-        <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหา (ชื่อ, บิล, สาขา, เบอร์โทร)..." oninput="pgNum=1; renderTable();">
+        <i class="fas fa-search" style="color:#BBBBBB; font-size:15px;"></i>
+        <input 
+          type="text" 
+          id="orderSearch" 
+          class="search-input" 
+          placeholder="พิมพ์ชื่อ, เลขบิล (เช่น 1), สาขา, เบอร์โทร..." 
+          oninput="pgNum=1; renderTable();"
+        >
       </div>
-      <div style="display:flex; gap:8px;">
-        <button id="deepSearchBtn" class="btn" style="background:var(--dark); color:white; padding:6px 12px; font-size:10px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="executeDeepSearch()">
-          <i class="fas fa-database"></i> ค้นหาลึก
+      <div style="display:flex; gap:10px;">
+        <button 
+          id="deepSearchBtn" 
+          class="btn" 
+          style="background-color:var(--dark); color:white; padding:8px 15px; font-size:11px; border-radius:12px; white-space:nowrap; border:none; cursor:pointer;" 
+          onclick="executeDeepSearch()"
+        >
+          <i class="fas fa-magnifying-glass-plus"></i> ค้นหาลึก
         </button>
-        <button id="clearSearchBtn" class="btn" style="display:none; background:#EEE; color:#333; padding:6px 12px; font-size:10px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="clearDeepSearch()">
-          <i class="fas fa-times"></i> ล้าง
+        <button 
+          id="clearSearchBtn" 
+          class="btn" 
+          style="display:none; background-color:#EEEEEE; color:#333333; padding:8px 15px; font-size:11px; border-radius:12px; white-space:nowrap; border:none; cursor:pointer;" 
+          onclick="clearDeepSearch()"
+        >
+          <i class="fas fa-rotate-left"></i> ล้าง
         </button>
       </div>
     </div>
 
     <div class="card" id="tableCard">
       <div class="section-header">
-        <h3 style="margin:0; font-family:'Prompt'; font-size:22px;"><i class="fas fa-history"></i> Recent Orders</h3>
-        <div id="lastUpd" style="font-size:12px; color:#AAA;">Update: -</div>
+        <h3 class="section-title" style="font-size:22px;"><i class="fas fa-clock-rotate-left"></i> ประวัติออเดอร์ล่าสุด</h3>
+        <div id="lastUpd" style="font-size:12px; color:#AAAAAA;">Update: -</div>
       </div>
       <div style="overflow-x:auto;">
-        <table width="100%" id="oT">
+        <table id="oT">
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>วันที่/เวลา</th>
-              <th>สาขา</th>
-              <th>ผู้สั่ง</th>
+              <th style="width: 140px;">Order ID</th>
+              <th style="width: 160px;">วัน/เวลา</th>
+              <th>ชื่อสาขา</th>
+              <th>ลูกค้า</th>
               <th>เบอร์โทร</th>
               <th>รายการสินค้า</th>
-              <th align="center" style="width:150px;">สถานะ / Print</th>
+              <th align="center" style="width:160px;">สถานะ</th>
             </tr>
           </thead>
-          <tbody id="oB"></tbody>
+          <tbody id="oB">
+            </tbody>
         </table>
       </div>
+      
       <div class="pagination-footer">
-        <span>Rows per page:</span>
+        <div style="margin-right: auto; color: #999; font-size: 13px;">
+          แสดงข้อมูลออเดอร์ในระบบ
+        </div>
+        <span style="font-size: 13px; color: #666;">Rows per page:</span>
         <select id="rowSel" class="styled-select" onchange="changeLimit()">
           <option value="8">8 รายการ</option>
           <option value="15">15 รายการ</option>
           <option value="30">30 รายการ</option>
+          <option value="50">50 รายการ</option>
         </select>
         <button class="page-btn" onclick="prev()"><i class="fas fa-chevron-left"></i></button> 
-        <span id="pI" style="font-weight:600; min-width:40px; text-align:center;">1 / 1</span> 
+        <span id="pI" style="font-weight:600; min-width:50px; text-align:center;">1 / 1</span> 
         <button class="page-btn" onclick="next()"><i class="fas fa-chevron-right"></i></button>
       </div>
     </div>
 
-    <div class="section-header" style="margin-top: 30px;">
-      <h2 style="margin:0; font-family:'Prompt';"><i class="fas fa-tools"></i> บริหารจัดการเมนู</h2>
-      <div>
-        <button class="btn btn-dark btn-sm" onclick="openCatModal()" style="background:#333; color:white;">+ เพิ่มหมวดหมู่</button>
-        <button class="btn btn-red btn-sm" onclick="openProdModal()">+ เพิ่มสินค้าใหม่</button>
+    <div class="section-header" style="margin-top: 50px; margin-bottom: 20px;">
+      <h2 class="section-title" style="font-size: 24px;"><i class="fas fa-sliders"></i> จัดการระบบเมนูสินค้า</h2>
+      <div style="display:flex; gap:12px; flex-wrap: wrap; justify-content: flex-end;">
+        <button id="saveOrderBtn" class="btn btn-sm" style="background-color: var(--orange); color: white;" onclick="saveMenuOrder()">
+          <i class="fas fa-save"></i> บันทึกลำดับ
+        </button>
+        <button class="btn btn-dark btn-sm" onclick="openCatModal()" style="background-color:#333333; color:white;">
+          <i class="fas fa-folder-plus"></i> เพิ่มหมวดหมู่
+        </button>
+        <button class="btn btn-red btn-sm" onclick="openProdModal()">
+          <i class="fas fa-plus-circle"></i> เพิ่มสินค้าใหม่
+        </button>
       </div>
     </div>
 
     <div id="catChips" class="chips-container"></div>
-    <div id="menuItems" class="card" style="padding: 10px 40px; min-height: 100px;"></div>
+    
+    <div id="menuItems" class="card" style="padding: 15px 40px; min-height: 120px; border-top: 6px solid var(--red);">
+      <div style="text-align:center; padding:40px; color:#CCC;">กรุณาเลือกหมวดหมู่...</div>
+    </div>
 
   </div>
 </div>
@@ -642,346 +830,456 @@
 <div id="receiptModal" class="overlay">
   <div class="receipt-card">
     <div id="pdf-content">
-      <div style="text-align:center; margin-bottom:10px;">
-        <h3 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:1px;">ORDER RECEIPT</h3>
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:2px; font-weight:bold;">OFFICIAL RECEIPT</h2>
+        <div style="height:2px; background:#A91D3A; width:50px; margin:10px auto;"></div>
       </div>
       <div id="receiptBody"></div>
-      <div style="margin-top: 30px; text-align: center; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #888;">
-        <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
-        <p>วันที่พิมพ์: <span id="printDate"></span></p>
+      <div style="margin-top: 40px; text-align: center; border-top: 1px dashed #cccccc; padding-top: 20px; font-size: 11px; color: #999999;">
+        <p style="margin: 5px 0;">เอกสารตรวจสอบการจัดเตรียมพัสดุ</p>
+        <p style="margin: 5px 0;">วันที่พิมพ์เอกสาร: <span id="printDate"></span></p>
+        <p style="margin: 5px 0; font-weight: bold; color: #666;">© CoffeeToday Shop System 2026</p>
       </div>
     </div>
-    <button id="dlBtn" class="btn" style="width:100%; margin-top:25px; padding:15px; background:var(--green); color:white;" onclick="downloadPDF()">
-      <i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF
-    </button>
-    <button class="btn btn-red" style="width:100%; margin-top:10px; padding:15px;" onclick="closeM('receiptModal')">Close View</button>
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 30px;">
+      <button id="dlBtn" class="btn" style="background-color:var(--green); color:white; padding:18px;" onclick="downloadPDF()">
+        <i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)
+      </button>
+      <button class="btn btn-red" style="padding:15px;" onclick="closeM('receiptModal')">
+        <i class="fas fa-times"></i> ปิดหน้าต่างนี้
+      </button>
+    </div>
   </div>
 </div>
 
 <div id="confirmModal" class="overlay">
-  <div class="modal-card" style="text-align: center; max-width: 400px;">
-    <i class="fas fa-check-circle" style="font-size: 60px; color: var(--green); margin-bottom: 20px;"></i>
-    <h2 style="margin-top: 0; font-family: 'Prompt'; color: var(--dark);">ยืนยันการส่งออเดอร์</h2>
-    <p style="color: #666; margin-bottom: 30px; font-size: 16px;">
-      ต้องการอนุมัติส่งมอบออเดอร์ <br><b id="confirmOrderId" style="color: var(--red); font-size: 20px;"></b><br> ใช่หรือไม่?
+  <div class="modal-card" style="text-align: center; max-width: 420px;">
+    <div style="margin-bottom: 25px;">
+      <i class="fas fa-circle-check" style="font-size: 75px; color: var(--green); filter: drop-shadow(0 5px 15px rgba(34,197,94,0.3));"></i>
+    </div>
+    <h2 style="margin:0; font-family:'Prompt'; color:var(--dark); font-size: 24px;">อนุมัติการส่งมอบ</h2>
+    <p style="color: #777777; margin: 20px 0 35px; font-size: 15px; line-height: 1.6;">
+      คุณกำลังจะอนุมัติให้สถานะออเดอร์ <br><b id="confirmOrderId" style="color: var(--red); font-size: 22px;"></b><br> เป็น "จัดส่งสำเร็จ" ใช่หรือไม่?
     </p>
-    <div style="display: flex; gap: 20px;">
-      <button class="btn" style="flex: 1; background: #F5F5F5; color: #333;" onclick="closeM('confirmModal')">ยกเลิก</button>
-      <button class="btn" style="flex: 1; background: var(--green); color: white;" onclick="executeApproveOrder()">ยืนยันอนุมัติ</button>
+    <div style="display: flex; gap: 15px;">
+      <button class="btn" style="flex: 1; background-color: #F5F5F5; color: #333333;" onclick="closeM('confirmModal')">ยกเลิก</button>
+      <button class="btn" style="flex: 1; background-color: var(--green); color: white;" onclick="executeApproveOrder()">ยืนยันอนุมัติ</button>
     </div>
   </div>
 </div>
 
 <div id="cM" class="overlay">
   <div class="modal-card">
-    <h3 style="margin-top:0;">เพิ่มหมวดหมู่ใหม่</h3>
-    <input type="text" id="cN" class="login-input" style="font-size:18px; text-align:left;" placeholder="ชื่อหมวดหมู่...">
-    <div style="display:flex; gap:20px;">
-      <button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('cM')">ยกเลิก</button>
-      <button class="btn btn-red" style="flex:1;" onclick="saveCat()">ยืนยัน</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+      <h3 style="margin:0; font-family:'Prompt';">สร้างหมวดหมู่ใหม่</h3>
+      <i class="fas fa-folder-open" style="color:var(--red); font-size:20px;"></i>
+    </div>
+    <label style="font-size:12px; color:#999; margin-bottom:8px; display:block;">ชื่อหมวดหมู่สินค้า</label>
+    <input type="text" id="cN" class="login-input" style="font-size:18px; text-align:left; padding:15px 25px;" placeholder="ระบุชื่อหมวดหมู่ เช่น กาแฟ TD...">
+    <div style="display:flex; gap:15px; margin-top:10px;">
+      <button class="btn" style="flex:1; background-color:#F5F5F5;" onclick="closeM('cM')">กลับ</button>
+      <button class="btn btn-red" style="flex:1;" onclick="saveCat()">บันทึกข้อมูล</button>
     </div>
   </div>
 </div>
 
 <div id="pM" class="overlay">
   <div class="modal-card">
-    <h3 style="margin-top:0;">จัดการรายการสินค้า</h3>
-    <label style="font-size:12px; color:#999;">หมวดหมู่</label>
-    <select id="pCatSelect" class="login-input" style="font-size:16px; margin-bottom:15px;"></select>
-    <label style="font-size:12px; color:#999;">ชื่อสินค้า</label>
-    <input type="text" id="pN" class="login-input" style="font-size:16px; text-align:left;" placeholder="ระบุชื่อสินค้า...">
-    <div style="display:flex; gap:20px;">
-      <button class="btn" style="flex:1; background:#F5F5F5;" onclick="closeM('pM')">ยกเลิก</button>
-      <button class="btn btn-red" style="flex:1;" onclick="saveP()">บันทึกข้อมูล</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+      <h3 style="margin:0; font-family:'Prompt';">ข้อมูลรายการสินค้า</h3>
+      <i class="fas fa-tag" style="color:var(--red); font-size:20px;"></i>
+    </div>
+    
+    <div style="margin-bottom:20px;">
+      <label style="font-size:11px; color:#AAAAAA; text-transform:uppercase; font-weight:bold;">หมวดหมู่หลัก</label>
+      <select id="pCatSelect" class="login-input" style="font-size:16px; margin-top:8px; padding:15px; text-align:left;"></select>
+    </div>
+    
+    <div style="margin-bottom:30px;">
+      <label style="font-size:11px; color:#AAAAAA; text-transform:uppercase; font-weight:bold;">ชื่อสินค้า / ขนาดบรรจุ</label>
+      <input type="text" id="pN" class="login-input" style="font-size:16px; margin-top:8px; padding:15px; text-align:left;" placeholder="เช่น กาแฟ TD-1 (250g)">
+    </div>
+    
+    <div style="display:flex; gap:15px;">
+      <button class="btn" style="flex:1; background-color:#F5F5F5;" onclick="closeM('pM')">ยกเลิก</button>
+      <button class="btn btn-red" style="flex:1;" onclick="saveP()">บันทึกรายการ</button>
     </div>
   </div>
 </div>
 
 <script>
   /**
-   * ⚙️ System Engine - CoffeeToday Management
-   * เวอร์ชั่น: Optimized Speed + Full Data View
+   * ⚙️ System Application Logic - Nitro Core Engine
+   * เวอร์ชั่น: High-Precision Drag & Drop System
    */
   
-  let bcObj, pcObj, scObj;
+  let bcObj = null; 
+  let pcObj = null; 
+  let scObj = null;
   let allOrders = [];
   let pgNum = 1;
   let pgLim = 8;
+  
   let menuObj = {};
   let editTargetId = null;
   let currentCat = null;
+  
   let pendingApproveId = "";
-  let currentDeepSearchQuery = "";
+  let currentDeepSearchQuery = ""; 
+
+  // ตัวแปรสำหรับระบบ Drag & Drop
+  let dragCatIndex = null;
+  let dragItemIndex = null;
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
 
   window.onload = function() {
+    
     const savedToken = localStorage.getItem(TOKEN_KEY);
+    
     if (savedToken) {
+      
       document.getElementById('login-overlay').style.display = 'none';
       document.getElementById('main-app').style.display = 'block';
       initApp(savedToken);
+      
+    } else {
+      
+      document.getElementById('passInput').focus();
+      
     }
   };
 
-  /** ✅ Authentication Handler */
+  /** ✅ ฟังก์ชันล็อคอินเข้าสู่ระบบ */
   function handleLogin() { 
+    
     const lBtn = document.getElementById('loginBtn');
     const pInput = document.getElementById('passInput');
     
+    if (pInput.value.length < 4) {
+      return alert("กรุณากรอกรหัสผ่านให้ครบ 4 หลัก");
+    }
+    
     lBtn.disabled = true; 
-    lBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking PIN...';
+    lBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> เข้าถึงระบบ...';
 
     fetch(GAS_URL + '?action=verifyLogin&pass=' + pInput.value)
       .then(function(res) { 
         return res.json(); 
       })
       .then(function(res) {
-        if(res.status === 'success'){
+        
+        if(res.status === 'success') {
+          
           localStorage.setItem(TOKEN_KEY, res.token);
-          document.getElementById('login-overlay').style.display = 'none';
-          document.getElementById('main-app').style.display = 'block';
-          initApp(res.token);
+          document.getElementById('login-overlay').style.opacity = '0';
+          
+          setTimeout(function() {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            initApp(res.token);
+          }, 400);
+          
         } else {
+          
           alert(res.message);
           lBtn.disabled = false;
-          lBtn.innerHTML = 'Unlock Database';
+          lBtn.innerHTML = '<i class="fas fa-key"></i> UNLOCK SYSTEM';
           pInput.value = '';
           pInput.focus();
+          
         }
       })
       .catch(function(err) {
-        alert("การเชื่อมต่อล้มเหลว กรุณาลองใหม่อีกครั้ง");
+        
+        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
         lBtn.disabled = false;
-        lBtn.innerHTML = 'Unlock Database';
+        lBtn.innerHTML = '<i class="fas fa-key"></i> UNLOCK SYSTEM';
+        
       });
   }
 
   function handleLogout() {
-    localStorage.removeItem(TOKEN_KEY);
-    location.reload();
+    
+    if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+      localStorage.removeItem(TOKEN_KEY);
+      location.reload();
+    }
+    
   }
 
   function initApp(token) { 
+    
     loadDashboardData(false, token); 
     loadApproveList(token); 
     
     setInterval(function() {
-      // Auto-refresh without clearing searches
+      
       loadDashboardData(false, token, currentDeepSearchQuery);
       loadApproveList(token);
+      
     }, 180000); 
   }
 
-  /** ✅ Data Loading & Filter Engine (Hybrid Logic + Frontend Graph Fix) */
-  function loadDashboardData(smooth = false, token = null, searchQ = "") { 
+  /**
+   * ✅ ฟังก์ชันดึงข้อมูล Dashboard (ประมวลผลกราฟด้วยเวลา Local)
+   */
+  function loadDashboardData(smooth, token, searchQ) { 
+    
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
-    currentDeepSearchQuery = searchQ;
+    currentDeepSearchQuery = searchQ || "";
 
     if(smooth) {
-      document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
+      document.querySelectorAll('.card').forEach(function(c) { 
+        c.classList.add('loading-pulse'); 
+      });
     }
     
-    const s = document.getElementById('sDate').value;
-    const e = document.getElementById('eDate').value;
-    const q = encodeURIComponent(searchQ);
+    const sDateValue = document.getElementById('sDate').value;
+    const eDateValue = document.getElementById('eDate').value;
+    const searchEncoded = encodeURIComponent(currentDeepSearchQuery);
 
-    fetch(`${GAS_URL}?action=managerGetData&token=${currentToken}&s=${s}&e=${e}&q=${q}`)
-      .then(res => res.json())
-      .then(d => {
+    const fetchUrl = GAS_URL + 
+                     '?action=managerGetData' + 
+                     '&token=' + currentToken + 
+                     '&s=' + sDateValue + 
+                     '&e=' + eDateValue + 
+                     '&q=' + searchEncoded;
+
+    fetch(fetchUrl)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(d) {
+        
         if(d.status === 'success') {
+          
           allOrders = d.analytics.history;
           renderTable();
           
-          /*
-           * =========================================================================
-           * ✅ การแก้ไขระบบกราฟแบบอัจฉริยะ (Frontend Calculation)
-           * สั่งให้ดึงเฉพาะออเดอร์ของ "วันนี้" อ้างอิงจากเวลาเที่ยงคืนของเครื่องคุณเบลล์
-           * วิธีนี้จะแก้ปัญหา Timezone ของเซิร์ฟเวอร์ Google ที่ทำให้กราฟไม่ขึ้นครับ
-           * =========================================================================
-           */
-          let chartDataToRender = d.analytics.charts;
+          // ==========================================
+          // การคำนวณกราฟแบบ Local Time (แก้ปัญหา Timezone)
+          // ==========================================
+          let finalChartData = d.analytics.charts;
           
-          if (!s && !e && searchQ === "") {
-             let bCounts = {};
-             let pStats = {};
-             let sRep = {};
+          if (!sDateValue && !eDateValue && currentDeepSearchQuery === "") {
              
-             let nowObj = new Date();
-             nowObj.setHours(0, 0, 0, 0); // ยึดเวลาเที่ยงคืนตรงของวันนี้
+             let branchSum = {};
+             let productSum = {};
+             let stockSum = {};
              
-             allOrders.forEach(o => {
-                // แปลง format วันที่ "dd/MM/yyyy HH:mm"
-                let dtStr = o.date; 
-                let dp = dtStr.split(' ')[0].split('/');
-                let tp = dtStr.split(' ')[1].split(':');
-                let oDateObj = new Date(dp[2], dp[1]-1, dp[0], tp[0], tp[1]);
+             // ตั้งเป้าเป็นเที่ยงคืนของเครื่องคุณเบลล์ปัจจุบัน
+             let todayMidnight = new Date();
+             todayMidnight.setHours(0, 0, 0, 0);
+             
+             allOrders.forEach(function(ord) {
                 
-                if (oDateObj >= nowObj) { 
-                   // นำยอดเข้ากราฟเฉพาะออเดอร์ของวันนี้
-                   let bNameStr = o.branch || "อื่นๆ";
-                   bCounts[bNameStr] = (bCounts[bNameStr] || 0) + 1;
+                let dtStr = ord.date; 
+                let dtParts = dtStr.split(' ')[0].split('/');
+                let timeParts = dtStr.split(' ')[1].split(':');
+                
+                let orderDateObj = new Date(dtParts[2], dtParts[1]-1, dtParts[0], timeParts[0], timeParts[1]);
+                
+                // ถ้ายอดเกิดหลังเที่ยงคืนวันนี้ ให้นับเข้ากราฟ
+                if (orderDateObj >= todayMidnight) { 
                    
-                   let itemsStr = o.items || "";
-                   itemsStr.split('\n').forEach(lineStr => {
-                      if (lineStr.includes('สั่ง:')) {
-                         let nameOnlyStr = lineStr.split(' (')[0].trim();
-                         let qtyMatchReg = lineStr.match(/สั่ง:([\d.]+)/);
-                         let quantityVal = qtyMatchReg ? parseFloat(qtyMatchReg[1]) : 0;
-                         pStats[nameOnlyStr] = (pStats[nameOnlyStr] || 0) + quantityVal;
+                   let bNameStr = ord.branch || "อื่นๆ";
+                   branchSum[bNameStr] = (branchSum[bNameStr] || 0) + 1;
+                   
+                   let iStr = ord.items || "";
+                   iStr.split('\n').forEach(function(lineStr) {
+                      
+                      if (lineStr.indexOf('สั่ง:') !== -1) {
                          
-                         let stockMatchReg = lineStr.match(/เหลือ:([^,)]+)/);
-                         if (stockMatchReg) {
-                            let valStrStr = stockMatchReg[1].trim();
-                            let numMatchReg = valStrStr.match(/[\d.]+/);
-                            let numVal = numMatchReg ? parseFloat(numMatchReg[0]) : 0;
-                            sRep[nameOnlyStr] = numVal;
+                         let nameOnlyStr = lineStr.split(' (')[0].trim();
+                         let qtyReg = lineStr.match(/สั่ง:([\d.]+)/);
+                         let qtyVal = qtyReg ? parseFloat(qtyReg[1]) : 0;
+                         productSum[nameOnlyStr] = (productSum[nameOnlyStr] || 0) + qtyVal;
+                         
+                         let stockReg = lineStr.match(/เหลือ:([^,)]+)/);
+                         if (stockReg) {
+                            let stockStr = stockReg[1].trim();
+                            let stockNumReg = stockStr.match(/[\d.]+/);
+                            let numVal = stockNumReg ? parseFloat(stockNumReg[0]) : 0;
+                            stockSum[nameOnlyStr] = numVal;
                          }
                       }
                    });
                 }
              });
              
-             let topListArray = Object.entries(pStats).sort((a, b) => b[1] - a[1]).slice(0, 10);
-             let stockListArray = Object.entries(sRep).sort((a, b) => a[1] - b[1]);
+             let topSorted = Object.entries(productSum).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 10);
+             let stockSorted = Object.entries(stockSum).sort(function(a, b) { return a[1] - b[1]; });
              
-             chartDataToRender = {
-               pL: topListArray.map(i => i[0]),
-               pV: topListArray.map(i => i[1]),
-               bL: Object.keys(bCounts),
-               bV: Object.values(bCounts),
-               sL: stockListArray.map(i => i[0]),
-               sV: stockListArray.map(i => i[1])
+             let finalBLabels = Object.keys(branchSum);
+             let finalBVals = [];
+             finalBLabels.forEach(function(k) { finalBVals.push(branchSum[k]); });
+             
+             finalChartData = {
+               pL: topSorted.map(function(i) { return i[0]; }),
+               pV: topSorted.map(function(i) { return i[1]; }),
+               bL: finalBLabels,
+               bV: finalBVals,
+               sL: stockSorted.map(function(i) { return i[0]; }),
+               sV: stockSorted.map(function(i) { return i[1]; })
              };
           }
           
-          // ส่งข้อมูลที่คำนวณใหม่ไปให้ Chart.js สร้างกราฟ
-          renderCharts(chartDataToRender); 
-          // =========================================================================
+          renderCharts(finalChartData); 
+          // ==========================================
 
           renderMenuAccordion(d.menu); 
           
-          document.getElementById('lastUpd').innerText = "Update: " + new Date().toLocaleTimeString();
+          const timeNow = new Date();
+          document.getElementById('lastUpd').innerText = "Last Sync: " + timeNow.toLocaleTimeString();
           
-          const dsBtn = document.getElementById('deepSearchBtn');
-          const clBtn = document.getElementById('clearSearchBtn');
+          const btnDeepSearch = document.getElementById('deepSearchBtn');
+          const btnClearSearch = document.getElementById('clearSearchBtn');
           
-          if (currentDeepSearchQuery) {
-            dsBtn.style.display = "none";
-            clBtn.style.display = "inline-flex";
+          if (currentDeepSearchQuery !== "") {
+            
+            btnDeepSearch.style.display = "none";
+            btnClearSearch.style.display = "inline-flex";
+            
           } else {
-            dsBtn.style.display = "inline-flex";
-            clBtn.style.display = "none";
+            
+            btnDeepSearch.style.display = "inline-flex";
+            btnClearSearch.style.display = "none";
+            
           }
 
-          if(dsBtn) {
-            dsBtn.innerHTML = '<i class="fas fa-database"></i> ค้นหาลึก';
-            dsBtn.disabled = false;
+          if(btnDeepSearch) {
+            btnDeepSearch.innerHTML = '<i class="fas fa-database"></i> ค้นหาลึกจากฐานข้อมูล';
+            btnDeepSearch.disabled = false;
           }
-        } else {
+          
+        } else if (d.status === 'expired') {
+          
           handleLogout();
+          
         }
         
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
+        document.querySelectorAll('.card').forEach(function(c) { 
+          c.classList.remove('loading-pulse'); 
+        });
+        
       })
-      .catch(err => {
-        console.error("Dashboard Load Error:", err);
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
+      .catch(function(err) {
+        
+        console.error("Dashboard Load Failure:", err);
+        document.querySelectorAll('.card').forEach(function(c) { 
+          c.classList.remove('loading-pulse'); 
+        });
+        
       });
   }
 
-  /** ✅ Server-Side Deep Searching */
   function executeDeepSearch() {
-    const q = document.getElementById('orderSearch').value.trim();
-    if (!q) {
-      return showToast("กรุณาพิมพ์คำค้นหาก่อนดำเนินการ");
+    
+    const queryValue = document.getElementById('orderSearch').value.trim();
+    
+    if (queryValue === "") {
+      return showToast("กรุณาระบุคำค้นหา (เลขบิล, ชื่อ หรือเบอร์โทร)");
     }
     
     document.getElementById('sDate').value = "";
     document.getElementById('eDate').value = "";
     
     const btn = document.getElementById('deepSearchBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเจาะข้อมูล...';
     btn.disabled = true;
     
-    loadDashboardData(true, null, q);
+    loadDashboardData(true, null, queryValue);
   }
 
   function clearDeepSearch() {
+    
     document.getElementById('orderSearch').value = "";
-    document.getElementById('deepSearchBtn').style.display = "inline-flex";
-    document.getElementById('clearSearchBtn').style.display = "none";
     loadDashboardData(true, null, ""); 
+    
   }
 
   function applyDateFilter() {
+    
     document.getElementById('orderSearch').value = "";
     loadDashboardData(true, null, ""); 
+    
   }
 
-  /** ✅ Time Conversion Engine (ISO -> Human) */
-  function formatPackedTime(pt) {
-    if (!pt || pt === "-") {
+  function formatPackedTime(packedTimeValue) {
+    
+    if (!packedTimeValue || packedTimeValue === "-" || packedTimeValue === "") {
       return "-";
     }
     
-    if (typeof pt === 'string' && pt.includes('T') && pt.includes('Z')) {
-      const d = new Date(pt);
-      const datePart = d.toLocaleDateString('th-TH', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric' 
-      });
-      const timePart = d.toLocaleTimeString('th-TH', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-      return datePart + ' ' + timePart;
+    if (typeof packedTimeValue === 'string' && packedTimeValue.indexOf('T') !== -1 && packedTimeValue.indexOf('Z') !== -1) {
+      
+      const dateObject = new Date(packedTimeValue);
+      
+      const dd = ("0" + dateObject.getDate()).slice(-2);
+      const mm = ("0" + (dateObject.getMonth() + 1)).slice(-2);
+      const yyyy = dateObject.getFullYear() + 543;
+      
+      const hours = ("0" + dateObject.getHours()).slice(-2);
+      const minutes = ("0" + dateObject.getMinutes()).slice(-2);
+      
+      return dd + "/" + mm + "/" + yyyy + " " + hours + ":" + minutes;
     }
     
-    return pt;
+    return packedTimeValue;
   }
 
-  /** ✅ Fulfillment Queue Loader */
   function loadApproveList(token) {
+    
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
-    fetch(GAS_URL + '?action=getOrdersByStatus&status=Packed&token=' + currentToken)
+    const apiUrl = GAS_URL + '?action=getOrdersByStatus&status=Packed&token=' + currentToken;
+    
+    fetch(apiUrl)
       .then(function(res) { 
         return res.json(); 
       })
       .then(function(data) {
-        const card = document.getElementById('approveCard');
-        const div = document.getElementById('approveList');
+        
+        const approveCardElement = document.getElementById('approveCard');
+        const approveListContainer = document.getElementById('approveList');
         
         if(!data || data.length === 0) { 
-          card.style.display = 'none'; 
+          approveCardElement.style.display = 'none'; 
           return; 
         }
         
-        card.style.display = 'block';
-        div.innerHTML = data.map(function(o) {
-          let matchOrder = allOrders.find(function(x) { 
-            return x.id === o.id; 
+        approveCardElement.style.display = 'block';
+        
+        const listItems = data.map(function(order) {
+          
+          let matched = allOrders.find(function(item) { 
+            return item.id === order.id; 
           });
           
-          let ptStr = matchOrder && matchOrder.packedTime ? matchOrder.packedTime : "-";
-          let pTime = formatPackedTime(ptStr);
+          let pTimeValue = (matched && matched.packedTime) ? matched.packedTime : "-";
+          let pTimeFormatted = formatPackedTime(pTimeValue);
           
-          let timeBadge = '';
-          if (pTime !== "-") {
-            timeBadge = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:3px 8px; border-radius:6px; display:inline-block; margin-bottom:8px; font-weight:bold;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ' + pTime + '</div><br>';
+          let timeBadgeHtml = '';
+          if (pTimeFormatted !== "-") {
+            timeBadgeHtml = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:5px 12px; border-radius:8px; display:inline-block; margin-bottom:12px; font-weight:600;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ' + pTimeFormatted + '</div><br>';
           }
 
-          return '<div class="approve-item">' +
-            '<div class="approve-info">' +
-              timeBadge +
-              '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:17px;" onclick="viewOrderDetail(\'' + o.id + '\')">' + o.id + '</b> - ' + o.branch + '<br>' +
-              '<small style="color:#666">' + o.items.replace(/\n/g, ', ').substring(0, 45) + '...</small>' +
-            '</div>' +
-            '<button class="btn-approve" onclick="approveOrder(\'' + o.id + '\')">อนุมัติส่งของ</button>' +
-          '</div>';
-        }).join('');
+          let itemRow = '<div class="approve-item">';
+          itemRow += '<div class="approve-info">';
+          itemRow += timeBadgeHtml;
+          itemRow += '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:17px;" onclick="viewOrderDetail(\'' + order.id + '\')">' + order.id + '</b>';
+          itemRow += ' - ' + order.branch + '<br>';
+          itemRow += '<small style="color:#666; font-size: 13px;">' + order.items.replace(/\n/g, ', ').substring(0, 48) + '...</small>';
+          itemRow += '</div>';
+          itemRow += '<button class="btn-approve" onclick="approveOrder(\'' + order.id + '\')">อนุมัติจัดส่ง</button>';
+          itemRow += '</div>';
+          
+          return itemRow;
+          
+        });
+        
+        approveListContainer.innerHTML = listItems.join('');
       });
   }
 
@@ -992,501 +1290,550 @@
   }
 
   function executeApproveOrder() {
+    
     closeM('confirmModal'); 
+    
     if(!pendingApproveId) {
       return;
     }
     
     const token = localStorage.getItem(TOKEN_KEY);
-    fetch(GAS_URL + '?action=setOrderStatus&id=' + pendingApproveId + '&status=Success&token=' + token)
+    const updateUrl = GAS_URL + '?action=setOrderStatus&id=' + pendingApproveId + '&status=Success&token=' + token;
+    
+    fetch(updateUrl)
       .then(function(res) { 
         return res.json(); 
       })
       .then(function(res) {
+        
         if(res.status === 'success') {
+          
           loadApproveList(token); 
           loadDashboardData(false, token, currentDeepSearchQuery); 
-          showToast("✅ อนุมัติการส่งมอบเรียบร้อย!");
+          showToast("✅ ยืนยันการจัดส่งออเดอร์สำเร็จ!");
+          
+        } else {
+          
+          alert("ไม่สามารถยืนยันสถานะได้");
+          
         }
       });
   }
   
-  /** ✅ Ultra Client Search Engine (High Performance) */
   function renderTable() {
-    const input = document.getElementById('orderSearch');
-    const query = input.value.trim().toLowerCase();
     
-    let filtered = allOrders.filter(function(o) {
-      if(!query) {
+    const searchInput = document.getElementById('orderSearch');
+    const queryLower = searchInput.value.trim().toLowerCase();
+    
+    let filteredOrders = allOrders.filter(function(order) {
+      
+      if(queryLower === "") {
         return true;
       }
       
-      const orderNum = o.id.replace(/\D/g, ''); 
-      const shortNum = parseInt(orderNum).toString(); 
+      const fullId = order.id.toLowerCase();
+      const numOnlyId = order.id.replace(/\D/g, ''); 
+      const shortId = parseInt(numOnlyId).toString(); 
       
-      // ✅ Multi-Field Searching: ID, Name, Phone, Branch
-      const idMatch = o.id.toLowerCase().includes(query);
-      const numMatch = orderNum.includes(query);
-      const shortNumMatch = (shortNum === query);
-      const customerMatch = o.customer.toLowerCase().includes(query);
-      const phoneMatch = (o.phone && o.phone.toString().includes(query));
-      const branchMatch = (o.branch && o.branch.toLowerCase().includes(query));
+      const customerName = order.customer.toLowerCase();
+      const branchName = order.branch ? order.branch.toLowerCase() : "";
+      const phoneNum = order.phone ? order.phone.toString() : "";
       
-      return idMatch || numMatch || shortNumMatch || customerMatch || phoneMatch || branchMatch;
+      const isIdMatch = (fullId.indexOf(queryLower) !== -1);
+      const isNumMatch = (numOnlyId.indexOf(queryLower) !== -1);
+      const isShortIdMatch = (shortId === queryLower);
+      const isCustomerMatch = (customerName.indexOf(queryLower) !== -1);
+      const isPhoneMatch = (phoneNum.indexOf(queryLower) !== -1);
+      const isBranchMatch = (branchName.indexOf(queryLower) !== -1);
+      
+      return isIdMatch || isNumMatch || isShortIdMatch || isCustomerMatch || isPhoneMatch || isBranchMatch;
     });
 
-    const data = filtered.slice((pgNum - 1) * pgLim, pgNum * pgLim);
-    let html = '';
+    const totalCount = filteredOrders.length;
+    const offset = (pgNum - 1) * pgLim;
+    const pagedData = filteredOrders.slice(offset, offset + pgLim);
     
-    data.forEach(function(o) {
-      const isPacked = o.status === 'Packed';
-      const isSuccess = o.status === 'Success';
+    let rowsHtml = '';
+    
+    pagedData.forEach(function(item) {
       
-      let pTime = formatPackedTime(o.packedTime);
-      let timeHtml = '';
+      const isPackedStatus = (item.status === 'Packed');
+      const isSuccessStatus = (item.status === 'Success');
       
-      if ((isPacked || isSuccess) && pTime && pTime !== "-") {
-        timeHtml = '<div style="font-size:10px; color:#888; margin-top:6px; background:#f3f4f6; padding:4px 10px; border-radius:10px; display:inline-block; font-weight:500;"><i class="fas fa-box"></i> แพ็คเมื่อ ' + pTime + '</div>';
+      const pTimeFormatted = formatPackedTime(item.packedTime);
+      let timeStampHtml = '';
+      
+      if ((isPackedStatus || isSuccessStatus) && pTimeFormatted !== "-") {
+        timeStampHtml = '<div style="font-size:10px; color:#888; margin-top:8px; background:#f3f4f6; padding:5px 10px; border-radius:12px; display:inline-block; font-weight:600;">';
+        timeStampHtml += '<i class="fas fa-box"></i> ' + pTimeFormatted;
+        timeStampHtml += '</div>';
       }
 
-      html += '<tr class="' + (isSuccess ? 'row-ready' : '') + '">' +
-        '<td>' +
-          '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:15px;" onclick="viewOrderDetail(\'' + o.id + '\')">' + o.id + '</b>' +
-          '<div style="margin-top: 5px;">' + timeHtml + '</div>' +
-        '</td>' +
-        '<td>' + o.date + '</td>' +
-        '<td><b>' + o.branch + '</b></td>' +
-        '<td>' + o.customer + '</td>' +
-        '<td style="font-weight:600; color:var(--blue);">' + (o.phone || '-') + '</td>' +
-        '<td style="font-size:12px; color:#555;">' + o.items.replace(/\n/g,'<br>') + '</td>' +
-        '<td align="center">' +
-          '<div style="display:flex; gap:15px; justify-content:center; align-items:center;">' +
-            '<div style="text-align:center; min-width: 65px;">' +
-              '<span style="font-size:12px; font-weight:600; color:' + (isSuccess?'var(--green)': (isPacked?'#3498db':'#AAA')) + '">' + o.status + '</span>' +
-            '</div>' +
-            '<button class="page-btn" style="width:32px; height:32px;" onclick="printOrder(\'' + encodeURIComponent(JSON.stringify(o)) + '\')">' +
-              '<i class="fas fa-print" style="font-size:12px;"></i>' +
-            '</button>' +
-          '</div>' +
-        '</td>' +
-      '</tr>';
+      let colorStatus = '#AAAAAA';
+      if (isSuccessStatus) {
+        colorStatus = 'var(--green)';
+      } else if (isPackedStatus) {
+        colorStatus = 'var(--blue)';
+      }
+
+      rowsHtml += '<tr class="' + (isSuccessStatus ? 'row-ready' : '') + '">';
+      rowsHtml += '<td>';
+      rowsHtml += '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:16px;" onclick="viewOrderDetail(\'' + item.id + '\')">' + item.id + '</b>';
+      rowsHtml += '<br>' + timeStampHtml;
+      rowsHtml += '</td>';
+      rowsHtml += '<td style="color:#666;">' + item.date + '</td>';
+      rowsHtml += '<td><b style="color:#333;">' + item.branch + '</b></td>';
+      rowsHtml += '<td style="font-weight:600;">' + item.customer + '</td>';
+      rowsHtml += '<td style="font-weight:700; color:var(--blue);">' + (item.phone || '-') + '</td>';
+      rowsHtml += '<td style="font-size:12px; color:#555; line-height:1.4;">' + item.items.replace(/\n/g,'<br>') + '</td>';
+      rowsHtml += '<td align="center">';
+      rowsHtml += '<div style="display:flex; gap:18px; justify-content:center; align-items:center;">';
+      rowsHtml += '<div style="text-align:center; min-width: 75px;">';
+      rowsHtml += '<span style="font-size:12px; font-weight:bold; color:' + colorStatus + '">' + item.status + '</span>';
+      rowsHtml += '</div>';
+      rowsHtml += '<button class="page-btn" style="width:36px; height:36px; background:#FFF; border:1px solid #EEE;" onclick="printOrder(\'' + encodeURIComponent(JSON.stringify(item)) + '\')">';
+      rowsHtml += '<i class="fas fa-print" style="font-size:14px; color:#666;"></i>';
+      rowsHtml += '</button>';
+      rowsHtml += '</div>';
+      rowsHtml += '</td>';
+      rowsHtml += '</tr>';
     });
     
-    document.getElementById('oB').innerHTML = html || '<tr><td colspan="7" align="center" style="padding:70px; color:#BBB;">ไม่พบข้อมูลออเดอร์ในส่วนนี้...</td></tr>';
+    const tableBody = document.getElementById('oB');
+    if (totalCount === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7" align="center" style="padding:100px; color:#BBBBBB; font-style:italic;">ไม่พบข้อมูลออเดอร์ที่คุณกำลังค้นหา...</td></tr>';
+    } else {
+      tableBody.innerHTML = rowsHtml;
+    }
     
-    const totalPages = Math.ceil(filtered.length/pgLim) || 1;
-    document.getElementById('pI').innerText = pgNum + " / " + totalPages;
+    const maxPages = Math.ceil(totalCount / pgLim) || 1;
+    const indicator = document.getElementById('pI');
+    indicator.innerText = pgNum + " / " + maxPages;
   }
 
-  let currentViewingOrderId = "";
-
-  /** ✅ Receipt Detail Viewer (Expanded UI) */
-  function viewOrderDetail(id) {
-    const o = allOrders.find(function(x) { 
-      return x.id === id; 
+  function viewOrderDetail(orderId) {
+    
+    const foundOrder = allOrders.find(function(order) { 
+      return order.id === orderId; 
     });
     
-    if(!o) {
+    if(!foundOrder) {
       return;
     }
     
-    currentViewingOrderId = id;
+    currentViewingOrderId = orderId;
 
-    let tableRows = '';
-    const items = o.items.split('\n');
+    let rowsList = '';
+    const itemListArray = foundOrder.items.split('\n');
     
-    items.forEach(function(line) {
-      if(line.trim() !== "") {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
-        if(match) {
-          tableRows += '<tr>';
-          tableRows += '<td>' + match[1] + '</td>';
-          tableRows += '<td align="center">' + match[2] + '</td>';
-          tableRows += '<td align="center"><b>' + match[3] + '</b></td>';
-          tableRows += '</tr>';
+    itemListArray.forEach(function(itemLine) {
+      if(itemLine.trim() !== "") {
+        const regexMatch = itemLine.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(regexMatch) {
+          rowsList += '<tr>';
+          rowsList += '<td style="padding:15px 10px; border-bottom:1px solid #f9f9f9; color:#444;">' + regexMatch[1] + '</td>';
+          rowsList += '<td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; color:#888;">' + regexMatch[2] + '</td>';
+          rowsList += '<td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:var(--red);">' + regexMatch[3] + '</td>';
+          rowsList += '</tr>';
         } else {
-          tableRows += '<tr><td colspan="3">' + line + '</td></tr>';
+          rowsList += '<tr><td colspan="3" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; color:#777; font-size:13px;">' + itemLine + '</td></tr>';
         }
       }
     });
 
-    let pTime = formatPackedTime(o.packedTime);
-    let packedAlert = '';
+    const formattedPTime = formatPackedTime(foundOrder.packedTime);
+    let alertHtml = '';
     
-    if ((o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-") {
-      packedAlert = '<div style="grid-column: 1 / -1; background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 12px; border-radius: 12px; text-align: center; margin-top: 8px;">';
-      packedAlert += '<span style="font-size: 11px; color: #166534; font-weight: 600;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ' + pTime + '</span>';
-      packedAlert += '</div>';
+    if ((foundOrder.status === 'Packed' || foundOrder.status === 'Success') && formattedPTime !== "-") {
+      alertHtml += '<div style="grid-column: 1 / -1; background-color: #ecfdf5; border: 1.5px dashed #a7f3d0; padding: 15px; border-radius: 15px; text-align: center; margin-top: 10px;">';
+      alertHtml += '<span style="font-size: 13px; color: #065f46; font-weight: 700;">';
+      alertHtml += '<i class="fas fa-check-circle" style="margin-right:8px;"></i> บรรจุสินค้าเสร็จสมบูรณ์เมื่อ: ' + formattedPTime;
+      alertHtml += '</span>';
+      alertHtml += '</div>';
     }
     
-    const bodyHtml = '<div class="receipt-info-grid">' +
-        '<div><div class="receipt-label">Order ID</div><div class="receipt-value">' + o.id + '</div></div>' + 
-        '<div style="text-align:right;"><div class="receipt-label">Date</div><div class="receipt-value">' + o.date + '</div></div>' +
-        '<div><div class="receipt-label">Branch</div><div class="receipt-value">' + o.branch + '</div></div>' +
-        '<div style="text-align:right;"><div class="receipt-label">Phone</div><div class="receipt-value">' + (o.phone || '-') + '</div></div>' +
-        packedAlert +
+    const modalContent = '<div class="receipt-info-grid">' +
+        '<div><div class="receipt-label">Order ID</div><div class="receipt-value">' + foundOrder.id + '</div></div>' + 
+        '<div style="text-align:right;"><div class="receipt-label">Order Date</div><div class="receipt-value">' + foundOrder.date + '</div></div>' +
+        '<div><div class="receipt-label">Branch Store</div><div class="receipt-value">' + foundOrder.branch + '</div></div>' +
+        '<div style="text-align:right;"><div class="receipt-label">Contact</div><div class="receipt-value">' + (foundOrder.phone || '-') + '</div></div>' +
+        alertHtml +
       '</div>' +
       '<table class="receipt-table">' +
-        '<thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>' +
-        '<tbody>' + tableRows + '</tbody>' +
+        '<thead><tr style="background:#F9FAFB;">' +
+        '<th style="border-radius:10px 0 0 10px;">Product Name</th>' +
+        '<th style="text-align:center;">In Stock</th>' +
+        '<th style="text-align:center; border-radius:0 10px 10px 0;">Qty Ordered</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rowsList + '</tbody>' +
       '</table>';
       
-    document.getElementById('receiptBody').innerHTML = bodyHtml;
-    document.getElementById('printDate').innerText = new Date().toLocaleString("th-TH");
-    document.getElementById('receiptModal').style.display = 'flex';
+    const receiptContainer = document.getElementById('receiptBody');
+    const printDateElement = document.getElementById('printDate');
+    
+    receiptContainer.innerHTML = modalContent;
+    printDateElement.innerText = new Date().toLocaleString("th-TH");
+    
+    const modal = document.getElementById('receiptModal');
+    modal.style.display = 'flex';
   }
 
-  /** ✅ A4 PDF Document Generator (Full Scale) */
   function downloadPDF() {
-    const o = allOrders.find(function(x) { 
-      return x.id === currentViewingOrderId; 
+    
+    const targetOrder = allOrders.find(function(order) { 
+      return order.id === currentViewingOrderId; 
     });
     
-    if(!o) {
+    if(!targetOrder) {
       return;
     }
 
-    const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
-    btn.disabled = true;
+    const btnDownload = document.getElementById('dlBtn');
+    btnDownload.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> บีบอัดข้อมูล PDF...';
+    btnDownload.disabled = true;
 
-    let tableRows = '';
-    const items = o.items.split('\n');
+    let rowsBuilder = '';
+    const itemsArray = targetOrder.items.split('\n');
     
-    items.forEach(function(line) {
-      if(line.trim() !== "") {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
-        if(match) {
-          tableRows += '<tr>';
-          tableRows += '<td style="padding:12px; border-bottom:1px solid #EEE;">' + match[1] + '</td>';
-          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;">' + match[2] + '</td>';
-          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;"><b>' + match[3] + '</b></td>';
-          tableRows += '</tr>';
+    itemsArray.forEach(function(rowLine) {
+      if(rowLine.trim() !== "") {
+        const parts = rowLine.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(parts) {
+          rowsBuilder += '<tr>';
+          rowsBuilder += '<td style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#333;">' + parts[1] + '</td>';
+          rowsBuilder += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#666;">' + parts[2] + '</td>';
+          rowsBuilder += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:16px; font-weight:bold; color:#A91D3A;">' + parts[3] + '</td>';
+          rowsBuilder += '</tr>';
         } else {
-          tableRows += '<tr><td colspan="3" style="padding:12px; border-bottom:1px solid #EEE;">' + line + '</td></tr>';
+          rowsBuilder += '<tr><td colspan="3" style="padding:15px; border-bottom:1px solid #EEEEEE; color:#999; font-style:italic;">' + rowLine + '</td></tr>';
         }
       }
     });
 
-    let pTime = formatPackedTime(o.packedTime);
-    let packedAlert = '';
+    const ThaiTimeNow = formatPackedTime(targetOrder.packedTime);
+    let alertBanner = '';
     
-    if ((o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-") {
-      packedAlert = '<div style="background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 25px;">';
-      packedAlert += '<span style="font-size: 13px; color: #166534; font-weight: bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ' + pTime + '</span>';
-      packedAlert += '</div>';
+    if ((targetOrder.status === 'Packed' || targetOrder.status === 'Success') && ThaiTimeNow !== "-") {
+      alertBanner += '<div style="background-color: #f0fdf4; border: 2px dashed #10b981; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 30px;">';
+      alertBanner += '<span style="font-size: 14px; color: #065f46; font-weight: bold;">✓ ยืนยันการจัดเตรียมพัสดุเสร็จสิ้นเมื่อ: ' + ThaiTimeNow + '</span>';
+      alertBanner += '</div>';
     }
 
-    const win = window.open('', '', 'width=850,height=900');
+    const pdfWindow = window.open('', '', 'width=900,height=950');
     
-    win.document.write('<!DOCTYPE html>');
-    win.document.write('<html>');
-    win.document.write('<head>');
-    win.document.write('<title>CoffeeToday Receipt</title>');
-    win.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
-    win.document.write('<style>');
-    win.document.write('body{font-family:Tahoma, sans-serif; padding:20px; color:#333;}');
-    win.document.write('.box{padding:45px; border:2px solid #EEE; border-radius:25px; max-width:650px; margin:0 auto;}');
-    win.document.write('.header{text-align:center; color:#A91D3A; font-size:26px; font-weight:bold; margin-bottom:25px;}');
-    win.document.write('.grid{display:flex; justify-content:space-between; margin-bottom:25px; background:#F9F9F9; padding:20px; border-radius:15px;}');
-    win.document.write('table{width:100%; border-collapse:collapse; margin-top:15px; margin-bottom:25px;}');
-    win.document.write('th{text-align:left; padding:12px; border-bottom:2px solid #DDD; font-size:14px; color:#2D3133;}');
-    win.document.write('.footer{text-align:center; margin-top:30px; border-top:1px dashed #CCC; padding-top:25px; font-size:12px; color:#888;}');
-    win.document.write('</style>');
-    win.document.write('</head>');
-    win.document.write('<body>');
-    win.document.write('<div id="pdf-content" class="box">');
-    win.document.write('<div class="header">ORDER RECEIPT</div>');
-    win.document.write(packedAlert);
-    win.document.write('<div class="grid">');
-    win.document.write('<div>');
-    win.document.write('<div style="font-size:11px; color:#999;">ORDER ID</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.id + '</div>');
-    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">BRANCH</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.branch + '</div>');
-    win.document.write('</div>');
-    win.document.write('<div style="text-align:right;">');
-    win.document.write('<div style="font-size:11px; color:#999;">DATE</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.date + '</div>');
-    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">PHONE</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + (o.phone || '-') + '</div>');
-    win.document.write('</div>');
-    win.document.write('</div>');
-    win.document.write('<table>');
-    win.document.write('<thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>');
-    win.document.write('<tbody>' + tableRows + '</tbody>');
-    win.document.write('</table>');
-    win.document.write('<div class="footer">');
-    win.document.write('<p>เอกสารยืนยันการจัดเตรียมสินค้า</p>');
-    win.document.write('<p>วันที่พิมพ์: ' + new Date().toLocaleString("th-TH") + '</p>');
-    win.document.write('</div>');
-    win.document.write('</div>');
-    win.document.write('<script>');
-    win.document.write('window.onload=function(){');
-    win.document.write('const element=document.getElementById("pdf-content");');
-    win.document.write('html2pdf().set({margin:10, filename:"Receipt_' + o.id + '.pdf", image:{type:"jpeg", quality:0.98},');
-    win.document.write('html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
-    win.document.write('}).from(element).save().then(function(){setTimeout(function(){window.close();},1000);});');
-    win.document.write('};');
-    win.document.write('<\/script>');
-    win.document.write('</body>');
-    win.document.write('</html>');
+    pdfWindow.document.write('<!DOCTYPE html>');
+    pdfWindow.document.write('<html lang="th">');
+    pdfWindow.document.write('<head>');
+    pdfWindow.document.write('<title>Official_Receipt_' + targetOrder.id + '</title>');
+    pdfWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+    pdfWindow.document.write('<style>');
+    pdfWindow.document.write('body { font-family: "Tahoma", sans-serif; padding: 40px; color: #333333; line-height: 1.6; }');
+    pdfWindow.document.write('.main-container { padding: 60px; border: 2px solid #EEEEEE; border-radius: 30px; max-width: 700px; margin: 0 auto; background: #FFFFFF; }');
+    pdfWindow.document.write('.title-main { text-align: center; color: #A91D3A; font-size: 32px; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px; }');
+    pdfWindow.document.write('.title-sub { text-align: center; color: #AAAAAA; font-size: 14px; margin-bottom: 40px; text-transform: uppercase; }');
+    pdfWindow.document.write('.grid-data { display: flex; justify-content: space-between; margin-bottom: 35px; background: #F9F9F9; padding: 25px; border-radius: 20px; }');
+    pdfWindow.document.write('.grid-col-label { font-size: 11px; color: #999999; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }');
+    pdfWindow.document.write('.grid-col-value { font-size: 16px; font-weight: bold; color: #2D3133; }');
+    pdfWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 40px; }');
+    pdfWindow.document.write('th { text-align: left; padding: 15px; border-bottom: 2px solid #333333; font-size: 15px; color: #333333; }');
+    pdfWindow.document.write('.footer-note { text-align: center; margin-top: 40px; border-top: 1px dashed #DDDDDD; padding-top: 30px; font-size: 13px; color: #BBBBBB; }');
+    pdfWindow.document.write('</style>');
+    pdfWindow.document.write('</head>');
+    pdfWindow.document.write('<body>');
+    pdfWindow.document.write('<div id="print-area" class="main-container">');
+    pdfWindow.document.write('<div class="title-main">COFFEETODAY</div>');
+    pdfWindow.document.write('<div class="title-sub">Order Confirmation Receipt</div>');
+    pdfWindow.document.write(alertBanner);
+    pdfWindow.document.write('<div class="grid-data">');
+    pdfWindow.document.write('<div>');
+    pdfWindow.document.write('<div class="grid-col-label">Reference ID</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.id + '</div>');
+    pdfWindow.document.write('<div style="height:20px;"></div>');
+    pdfWindow.document.write('<div class="grid-col-label">Branch Store</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.branch + '</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('<div style="text-align:right;">');
+    pdfWindow.document.write('<div class="grid-col-label">Issue Date</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.date + '</div>');
+    pdfWindow.document.write('<div style="height:20px;"></div>');
+    pdfWindow.document.write('<div class="grid-col-label">Contact Phone</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + (targetOrder.phone || '-') + '</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('<table>');
+    pdfWindow.document.write('<thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead>');
+    pdfWindow.document.write('<tbody>' + rowsBuilder + '</tbody>');
+    pdfWindow.document.write('</table>');
+    pdfWindow.document.write('<div class="footer-note">');
+    pdfWindow.document.write('<p>เอกสารฉบับนี้ใช้สำหรับยืนยันการจัดเตรียมสินค้าของ CoffeeToday เท่านั้น</p>');
+    pdfWindow.document.write('<p>Generated at: ' + new Date().toLocaleString("th-TH") + '</p>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('<script>');
+    pdfWindow.document.write('window.onload = function() {');
+    pdfWindow.document.write('  const element = document.getElementById("print-area");');
+    pdfWindow.document.write('  html2pdf().set({');
+    pdfWindow.document.write('    margin: 10,');
+    pdfWindow.document.write('    filename: "CT_Receipt_' + targetOrder.id + '.pdf",');
+    pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
+    pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
+    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }');
+    pdfWindow.document.write('  }).from(element).save().then(function() {');
+    pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1200);');
+    pdfWindow.document.write('  });');
+    pdfWindow.document.write('};');
+    pdfWindow.document.write('<\/script>');
+    pdfWindow.document.write('</body>');
+    pdfWindow.document.write('</html>');
     
-    win.document.close();
+    pdfWindow.document.close();
 
     setTimeout(function() {
-      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
-      btn.disabled = false;
-    }, 1200);
+      btnDownload.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)';
+      btnDownload.disabled = false;
+    }, 1500);
   }
 
-  /** ✅ Branch Summary PDF Generator */
   function downloadSummaryReport() {
+    
     if(allOrders.length === 0) {
-      return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก...");
+      alert("ไม่พบข้อมูลออเดอร์ในช่วงเวลาที่เลือก");
+      return;
     }
     
-    const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    btn.disabled = true;
+    const btnSummary = document.getElementById('summaryBtn');
+    btnSummary.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing Report...';
+    btnSummary.disabled = true;
 
-    const startDate = document.getElementById('sDate').value || "เริ่มต้น";
-    const endDate = document.getElementById('eDate').value || "ปัจจุบัน";
+    const startFilter = document.getElementById('sDate').value || "Start Point";
+    const endFilter = document.getElementById('eDate').value || "Current Moment";
 
-    const branchSummary = {};
+    const groupedSummary = {};
     allOrders.forEach(function(order) {
-      const branchName = order.branch || "อื่นๆ";
-      if (!branchSummary[branchName]) {
-        branchSummary[branchName] = {};
+      
+      const storeName = order.branch || "Unknown Store";
+      if (!groupedSummary[storeName]) {
+        groupedSummary[storeName] = {};
       }
 
-      order.items.split('\n').forEach(function(line) {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
-        if (match) {
-          const itemName = match[1].trim();
-          const stockVal = match[2].trim();
-          const qtyOrdered = parseFloat(match[3]);
-          if(!branchSummary[branchName][itemName]) {
-            branchSummary[branchName][itemName] = { total: 0, stock: stockVal };
+      const itemLines = order.items.split('\n');
+      itemLines.forEach(function(line) {
+        
+        const lineMatch = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
+        if (lineMatch) {
+          
+          const name = lineMatch[1].trim();
+          const stock = lineMatch[2].trim();
+          const qtyVal = parseFloat(lineMatch[3]);
+          
+          if(!groupedSummary[storeName][name]) {
+            groupedSummary[storeName][name] = { sum: 0, lastStock: stock };
           }
-          branchSummary[branchName][itemName].total += qtyOrdered;
-          branchSummary[branchName][itemName].stock = stockVal;
+          
+          groupedSummary[storeName][name].sum += qtyVal;
+          groupedSummary[storeName][name].lastStock = stock;
         }
+        
       });
     });
 
-    let branchTablesHTML = "";
-    Object.keys(branchSummary).sort().forEach(function(branch) {
-      let itemRows = "";
-      Object.entries(branchSummary[branch]).forEach(function(entry) {
-        let item = entry[0]; let data = entry[1];
-        itemRows += '<tr>';
-        itemRows += '<td style="padding:10px; border-bottom:1px solid #EEE; font-size:12px;">' + item + '</td>';
-        itemRows += '<td style="padding:10px; border-bottom:1px solid #EEE; text-align:center; font-size:12px; color:#666;">' + data.stock + '</td>';
-        itemRows += '<td style="padding:10px; border-bottom:1px solid #EEE; text-align:center; font-weight:bold; font-size:12px; color:#A91D3A;">' + data.total + '</td>';
-        itemRows += '</tr>';
+    let reportHtml = "";
+    const storeKeys = Object.keys(groupedSummary).sort();
+    
+    storeKeys.forEach(function(store) {
+      
+      let itemRowsHtml = "";
+      const itemsInStore = groupedSummary[store];
+      const productNames = Object.keys(itemsInStore).sort();
+      
+      productNames.forEach(function(pName) {
+        
+        const data = itemsInStore[pName];
+        itemRowsHtml += '<tr>';
+        itemRowsHtml += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; font-size:13px;">' + pName + '</td>';
+        itemRowsHtml += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; text-align:center; font-size:13px; color:#777;">' + data.lastStock + '</td>';
+        itemRowsHtml += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; text-align:center; font-weight:bold; font-size:14px; color:var(--red);">' + data.sum + '</td>';
+        itemRowsHtml += '</tr>';
+        
       });
 
-      branchTablesHTML += '<div style="break-inside:avoid; margin-bottom:25px; border:1px solid #EEE; border-radius:12px; overflow:hidden;">' +
-          '<h2 style="background:#F8F9FA; padding:12px; color:#A91D3A; border-left:5px solid #A91D3A; font-size:16px; margin:0; font-weight:bold;">สาขา: ' + branch + '</h2>' +
-          '<table style="width:100%; border-collapse:collapse;">' +
-            '<thead><tr style="background:#FAFAFA; font-size:12px;">' +
-                '<th style="padding:10px; text-align:left; border-bottom:2px solid #EEE; width:50%;">รายการสินค้า</th>' +
-                '<th style="padding:10px; text-align:center; border-bottom:2px solid #EEE;">คงเหลือล่าสุด</th>' +
-                '<th style="padding:10px; text-align:center; border-bottom:2px solid #EEE;">ยอดรวมสั่งซื้อ</th>' +
-            '</tr></thead><tbody>' + itemRows + '</tbody></table></div>';
+      reportHtml += '<div style="break-inside:avoid; margin-bottom:35px; border:1px solid #EEEEEE; border-radius:15px; overflow:hidden;">';
+      reportHtml += '<h2 style="background-color:#F8F9FA; padding:15px 20px; color:#A91D3A; border-left:8px solid #A91D3A; font-size:18px; margin:0; font-weight:bold;">สาขา: ' + store + '</h2>';
+      reportHtml += '<table style="width:100%; border-collapse:collapse;">';
+      reportHtml += '<thead><tr style="background:#FAFAFA; font-size:12px; color:#999;">';
+      reportHtml += '<th style="padding:12px; text-align:left; border-bottom:2px solid #EEEEEE; width:55%;">รายการสินค้า</th>';
+      reportHtml += '<th style="padding:12px; text-align:center; border-bottom:2px solid #EEEEEE;">คงเหลือ</th>';
+      reportHtml += '<th style="padding:12px; text-align:center; border-bottom:2px solid #EEEEEE;">ยอดสั่งรวม</th>';
+      reportHtml += '</tr></thead><tbody>' + itemRowsHtml + '</tbody></table></div>';
+      
     });
 
-    const win = window.open('', '', 'width=900,height=800');
+    const summaryWindow = window.open('', '', 'width=950,height=900');
     
-    win.document.write('<!DOCTYPE html>');
-    win.document.write('<html>');
-    win.document.write('<head>');
-    win.document.write('<title>Branch Summary</title>');
-    win.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
-    win.document.write('<style>');
-    win.document.write('body{font-family:Tahoma, sans-serif; padding:35px; color:#333; background:#FFF;}');
-    win.document.write('.box{max-width:850px; margin:0 auto;}');
-    win.document.write('h1{color:#A91D3A; margin:0 0 10px 0; font-size:26px; font-weight:bold; text-align:center;}');
-    win.document.write('p{color:#888; font-size:14px; margin:0; text-align:center;}');
-    win.document.write('.footer{text-align:center; font-size:11px; color:#BBB; margin-top:35px; border-top:1px dashed #EEE; padding-top:15px;}');
-    win.document.write('</style>');
-    win.document.write('</head>');
-    win.document.write('<body>');
-    win.document.write('<div id="pdf-content" class="box">');
-    win.document.write('<h1>CoffeeToday Summary Report</h1>');
-    win.document.write('<p>ช่วงวันที่: ' + startDate + ' ถึง ' + endDate + '</p>');
-    win.document.write('<br>' + branchTablesHTML);
-    win.document.write('<div class="footer">พิมพ์เมื่อ: ' + new Date().toLocaleString("th-TH") + '</div>');
-    win.document.write('</div>');
-    win.document.write('<script>');
-    win.document.write('window.onload=function(){');
-    win.document.write('const element=document.getElementById("pdf-content");');
-    win.document.write('html2pdf().set({margin:10, filename:"Summary.pdf", image:{type:"jpeg", quality:0.98},');
-    win.document.write('html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
-    win.document.write('}).from(element).save().then(function(){setTimeout(function(){window.close();},1000);});');
-    win.document.write('};');
-    win.document.write('<\/script>');
-    win.document.write('</body>');
-    win.document.write('</html>');
+    summaryWindow.document.write('<!DOCTYPE html><html><head><title>Branch_Analytics_Summary</title>');
+    summaryWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+    summaryWindow.document.write('<style>body{font-family:"Tahoma", sans-serif; padding:45px; color:#333; background:#FFF;}');
+    summaryWindow.document.write('.report-box{max-width:880px; margin:0 auto;} h1{color:#A91D3A; margin:0 0 10px 0; font-size:30px; font-weight:bold; text-align:center; letter-spacing:1px;}');
+    summaryWindow.document.write('p{color:#999; font-size:15px; margin:0; text-align:center;} .rpt-footer{text-align:center; font-size:12px; color:#BBB; margin-top:45px; border-top:2px dashed #F0F0F0; padding-top:20px;}');
+    summaryWindow.document.write('</style></head><body><div id="pdf-manifest" class="report-box"><h1>CoffeeToday Sales Summary</h1>');
+    summaryWindow.document.write('<p>Period: ' + startFilter + ' to ' + endFilter + '</p><br><br>');
+    summaryWindow.document.write(reportHtml);
+    summaryWindow.document.write('<div class="rpt-footer">เอกสารสรุปยอดสะสม | ออกโดยระบบ CoffeeToday Manager v.2026 | วันที่: ' + new Date().toLocaleString("th-TH") + '</div></div>');
+    summaryWindow.document.write('<script>window.onload=function(){const target=document.getElementById("pdf-manifest");');
+    summaryWindow.document.write('html2pdf().set({margin:10, filename:"Sales_Summary.pdf", image:{type:"jpeg", quality:0.98},');
+    summaryWindow.document.write('html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
+    summaryWindow.document.write('}).from(target).save().then(function(){setTimeout(function(){window.close();},1200);});};<\/script></body></html>');
     
-    win.document.close();
+    summaryWindow.document.close();
 
     setTimeout(function() {
-      btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
-      btn.disabled = false;
-    }, 1200);
+      btnSummary.innerHTML = '<i class="fas fa-file-invoice"></i> รายงานสาขา';
+      btnSummary.disabled = false;
+    }, 1500);
   }
 
-  /** ✅ High-Quality Print Interface (Table Style) */
-  function printOrder(data) { 
-    const o = JSON.parse(decodeURIComponent(data));
+  function printOrder(encodedOrderData) { 
     
-    let tableRows = '';
-    const items = o.items.split('\n');
+    const targetObj = JSON.parse(decodeURIComponent(encodedOrderData));
     
-    items.forEach(function(line) {
-      if(line.trim() !== "") {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
-        if(match) {
-          tableRows += '<tr>';
-          tableRows += '<td style="padding:12px; border-bottom:1px solid #EEE;">' + match[1] + '</td>';
-          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;">' + match[2] + '</td>';
-          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;"><b>' + match[3] + '</b></td>';
-          tableRows += '</tr>';
+    let tableRowsHtml = '';
+    const itemStringArray = targetObj.items.split('\n');
+    
+    itemStringArray.forEach(function(lineText) {
+      if(lineText.trim() !== "") {
+        const partsMatch = lineText.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(partsMatch) {
+          tableRowsHtml += '<tr>';
+          tableRowsHtml += '<td style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:15px;">' + partsMatch[1] + '</td>';
+          tableRowsHtml += '<td align="center" style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:15px; color:#888;">' + partsMatch[2] + '</td>';
+          tableRowsHtml += '<td align="center" style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:18px; font-weight:bold; color: #000;">' + partsMatch[3] + '</td>';
+          tableRowsHtml += '</tr>';
         } else {
-          tableRows += '<tr><td colspan="3" style="padding:12px; border-bottom:1px solid #EEE;">' + line + '</td></tr>';
+          tableRowsHtml += '<tr><td colspan="3" style="padding:16px; border-bottom:1px solid #EEEEEE; color:#AAAAAA; font-style:italic;">' + lineText + '</td></tr>';
         }
       }
     });
 
-    let pTime = formatPackedTime(o.packedTime);
-    let timeHtml = '';
+    let thaiPackedTime = formatPackedTime(targetObj.packedTime);
+    let bannerHtml = '';
     
-    if ((o.status === 'Packed' || o.status === 'Success') && pTime !== "-") {
-      timeHtml = '<div style="background:#f0fdf4; border:1px dashed #bbf7d0; padding:18px; border-radius:12px; text-align:center; margin-bottom:25px;">';
-      timeHtml += '<span style="color:#166534; font-size:15px; font-weight:bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ' + pTime + '</span>';
-      timeHtml += '</div>';
+    if ((targetObj.status === 'Packed' || targetObj.status === 'Success') && thaiPackedTime !== "-") {
+      bannerHtml = '<div style="background-color:#f0fdf4; border:2px dashed #10b981; padding:20px; border-radius:15px; text-align:center; margin-bottom:30px;">';
+      bannerHtml += '<span style="color:#047857; font-size:16px; font-weight:bold;">✓ ตรวจสอบความถูกต้องและแพ็กเสร็จสิ้น: ' + thaiPackedTime + '</span>';
+      bannerHtml += '</div>';
     }
 
-    const win = window.open('','','width=800,height=800'); 
+    const printWindow = window.open('','','width=850,height=900'); 
     
-    win.document.write('<html>');
-    win.document.write('<head>');
-    win.document.write('<style>');
-    win.document.write('body{font-family:Tahoma, sans-serif; padding:45px; color:#333;}');
-    win.document.write('.box{border:3px solid #EEE; padding:45px; border-radius:25px; max-width:650px; margin:0 auto;}'); 
-    win.document.write('h1{color:#A91D3A; text-align:center; font-size:26px; margin-bottom:25px;}');
-    win.document.write('.grid{display:flex; justify-content:space-between; margin-bottom:25px; background:#F9F9F9; padding:20px; border-radius:15px;}');
-    win.document.write('table{width:100%; border-collapse:collapse; margin-top:15px;}');
-    win.document.write('th{text-align:left; padding:12px; border-bottom:2px solid #DDD; font-size:14px; color:#2D3133;}');
-    win.document.write('</style>');
-    win.document.write('</head>');
-    win.document.write('<body>');
-    win.document.write('<div class="box">');
-    win.document.write('<h1>ORDER RECEIPT</h1>');
-    win.document.write(timeHtml);
-    win.document.write('<div class="grid">');
-    win.document.write('<div>');
-    win.document.write('<div style="font-size:11px; color:#999;">ORDER ID</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.id + '</div>');
-    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">BRANCH</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.branch + '</div>');
-    win.document.write('</div>');
-    win.document.write('<div style="text-align:right;">');
-    win.document.write('<div style="font-size:11px; color:#999;">DATE</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.date + '</div>');
-    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">PHONE</div>');
-    win.document.write('<div style="font-size:15px; font-weight:bold;">' + (o.phone || '-') + '</div>');
-    win.document.write('</div>');
-    win.document.write('</div>');
-    win.document.write('<table>');
-    win.document.write('<thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>');
-    win.document.write('<tbody>' + tableRows + '</tbody>');
-    win.document.write('</table>');
-    win.document.write('<div style="text-align:center; margin-top:45px; border-top:1px dashed #CCC; padding-top:25px; font-size:12px; color:#888;">');
-    win.document.write('<p>เอกสารยืนยันการจัดเตรียมสินค้า</p>');
-    win.document.write('<p>วันที่พิมพ์: ' + new Date().toLocaleString("th-TH") + '</p>');
-    win.document.write('</div>');
-    win.document.write('</div>');
-    win.document.write('<script>window.print();<\/script>');
-    win.document.write('</body>');
-    win.document.write('</html>');
+    printWindow.document.write('<html><head><style>');
+    printWindow.document.write('body{font-family:"Tahoma", sans-serif; padding:50px; color:#333333; background: #FFF;}');
+    printWindow.document.write('.receipt-wrapper{border:3px solid #F0F0F0; padding:50px; border-radius:30px; max-width:650px; margin:0 auto;}'); 
+    printWindow.document.write('h1{color:#A91D3A; text-align:center; font-size:28px; margin-bottom:30px; font-weight:bold; letter-spacing:1px;}');
+    printWindow.document.write('.meta-grid { display: flex; justify-content: space-between; margin-bottom: 30px; background: #F9F9F9; padding: 25px; border-radius: 20px; }');
+    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+    printWindow.document.write('th { text-align: left; padding: 15px; border-bottom: 2.5px solid #111; font-size: 15px; color: #111; }');
+    printWindow.document.write('</style></head><body>');
+    printWindow.document.write('<div class="receipt-wrapper">');
+    printWindow.document.write('<h1>COFFEETODAY ORDER</h1>');
+    printWindow.document.write(bannerHtml);
+    printWindow.document.write('<div class="meta-grid">');
+    printWindow.document.write('<div><div style="font-size:11px; color:#999; text-transform:uppercase;">Reference ID</div><div style="font-size:16px; font-weight:bold;">' + targetObj.id + '</div><br>');
+    printWindow.document.write('<div style="font-size:11px; color:#999; text-transform:uppercase;">Store Branch</div><div style="font-size:16px; font-weight:bold;">' + targetObj.branch + '</div></div>');
+    printWindow.document.write('<div style="text-align:right;"><div style="font-size:11px; color:#999; text-transform:uppercase;">Transaction Date</div><div style="font-size:16px; font-weight:bold;">' + targetObj.date + '</div><br>');
+    printWindow.document.write('<div style="font-size:11px; color:#999; text-transform:uppercase;">Contact Number</div><div style="font-size:16px; font-weight:bold;">' + (targetObj.phone || '-') + '</div></div>');
+    printWindow.document.write('</div>');
+    printWindow.document.write('<table><thead><tr><th>Product Manifesto</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead>');
+    printWindow.document.write('<tbody>' + tableRowsHtml + '</tbody></table>');
+    printWindow.document.write('<div style="text-align:center; margin-top:50px; border-top:1.5px dashed #DDDDDD; padding-top:30px; font-size:12px; color:#BBBBBB;">');
+    printWindow.document.write('<p>ขอบคุณที่ร่วมเป็นส่วนหนึ่งของการบริการคุณภาพจาก CoffeeToday</p>');
+    printWindow.document.write('<p>พิมพ์เอกสารเมื่อ: ' + new Date().toLocaleString("th-TH") + '</p>');
+    printWindow.document.write('</div></div>');
+    printWindow.document.write('<script>window.print();<\/script></body></html>'); 
     
-    win.document.close(); 
+    printWindow.document.close(); 
   }
   
-  /** ✅ Chart.js Handlers */
-  function renderCharts(c) {
-    if(bcObj) {
-      bcObj.destroy();
+  function renderCharts(analyticsData) {
+    
+    if(bcObj !== null) { 
+      bcObj.destroy(); 
     }
     
-    if(pcObj) {
-      pcObj.destroy();
+    if(pcObj !== null) { 
+      pcObj.destroy(); 
     }
     
-    if(scObj) {
-      scObj.destroy();
+    if(scObj !== null) { 
+      scObj.destroy(); 
     }
     
-    bcObj = new Chart(document.getElementById('bC'), { 
+    const ctxBar = document.getElementById('bC').getContext('2d');
+    const ctxPie = document.getElementById('pC_Chart').getContext('2d');
+    const ctxStock = document.getElementById('sC').getContext('2d');
+    
+    bcObj = new Chart(ctxBar, { 
       type: 'bar', 
       data: { 
-        labels: c.pL, 
+        labels: analyticsData.pL, 
         datasets: [{ 
-          label: 'จำนวนสั่ง', 
-          data: c.pV, 
-          backgroundColor: '#A91D3A', 
-          borderRadius: 10, 
-          barPercentage: 0.6, 
-          categoryPercentage: 0.8 
+          label: 'ปริมาณการสั่งซื้อ', 
+          data: analyticsData.pV, 
+          backgroundColor: 'rgba(169, 29, 58, 0.9)', 
+          borderWidth: 0,
+          borderRadius: 12,
+          barPercentage: 0.55,
+          categoryPercentage: 0.85
         }] 
       }, 
       options: { 
         maintainAspectRatio: false, 
         indexAxis: 'y', 
         plugins: { 
-          legend: { 
-            display: false 
-          } 
+          legend: { display: false }
         }, 
         scales: { 
           x: { 
-            title: { 
-              display: true, 
-              text: 'จำนวนที่สั่ง (ชิ้น)', 
-              font: { family: 'Prompt', size: 10 } 
-            } 
-          } 
+            grid: { display: false },
+            title: { display: true, text: 'ปริมาณสั่ง (ชิ้น/แก้ว)', font: { family: 'Prompt', size: 10 } } 
+          },
+          y: {
+            grid: { display: false },
+            ticks: { font: { family: 'Sarabun', size: 11 } }
+          }
         } 
       } 
     });
     
-    pcObj = new Chart(document.getElementById('pC_Chart'), { 
+    pcObj = new Chart(ctxPie, { 
       type: 'doughnut', 
       data: { 
-        labels: c.bL, 
+        labels: analyticsData.bL, 
         datasets: [{ 
-          data: c.bV, 
-          backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] 
+          data: analyticsData.bV, 
+          backgroundColor: ['#2D3133', '#A91D3A', '#3498db', '#95a5a6', '#f1c40f', '#e67e22', '#16a085'],
+          hoverOffset: 15,
+          borderWidth: 4,
+          borderColor: '#FFFFFF'
         }] 
       }, 
       options: { 
         maintainAspectRatio: false, 
-        cutout: '78%' 
+        cutout: '82%',
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Sarabun', size: 10 } } }
+        }
       } 
     });
     
-    scObj = new Chart(document.getElementById('sC'), {
+    scObj = new Chart(ctxStock, {
       type: 'bar', 
       data: { 
-        labels: c.sL ? c.sL.slice(0, 15) : [], 
+        labels: (analyticsData.sL ? analyticsData.sL.slice(0, 15) : []), 
         datasets: [{ 
-          label: 'คงเหลือล่าสุด', 
-          data: c.sV ? c.sV.slice(0, 15) : [], 
-          backgroundColor: '#f39c12', 
-          borderRadius: 8, 
+          label: 'คงเหลือหน้าสาขา', 
+          data: (analyticsData.sV ? analyticsData.sV.slice(0, 15) : []), 
+          backgroundColor: 'rgba(243, 156, 18, 0.85)', 
+          borderRadius: 10, 
           barPercentage: 0.6, 
           categoryPercentage: 0.8 
         }] 
@@ -1494,176 +1841,403 @@
       options: { 
         maintainAspectRatio: false, 
         indexAxis: 'y', 
-        plugins: { 
-          legend: { 
-            display: false 
-          } 
-        }, 
+        plugins: { legend: { display: false } }, 
         scales: { 
           x: { 
-            title: { 
-              display: true, 
-              text: 'จำนวนคงเหลือล่าสุด (ชิ้น)', 
-              font: { family: 'Prompt', size: 10 } 
-            } 
-          } 
+            grid: { color: '#F0F0F0' },
+            title: { display: true, text: 'ปริมาณสินค้าคงเหลือ (ชิ้น)', font: { family: 'Prompt', size: 10 } } 
+          },
+          y: {
+            grid: { display: false },
+            ticks: { font: { family: 'Sarabun', size: 11 } }
+          }
         } 
       }
     });
   }
 
-  /** ✅ Menu Configuration Accordion */
-  function renderMenuAccordion(d) {
-    if(!d || !d.categories) {
+  /** * =========================================================================
+   * 🚀 NEW FEATURE: Drag & Drop Configuration
+   * =========================================================================
+   */
+  function renderMenuAccordion(menuData) {
+    
+    if(!menuData || !menuData.categories) {
       return;
     }
     
-    menuObj = d; 
-    let chipsHtml = ''; 
-    let itemsHtml = ''; 
-    let opts = '';
+    menuObj = menuData; 
+    let chipsHtmlContent = ''; 
+    let itemsHtmlContent = ''; 
+    let selectOptionsHtml = '';
     
-    if(!currentCat && d.categories.length > 0) {
-      currentCat = d.categories[0];
+    if(!currentCat && menuData.categories.length > 0) {
+      currentCat = menuData.categories[0];
     }
     
-    d.categories.forEach(function(cat) {
-      opts += '<option value="' + cat + '">' + cat + '</option>';
+    // สร้างปุ่มหมวดหมู่แบบลากวางได้ (Draggable Chips)
+    menuData.categories.forEach(function(categoryName, idx) {
       
-      let count = d.grouped[cat] ? d.grouped[cat].length : 0;
-      chipsHtml += '<div class="chip ' + (cat === currentCat ? 'active' : '') + '" onclick="selectCat(\'' + cat + '\')">';
-      chipsHtml += cat + ' (' + count + ')';
-      chipsHtml += '</div>';
+      const itemCount = menuData.grouped[categoryName] ? menuData.grouped[categoryName].length : 0;
+      const isSelected = (categoryName === currentCat ? 'active' : '');
+      
+      selectOptionsHtml += '<option value="' + categoryName + '">' + categoryName + '</option>';
+      
+      chipsHtmlContent += '<div class="chip ' + isSelected + '" ';
+      chipsHtmlContent += 'onclick="selectCat(\'' + categoryName + '\')" ';
+      chipsHtmlContent += 'draggable="true" ';
+      chipsHtmlContent += 'ondragstart="dragStartCat(event, ' + idx + ')" ';
+      chipsHtmlContent += 'ondragover="dragOverCat(event)" ';
+      chipsHtmlContent += 'ondrop="dropCat(event, ' + idx + ')" ';
+      chipsHtmlContent += 'style="cursor: grab;"';
+      chipsHtmlContent += '>';
+      chipsHtmlContent += '<i class="fas fa-grip-vertical" style="margin-right: 6px; color: #CCC;"></i>';
+      chipsHtmlContent += categoryName + ' (' + itemCount + ')';
+      chipsHtmlContent += '</div>';
+      
     });
     
-    if(currentCat && d.grouped[currentCat]) {
-      d.grouped[currentCat].forEach(function(i) { 
-        itemsHtml += '<div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">';
-        itemsHtml += '<span style="font-weight:600; color:#444;">' + i.name + '</span>';
-        itemsHtml += '<div style="display:flex; gap:25px; align-items:center;">';
-        itemsHtml += '<label class="switch">';
-        itemsHtml += '<input type="checkbox" ' + (i.status==='Active'?'checked':'') + ' onchange="toggleItem(\'' + i.rowId + '\', \'' + i.name + '\', \'' + currentCat + '\', this)">';
-        itemsHtml += '<span class="slider"></span>';
-        itemsHtml += '</label>';
-        itemsHtml += '<i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(' + i.rowId + ', \'' + i.name + '\', \'' + currentCat + '\')"></i>';
-        itemsHtml += '</div>';
-        itemsHtml += '</div>'; 
+    // สร้างรายการสินค้าแบบลากวางได้ (Draggable Items)
+    if(currentCat && menuData.grouped[currentCat]) {
+      
+      menuData.grouped[currentCat].forEach(function(product, idx) { 
+        
+        const isProductActive = (product.status === 'Active' ? 'checked' : '');
+        
+        itemsHtmlContent += '<div class="cat-item" ';
+        itemsHtmlContent += 'draggable="true" ';
+        itemsHtmlContent += 'ondragstart="dragStartItem(event, ' + idx + ')" ';
+        itemsHtmlContent += 'ondragover="dragOverItem(event)" ';
+        itemsHtmlContent += 'ondrop="dropItem(event, ' + idx + ')" ';
+        itemsHtmlContent += 'style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor: grab;">';
+        
+        itemsHtmlContent += '<div style="display:flex; align-items:center; gap: 15px;">';
+        itemsHtmlContent += '<i class="fas fa-grip-lines" style="color: #DDD; font-size: 20px;"></i>';
+        itemsHtmlContent += '<div>';
+        itemsHtmlContent += '<span style="font-weight:600; color:#333; font-size:16px;">' + product.name + '</span>';
+        itemsHtmlContent += '<div style="font-size:11px; color:#AAA; margin-top:5px;">ID Ref: ' + product.rowId + '</div>';
+        itemsHtmlContent += '</div>';
+        itemsHtmlContent += '</div>';
+
+        itemsHtmlContent += '<div style="display:flex; gap:32px; align-items:center;">';
+        itemsHtmlContent += '<label class="switch">';
+        itemsHtmlContent += '<input type="checkbox" ' + isProductActive + ' onchange="toggleItem(\'' + product.rowId + '\', \'' + product.name + '\', \'' + currentCat + '\', this)">';
+        itemsHtmlContent += '<span class="slider"></span>';
+        itemsHtmlContent += '</label>';
+        itemsHtmlContent += '<i class="fas fa-edit" style="color:#CCCCCC; cursor:pointer; font-size:18px; transition:0.3s;" onmouseover="this.style.color=\'var(--red)\'" onmouseout="this.style.color=\'#CCCCCC\'" onclick="openProdModal(' + product.rowId + ', \'' + product.name + '\', \'' + currentCat + '\')"></i>';
+        itemsHtmlContent += '</div>';
+        
+        itemsHtmlContent += '</div>'; 
+        
       });
+      
     }
     
-    document.getElementById('catChips').innerHTML = chipsHtml; 
-    document.getElementById('menuItems').innerHTML = itemsHtml; 
-    document.getElementById('pCatSelect').innerHTML = opts;
+    document.getElementById('catChips').innerHTML = chipsHtmlContent; 
+    document.getElementById('menuItems').innerHTML = itemsHtmlContent; 
+    document.getElementById('pCatSelect').innerHTML = selectOptionsHtml;
   }
 
-  function selectCat(cat) { 
-    currentCat = cat; 
+  // ---------------------------------------------------------
+  // Drag & Drop Event Handlers (สำหรับหมวดหมู่)
+  // ---------------------------------------------------------
+  function dragStartCat(event, index) {
+    dragCatIndex = index;
+    event.dataTransfer.effectAllowed = 'move';
+    event.target.classList.add('dragging');
+  }
+
+  function dragOverCat(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  function dropCat(event, targetIndex) {
+    event.preventDefault();
+    const activeElem = document.querySelector('.chip.dragging');
+    if (activeElem) activeElem.classList.remove('dragging');
+
+    if (dragCatIndex !== null && dragCatIndex !== targetIndex) {
+      // สลับ Array ของหมวดหมู่ในหน้าจอ (ยังไม่เซฟขึ้น Google Sheets)
+      const categoriesArray = menuObj.categories;
+      const movedCategory = categoriesArray.splice(dragCatIndex, 1)[0];
+      categoriesArray.splice(targetIndex, 0, movedCategory);
+      
+      // วาดหน้าจอใหม่ทันที
+      renderMenuAccordion(menuObj);
+    }
+    dragCatIndex = null;
+  }
+
+  // ---------------------------------------------------------
+  // Drag & Drop Event Handlers (สำหรับสินค้า)
+  // ---------------------------------------------------------
+  function dragStartItem(event, index) {
+    dragItemIndex = index;
+    event.dataTransfer.effectAllowed = 'move';
+    event.target.classList.add('dragging');
+  }
+
+  function dragOverItem(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  function dropItem(event, targetIndex) {
+    event.preventDefault();
+    const activeElem = document.querySelector('.cat-item.dragging');
+    if (activeElem) activeElem.classList.remove('dragging');
+
+    if (dragItemIndex !== null && dragItemIndex !== targetIndex) {
+      // สลับ Array ของสินค้าภายใต้หมวดหมู่ปัจจุบัน
+      const itemsArray = menuObj.grouped[currentCat];
+      const movedItem = itemsArray.splice(dragItemIndex, 1)[0];
+      itemsArray.splice(targetIndex, 0, movedItem);
+      
+      renderMenuAccordion(menuObj);
+    }
+    dragItemIndex = null;
+  }
+
+  // ---------------------------------------------------------
+  // Save Reordered Menu Function (บันทึกข้อมูลทั้งหมดกลับขึ้นเซิร์ฟเวอร์)
+  // ---------------------------------------------------------
+  function saveMenuOrder() {
+    
+    const adminToken = localStorage.getItem(TOKEN_KEY);
+    const saveBtn = document.getElementById('saveOrderBtn');
+    
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังอัปเดตฐานข้อมูล...';
+    saveBtn.disabled = true;
+
+    // รวบรวมข้อมูลจาก Object ที่ถูกจัดเรียงใหม่ในหน้าจอ
+    let masterPayload = [];
+    
+    menuObj.categories.forEach(function(category) {
+      
+      const itemsInCat = menuObj.grouped[category];
+      
+      if (itemsInCat && itemsInCat.length > 0) {
+        
+        itemsInCat.forEach(function(product) {
+          masterPayload.push({
+            cat: category,
+            name: product.name,
+            status: product.status
+          });
+        });
+        
+      } else {
+        
+        // ส่งหมวดหมู่เปล่าๆ ไปจองที่ไว้ก่อน
+        masterPayload.push({
+          cat: category,
+          name: "",
+          status: "Active"
+        });
+        
+      }
+      
+    });
+
+    const postPayload = {
+      action: 'reorderMenu',
+      token: adminToken,
+      menuArray: masterPayload
+    };
+
+    fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(postPayload)
+    })
+    .then(function(res) { 
+      return res.json(); 
+    })
+    .then(function(d) {
+      
+      if (d.status === 'success') {
+        renderMenuAccordion(d.data); 
+        showToast("✅ การจัดเรียงระบบเมนูสำเร็จ และออนไลน์แล้ว!");
+      } else {
+        alert("เกิดข้อผิดพลาด: " + d.message);
+      }
+      
+      saveBtn.innerHTML = '<i class="fas fa-save"></i> บันทึกลำดับ';
+      saveBtn.disabled = false;
+      
+    })
+    .catch(function(err) {
+      
+      alert("เครือข่ายมีปัญหา ไม่สามารถบันทึกข้อมูลได้");
+      saveBtn.innerHTML = '<i class="fas fa-save"></i> บันทึกลำดับ';
+      saveBtn.disabled = false;
+      
+    });
+  }
+
+  function selectCat(catName) { 
+    currentCat = catName; 
     renderMenuAccordion(menuObj); 
   }
 
-  function toggleItem(id, n, c, el) { 
-    const token = localStorage.getItem(TOKEN_KEY);
-    const status = el.checked ? 'Active' : 'Inactive';
+  function toggleItem(rowId, productName, category, checkboxElement) { 
     
-    fetch(GAS_URL + '?action=updateProduct&id=' + id + '&name=' + n + '&cat=' + c + '&status=' + status + '&token=' + token)
+    const adminToken = localStorage.getItem(TOKEN_KEY);
+    const updatedStatus = (checkboxElement.checked ? 'Active' : 'Inactive');
+    
+    const updateUrl = GAS_URL + 
+                      '?action=updateProduct' + 
+                      '&id=' + rowId + 
+                      '&name=' + encodeURIComponent(productName) + 
+                      '&cat=' + encodeURIComponent(category) + 
+                      '&status=' + updatedStatus + 
+                      '&token=' + adminToken;
+    
+    fetch(updateUrl)
       .then(function(res) { 
         return res.json(); 
       })
-      .then(function(d) { 
-        renderMenuAccordion(d); 
-        showToast(el.checked ? "✅ เปิดการใช้งานแล้ว!" : "🌑 ปิดการใช้งานแล้ว"); 
+      .then(function(newMenuData) { 
+        renderMenuAccordion(newMenuData); 
+        const statusMsg = (checkboxElement.checked ? "✅ เปิดรับออเดอร์เมนูนี้แล้ว!" : "🌑 ปิดรับออเดอร์เมนูนี้ชั่วคราว");
+        showToast(statusMsg); 
       });
   }
 
   function openCatModal() { 
     document.getElementById('cN').value = ''; 
     document.getElementById('cM').style.display = 'flex'; 
+    setTimeout(function() { 
+      document.getElementById('cN').focus(); 
+    }, 300);
   }
 
-  function closeM(id) { 
-    document.getElementById(id).style.display='none'; 
+  function closeM(modalId) { 
+    const modal = document.getElementById(modalId);
+    modal.style.display = 'none'; 
   }
 
-  /** ✅ Modern Toast Notifications */
-  function showToast(msg) {
-    const t = document.createElement('div'); 
-    t.innerText = msg;
-    t.style = "position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:15px 35px; border-radius:50px; z-index:10000; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-family:'Prompt'; font-weight:600; animation: fadeInOut 2.5s forwards;";
-    document.body.appendChild(t); 
+  function showToast(message) {
+    
+    const toastElement = document.createElement('div'); 
+    toastElement.innerText = message;
+    
+    const designStyle = "position:fixed; bottom:35px; left:50%; transform:translateX(-50%); background:rgba(34, 197, 94, 0.95); backdrop-filter:blur(5px); color:white; padding:18px 45px; border-radius:60px; z-index:10000; box-shadow:0 15px 35px rgba(0,0,0,0.2); font-family:'Prompt'; font-weight:700; font-size:15px; pointer-events:none; animation: toastSlideIn 3.2s forwards;";
+    
+    toastElement.style = designStyle;
+    document.body.appendChild(toastElement); 
     
     setTimeout(function() { 
-      t.remove(); 
-    }, 2500);
+      toastElement.remove(); 
+    }, 3200);
   }
+  
+  const toastAnim = "@keyframes toastSlideIn { 0% { opacity:0; bottom:15px; } 15% { opacity:1; bottom:35px; } 85% { opacity:1; bottom:35px; } 100% { opacity:0; bottom:15px; } }";
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = toastAnim;
+  document.head.appendChild(styleSheet);
 
   function saveCat() { 
-    const n = document.getElementById('cN').value; 
-    if(!n) {
-      return; 
+    
+    const categoryNameInput = document.getElementById('cN');
+    const finalName = categoryNameInput.value.trim(); 
+    
+    if (finalName === "") {
+      alert("กรุณาระบุชื่อหมวดหมู่ที่ต้องการสร้าง");
+      return;
     }
     
     closeM('cM'); 
-    const token = localStorage.getItem(TOKEN_KEY);
+    const adminToken = localStorage.getItem(TOKEN_KEY);
+    const saveUrl = GAS_URL + '?action=addCategory&catName=' + encodeURIComponent(finalName) + '&token=' + adminToken;
     
-    fetch(GAS_URL + '?action=addCategory&catName=' + n + '&token=' + token)
+    fetch(saveUrl)
       .then(function(res) { 
         return res.json(); 
       })
-      .then(function(d) { 
-        renderMenuAccordion(d); 
-        showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); 
+      .then(function(newMenuData) { 
+        renderMenuAccordion(newMenuData); 
+        showToast("✅ สร้างหมวดหมู่ '" + finalName + "' เรียบร้อยแล้ว!"); 
       });
   }
 
-  function openProdModal(id, n, c) { 
-    editTargetId = id || null; 
-    document.getElementById('pN').value = n || ''; 
-    document.getElementById('pCatSelect').value = c || (menuObj.categories ? menuObj.categories[0] : ''); 
-    document.getElementById('pM').style.display = 'flex'; 
+  function openProdModal(rowId, name, cat) { 
+    
+    editTargetId = (rowId || null); 
+    document.getElementById('pN').value = (name || ''); 
+    document.getElementById('pCatSelect').value = (cat || (menuObj.categories ? menuObj.categories[0] : '')); 
+    
+    const modal = document.getElementById('pM');
+    modal.style.display = 'flex'; 
+    
+    setTimeout(function() { 
+      document.getElementById('pN').focus(); 
+    }, 300);
   }
 
   function saveP() { 
-    const name = document.getElementById('pN').value; 
-    const cat = document.getElementById('pCatSelect').value; 
     
-    if(!name) {
-      return; 
+    const pNameInput = document.getElementById('pN');
+    const cNameSelect = document.getElementById('pCatSelect');
+    
+    const finalPName = pNameInput.value.trim(); 
+    const finalCName = cNameSelect.value; 
+    
+    if (finalPName === "") {
+      alert("กรุณาระบุชื่อสินค้าและขนาดบรรจุให้ชัดเจน");
+      return;
     }
     
     closeM('pM'); 
-    const token = localStorage.getItem(TOKEN_KEY);
+    const adminToken = localStorage.getItem(TOKEN_KEY);
     
-    fetch(GAS_URL + '?action=updateProduct&id=' + editTargetId + '&name=' + name + '&cat=' + cat + '&status=Active&token=' + token)
+    const updateUrl = GAS_URL + 
+                      '?action=updateProduct' + 
+                      '&id=' + editTargetId + 
+                      '&name=' + encodeURIComponent(finalPName) + 
+                      '&cat=' + encodeURIComponent(finalCName) + 
+                      '&status=Active' + 
+                      '&token=' + adminToken;
+    
+    fetch(updateUrl)
       .then(function(res) { 
         return res.json(); 
       })
-      .then(function(d) { 
-        renderMenuAccordion(d); 
-        showToast("✅ บันทึกข้อมูลสินค้าเรียบร้อย!"); 
+      .then(function(newMenuData) { 
+        renderMenuAccordion(newMenuData); 
+        showToast("✅ บันทึกข้อมูลสินค้าสำเร็จแล้ว!"); 
       });
   }
 
-  /** ✅ Pagination Logic */
   function changeLimit() { 
+    
+    const limitSelect = document.getElementById('rowSel');
     pgNum = 1; 
-    pgLim = parseInt(document.getElementById('rowSel').value); 
+    pgLim = parseInt(limitSelect.value); 
+    
     renderTable(); 
   }
 
   function next() { 
-    const total = Math.ceil(allOrders.length / pgLim);
-    if(pgNum < total){ 
-      pgNum++; 
+    
+    const totalCount = allOrders.length;
+    const totalPages = Math.ceil(totalCount / pgLim);
+    
+    if(pgNum < totalPages) { 
+      pgNum = pgNum + 1; 
       renderTable(); 
     } 
   }
 
   function prev() { 
-    if(pgNum > 1){ 
-      pgNum--; 
+    
+    if(pgNum > 1) { 
+      pgNum = pgNum - 1; 
       renderTable(); 
     } 
+    
   }
+
 </script>
 
 </body>
