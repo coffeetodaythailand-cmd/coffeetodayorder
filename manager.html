@@ -596,12 +596,35 @@
     }
 
     @media (max-width: 768px) {
-      .nav { padding: 15px 30px; }
+      .nav { padding: 15px 20px; }
       .card { padding: 25px; border-radius: 25px; }
-      .section-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .section-header { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
+      
+      /* ✅ ซ่อม UI ส่วน Filter ให้ปัดบรรทัดและพอดีจอมือถือ */
+      .filter-panel { 
+        width: 100%; 
+        flex-wrap: wrap; 
+        justify-content: space-between; 
+        padding: 15px;
+      }
+      .filter-input { 
+        width: 46%; 
+        background: #FFFFFF; 
+        padding: 8px; 
+        border-radius: 10px;
+        text-align: center;
+      }
+      .filter-panel span { display: none; } /* ซ่อนขีด - บนมือถือกันเกะกะ */
+      .filter-panel .btn-sm { 
+        width: 48%; 
+        padding: 12px; 
+        font-size: 13px; 
+        margin-top: 5px;
+      }
+      
       .search-row { max-width: 100%; }
-      th, td { padding: 15px 12px; font-size: 13px; }
-      .btn { padding: 12px 20px; font-size: 13px; flex: 1; }
+      th, td { padding: 15px 10px; font-size: 13px; }
+      .btn { padding: 12px 20px; font-size: 13px; flex: 1; text-align: center; }
     }
     
     /* 🌫️ Animations */
