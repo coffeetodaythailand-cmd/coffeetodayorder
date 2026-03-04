@@ -87,6 +87,7 @@
       gap: 15px;
       border: 1px solid #EEE;
       box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+      flex-wrap: wrap; /* รองรับมือถือ */
     }
     .search-input { border: none; outline: none; width: 100%; font-family: 'Prompt'; font-size: 14px; color: var(--dark); }
 
@@ -242,7 +243,7 @@
           <div class="filter-panel" style="display:flex; gap:10px; background:#f8f9fa; padding:8px 15px; border-radius:15px;">
             <input type="date" id="sDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
             <input type="date" id="eDate" class="filter-input" style="border:none; background:transparent; font-size:12px;">
-            <button class="btn btn-red btn-sm" onclick="loadDashboardData(true)" style="padding:5px 15px; font-size:11px;">กรอง</button>
+            <button class="btn btn-red btn-sm" onclick="applyDateFilter()" style="padding:5px 15px; font-size:11px;">กรอง</button>
             <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="padding:5px 15px; font-size:11px; background:var(--blue); color:white;">
               <i class="fas fa-file-invoice"></i> สรุปรายสาขา
             </button>
@@ -262,9 +263,19 @@
       <div style="height:260px;"><canvas id="sC"></canvas></div>
     </div>
 
-    <div class="search-row">
-      <i class="fas fa-search" style="color:#BBB; font-size:16px;"></i>
-      <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหาออเดอร์ (เช่น พิมพ์ 4 หา ORD-0004)..." oninput="pgNum=1; renderTable();">
+    <div class="search-row" style="display:flex; flex-wrap:wrap; gap:10px;">
+      <div style="flex:1; display:flex; align-items:center; gap:15px; min-width: 250px;">
+        <i class="fas fa-search" style="color:#BBB; font-size:16px;"></i>
+        <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหาในหน้านี้ (หรือพิมพ์เลขแล้วกดปุ่มค้นหาลึก)..." oninput="pgNum=1; renderTable();">
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button id="deepSearchBtn" class="btn" style="background:var(--dark); color:white; padding:8px 15px; font-size:12px; border-radius:12px; white-space:nowrap; border:none; cursor:pointer;" onclick="executeDeepSearch()">
+          <i class="fas fa-database"></i> ค้นหาจากเซิร์ฟเวอร์
+        </button>
+        <button id="clearSearchBtn" class="btn" style="display:none; background:#EEE; color:#333; padding:8px 15px; font-size:12px; border-radius:12px; white-space:nowrap; border:none; cursor:pointer;" onclick="clearDeepSearch()">
+          <i class="fas fa-times"></i> ล้างการค้นหา
+        </button>
+      </div>
     </div>
 
     <div class="card" id="tableCard">
@@ -375,6 +386,7 @@
 
 <script>
   let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null, pendingApproveId = "";
+  let currentDeepSearchQuery = ""; // ✅ ตัวแปรเก็บสถานะการค้นหาลึก
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
@@ -426,21 +438,26 @@
     loadDashboardData(false, token); 
     loadApproveList(token); 
     setInterval(() => {
-      loadDashboardData(false, token);
+      // โหลดรีเฟรชออโต้ โดยจำสถานะการค้นหาลึกไว้ด้วย
+      loadDashboardData(false, token, currentDeepSearchQuery);
       loadApproveList(token);
     }, 180000); 
   }
 
-  function loadDashboardData(smooth = false, token) { 
+  // ✅ อัปเกรด loadDashboardData ให้รองรับระบบ Search ทะลุมิติ
+  function loadDashboardData(smooth = false, token = null, searchQ = "") { 
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
+    currentDeepSearchQuery = searchQ; // จำค่าไว้
+
     if(smooth) {
       document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
     }
     
     const s = document.getElementById('sDate').value;
     const e = document.getElementById('eDate').value;
+    const q = encodeURIComponent(searchQ);
 
-    fetch(`${GAS_URL}?action=managerGetData&token=${currentToken}&s=${s}&e=${e}`)
+    fetch(`${GAS_URL}?action=managerGetData&token=${currentToken}&s=${s}&e=${e}&q=${q}`)
       .then(res => res.json())
       .then(d => {
         if(d.status === 'success') {
@@ -449,6 +466,21 @@
           renderCharts(d.analytics.charts);
           renderMenuAccordion(d.menu); 
           document.getElementById('lastUpd').innerText = "Update: " + new Date().toLocaleTimeString();
+          
+          // สลับปุ่มค้นหาลึก
+          if (currentDeepSearchQuery) {
+            document.getElementById('deepSearchBtn').style.display = "none";
+            document.getElementById('clearSearchBtn').style.display = "inline-flex";
+          } else {
+            document.getElementById('deepSearchBtn').style.display = "inline-flex";
+            document.getElementById('clearSearchBtn').style.display = "none";
+          }
+
+          const dsBtn = document.getElementById('deepSearchBtn');
+          if(dsBtn) {
+            dsBtn.innerHTML = '<i class="fas fa-database"></i> ค้นหาจากเซิร์ฟเวอร์';
+            dsBtn.disabled = false;
+          }
         } else {
           handleLogout();
         }
@@ -457,7 +489,41 @@
       .catch(err => {
         console.error("Dashboard Load Error:", err);
         document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
+        const dsBtn = document.getElementById('deepSearchBtn');
+        if(dsBtn) {
+          dsBtn.innerHTML = '<i class="fas fa-database"></i> ค้นหาจากเซิร์ฟเวอร์';
+          dsBtn.disabled = false;
+        }
       });
+  }
+
+  // ✅ ฟังก์ชันปุ่มค้นหาแบบเจาะลึก
+  function executeDeepSearch() {
+    const q = document.getElementById('orderSearch').value.trim();
+    if (!q) return showToast("กรุณาพิมพ์คำค้นหาก่อน");
+    
+    document.getElementById('sDate').value = "";
+    document.getElementById('eDate').value = "";
+    
+    const btn = document.getElementById('deepSearchBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ค้นหา...';
+    btn.disabled = true;
+    
+    loadDashboardData(true, null, q);
+  }
+
+  // ✅ ฟังก์ชันปุ่มล้างการค้นหาลึก กลับสู่โหมดปัจจุบัน
+  function clearDeepSearch() {
+    document.getElementById('orderSearch').value = "";
+    document.getElementById('deepSearchBtn').style.display = "inline-flex";
+    document.getElementById('clearSearchBtn').style.display = "none";
+    loadDashboardData(true, null, ""); 
+  }
+
+  // ✅ ตอนกดปุ่ม "กรอง" ให้ล้างค่าช่องค้นหาทิ้งด้วย
+  function applyDateFilter() {
+    document.getElementById('orderSearch').value = "";
+    loadDashboardData(true, null, ""); 
   }
 
   function formatPackedTime(pt) {
@@ -517,7 +583,7 @@
       .then(res => {
         if(res.status === 'success') {
           loadApproveList(token); 
-          loadDashboardData(false, token); 
+          loadDashboardData(false, token, currentDeepSearchQuery); 
           showToast("✅ อนุมัติสำเร็จ!");
         }
       });
@@ -570,7 +636,7 @@
       </tr>`;
     });
     
-    document.getElementById('oB').innerHTML = html || '<tr><td colspan="7" align="center" style="padding:60px;">ไม่พบข้อมูลสั่งซื้อ</td></tr>';
+    document.getElementById('oB').innerHTML = html || '<tr><td colspan="7" align="center" style="padding:60px;">ไม่พบข้อมูล</td></tr>';
     document.getElementById('pI').innerText = pgNum + " / " + (Math.ceil(filtered.length/pgLim) || 1);
   }
 
@@ -626,7 +692,6 @@
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
-  // ✅ ฝังเวลา PackedTime ลงในไฟล์ PDF A4 อย่างชัดเจน
   function downloadPDF() {
     const o = allOrders.find(x => x.id === currentViewingOrderId);
     if(!o) return;
@@ -834,7 +899,6 @@
     }, 1000);
   }
 
-  // ✅ อัปเกรดหน้า Print ให้เป็นตารางสวยงามเหมือนใน PDF และฝังเวลาแพ็ค
   function printOrder(data) { 
     const o = JSON.parse(decodeURIComponent(data));
     
