@@ -501,7 +501,8 @@
       .section-header { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 15px; } 
       .search-row { max-width: 100%; padding: 8px 15px; }
       th, td { padding: 15px 10px; font-size: 13px; }
-      .btn { padding: 10px 15px; font-size: 13px; flex: 1; }
+      .btn { padding: 10px 15px; font-size: 13px; flex: 1; text-align: center; }
+      .pagination-footer { flex-wrap: wrap; justify-content: center; gap: 10px; }
     }
   </style>
 </head>
@@ -578,13 +579,13 @@
     <div class="search-row">
       <div style="flex:1; display:flex; align-items:center; gap:12px;">
         <i class="fas fa-search" style="color:#BBB; font-size:14px;"></i>
-        <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหา (ชื่อลูกค้า, บิล ORD-XXXX, สาขา, เบอร์โทร)..." oninput="pgNum=1; renderTable();">
+        <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหา (ชื่อ, บิล, สาขา, เบอร์โทร)..." oninput="pgNum=1; renderTable();">
       </div>
       <div style="display:flex; gap:8px;">
-        <button id="deepSearchBtn" class="btn" style="background:var(--dark); color:white; padding:8px 15px; font-size:11px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="executeDeepSearch()">
+        <button id="deepSearchBtn" class="btn" style="background:var(--dark); color:white; padding:6px 12px; font-size:10px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="executeDeepSearch()">
           <i class="fas fa-database"></i> ค้นหาลึก
         </button>
-        <button id="clearSearchBtn" class="btn" style="display:none; background:#EEE; color:#333; padding:8px 15px; font-size:11px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="clearDeepSearch()">
+        <button id="clearSearchBtn" class="btn" style="display:none; background:#EEE; color:#333; padding:6px 12px; font-size:10px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="clearDeepSearch()">
           <i class="fas fa-times"></i> ล้าง
         </button>
       </div>
@@ -773,30 +774,92 @@
     }, 180000); 
   }
 
-  /** ✅ Data Loading & Filter Engine (Hybrid Logic) */
-  function loadDashboardData(smooth, token, searchQ) { 
+  /** ✅ Data Loading & Filter Engine (Hybrid Logic + Frontend Graph Fix) */
+  function loadDashboardData(smooth = false, token = null, searchQ = "") { 
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
-    currentDeepSearchQuery = searchQ || "";
+    currentDeepSearchQuery = searchQ;
 
     if(smooth) {
-      document.querySelectorAll('.card').forEach(function(c) { 
-        c.classList.add('loading-pulse'); 
-      });
+      document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
     }
     
     const s = document.getElementById('sDate').value;
     const e = document.getElementById('eDate').value;
-    const q = encodeURIComponent(currentDeepSearchQuery);
+    const q = encodeURIComponent(searchQ);
 
-    fetch(GAS_URL + '?action=managerGetData&token=' + currentToken + '&s=' + s + '&e=' + e + '&q=' + q)
-      .then(function(res) { 
-        return res.json(); 
-      })
-      .then(function(d) {
+    fetch(`${GAS_URL}?action=managerGetData&token=${currentToken}&s=${s}&e=${e}&q=${q}`)
+      .then(res => res.json())
+      .then(d => {
         if(d.status === 'success') {
           allOrders = d.analytics.history;
           renderTable();
-          renderCharts(d.analytics.charts);
+          
+          /*
+           * =========================================================================
+           * ✅ การแก้ไขระบบกราฟแบบอัจฉริยะ (Frontend Calculation)
+           * สั่งให้ดึงเฉพาะออเดอร์ของ "วันนี้" อ้างอิงจากเวลาเที่ยงคืนของเครื่องคุณเบลล์
+           * วิธีนี้จะแก้ปัญหา Timezone ของเซิร์ฟเวอร์ Google ที่ทำให้กราฟไม่ขึ้นครับ
+           * =========================================================================
+           */
+          let chartDataToRender = d.analytics.charts;
+          
+          if (!s && !e && searchQ === "") {
+             let bCounts = {};
+             let pStats = {};
+             let sRep = {};
+             
+             let nowObj = new Date();
+             nowObj.setHours(0, 0, 0, 0); // ยึดเวลาเที่ยงคืนตรงของวันนี้
+             
+             allOrders.forEach(o => {
+                // แปลง format วันที่ "dd/MM/yyyy HH:mm"
+                let dtStr = o.date; 
+                let dp = dtStr.split(' ')[0].split('/');
+                let tp = dtStr.split(' ')[1].split(':');
+                let oDateObj = new Date(dp[2], dp[1]-1, dp[0], tp[0], tp[1]);
+                
+                if (oDateObj >= nowObj) { 
+                   // นำยอดเข้ากราฟเฉพาะออเดอร์ของวันนี้
+                   let bNameStr = o.branch || "อื่นๆ";
+                   bCounts[bNameStr] = (bCounts[bNameStr] || 0) + 1;
+                   
+                   let itemsStr = o.items || "";
+                   itemsStr.split('\n').forEach(lineStr => {
+                      if (lineStr.includes('สั่ง:')) {
+                         let nameOnlyStr = lineStr.split(' (')[0].trim();
+                         let qtyMatchReg = lineStr.match(/สั่ง:([\d.]+)/);
+                         let quantityVal = qtyMatchReg ? parseFloat(qtyMatchReg[1]) : 0;
+                         pStats[nameOnlyStr] = (pStats[nameOnlyStr] || 0) + quantityVal;
+                         
+                         let stockMatchReg = lineStr.match(/เหลือ:([^,)]+)/);
+                         if (stockMatchReg) {
+                            let valStrStr = stockMatchReg[1].trim();
+                            let numMatchReg = valStrStr.match(/[\d.]+/);
+                            let numVal = numMatchReg ? parseFloat(numMatchReg[0]) : 0;
+                            sRep[nameOnlyStr] = numVal;
+                         }
+                      }
+                   });
+                }
+             });
+             
+             let topListArray = Object.entries(pStats).sort((a, b) => b[1] - a[1]).slice(0, 10);
+             let stockListArray = Object.entries(sRep).sort((a, b) => a[1] - b[1]);
+             
+             chartDataToRender = {
+               pL: topListArray.map(i => i[0]),
+               pV: topListArray.map(i => i[1]),
+               bL: Object.keys(bCounts),
+               bV: Object.values(bCounts),
+               sL: stockListArray.map(i => i[0]),
+               sV: stockListArray.map(i => i[1])
+             };
+          }
+          
+          // ส่งข้อมูลที่คำนวณใหม่ไปให้ Chart.js สร้างกราฟ
+          renderCharts(chartDataToRender); 
+          // =========================================================================
+
           renderMenuAccordion(d.menu); 
           
           document.getElementById('lastUpd').innerText = "Update: " + new Date().toLocaleTimeString();
@@ -820,15 +883,11 @@
           handleLogout();
         }
         
-        document.querySelectorAll('.card').forEach(function(c) { 
-          c.classList.remove('loading-pulse'); 
-        });
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
       })
-      .catch(function(err) {
+      .catch(err => {
         console.error("Dashboard Load Error:", err);
-        document.querySelectorAll('.card').forEach(function(c) { 
-          c.classList.remove('loading-pulse'); 
-        });
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
       });
   }
 
@@ -911,7 +970,7 @@
           
           let timeBadge = '';
           if (pTime !== "-") {
-            timeBadge = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:5px 12px; border-radius:8px; display:inline-block; margin-bottom:12px; font-weight:600;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ' + pTime + '</div><br>';
+            timeBadge = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:3px 8px; border-radius:6px; display:inline-block; margin-bottom:8px; font-weight:bold;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ' + pTime + '</div><br>';
           }
 
           return '<div class="approve-item">' +
@@ -1120,7 +1179,6 @@
 
     const win = window.open('', '', 'width=850,height=900');
     
-    // กางแท็ก HTML แบบละเอียดบรรทัดต่อบรรทัด
     win.document.write('<!DOCTYPE html>');
     win.document.write('<html>');
     win.document.write('<head>');
@@ -1607,5 +1665,6 @@
     } 
   }
 </script>
+
 </body>
 </html>
