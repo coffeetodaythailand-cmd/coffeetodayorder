@@ -392,7 +392,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // 🗝️ กุญแจบ้านที่คุณเบลล์ดึงมา
     const firebaseConfig = {
       apiKey: "AIzaSyD9p-JEXH95pjW6H5IkkHR3O7hkJuxg7v8",
       authDomain: "coffeetoday-db.firebaseapp.com",
@@ -402,7 +401,6 @@
       appId: "1:949270145151:web:ae6cbc6c5c5d54a502b74a"
     };
 
-    // เริ่มต้นระบบ Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
   </script>
@@ -620,6 +618,7 @@
     const phone = document.getElementById('cP').value.trim();
     const email = document.getElementById('cE').value.trim();
     const branch = document.getElementById('cB').value.trim();
+    
     if(!name || !phone || !email || !branch) {
       window.scrollTo(0, 0);
       document.getElementById(name ? (phone ? (email ? 'cB' : 'cE') : 'cP') : 'cN').focus();
@@ -635,6 +634,7 @@
     const qis = document.querySelectorAll('.qi');
     const sis = document.querySelectorAll('.si');
     const tabBtns = document.querySelectorAll('.tbtn');
+    
     for(let i=0; i<qis.length; i++) {
       let qVal = parseFloat(qis[i].value) || 0;
       if(qVal > 0) {
@@ -649,9 +649,11 @@
         d += `${qis[i].dataset.n} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
       }
     }
+    
     const cns = document.querySelectorAll('.cn');
     const css = document.querySelectorAll('.cs');
     const cqs = document.querySelectorAll('.cq');
+    
     for(let i=0; i<cns.length; i++) {
       let qVal = parseFloat(cqs[i].value) || 0;
       let cName = cns[i].value.trim();
@@ -666,29 +668,31 @@
         d += `${cName} (เหลือ:${remainVal}, สั่ง:${qVal})\n`; 
       }
     }
+    
     if(!hasItem) return showError("กรุณาเลือกสินค้าอย่างน้อย 1 รายการ");
+    
     h += `<div style="border-bottom:2px solid #EEE; padding-bottom:10px; margin-bottom:15px;"><b>ผู้สั่ง:</b> ${name}<br><b>สาขา:</b> ${branch}</div><ul style="padding-left:20px;">`;
     d.split('\n').filter(Boolean).forEach(line => {
       const m = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
       if(m) h += `<li>${m[1]} x <b style="color:var(--primary)">${m[3]}</b> (เหลือ: ${m[2]})</li>`;
     });
+    
     pD = { name: name, phone: phone, email: email, branch: branch, details: d };
     document.getElementById('rL').innerHTML = h + "</ul>"; 
     document.getElementById('rM').style.display = 'flex';
   }
 
-  // 🚀 HYPER NITRO: ระบบส่งข้อมูลตรงเข้า Firebase
+  // ✅ แก้ไข confirmSubmit ให้ทำงานบน GitHub Pages โดยใช้ fetch แทน google.script.run
   async function confirmSubmit() {
     const cBtn = document.getElementById('cBtn');
     cBtn.innerText = "กำลังสั่ง...";
     cBtn.disabled = true;
 
     try {
-      // ⚡ 1. สร้างเลขบิลทันทีจากเวลา (CT + Timestamp)
       const now = new Date();
       const timeId = "CT-" + now.getTime(); 
 
-      // 🚀 2. ยิงตรงเข้า Firebase (ภูมิภาคสิงคโปร์ ไวมาก!)
+      // 🚀 1. ยิงตรงเข้า Firebase (ภูมิภาคสิงคโปร์ ไวแสง!)
       await db.collection("orders").doc(timeId).set({
         orderId: timeId,
         name: pD.name,
@@ -700,16 +704,24 @@
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // ✅ 3. โชว์ความสำเร็จทันที! (ลูกค้าไม่รู้สึกว่ารอ)
-      document.getElementById('rM').style.display='none'; 
+      // ✅ 2. โชว์ความสำเร็จทันที! (เร็วระดับ 0.5 วินาที)
+      document.getElementById('rM').style.display = 'none'; 
       document.getElementById('showOrderId').innerText = timeId; 
-      document.getElementById('successModal').style.display='flex'; 
+      document.getElementById('successModal').style.display = 'flex'; 
       
       cBtn.innerText = "ยืนยันสั่ง";
       cBtn.disabled = false;
 
-      // 🕵️‍♂️ 4. แอบส่งเข้า Google Sheets ในเบื้องหลัง (Backup)
-      google.script.run.submitOrderBackupOnly(pD, timeId);
+      // 🕵️‍♂️ 3. แอบส่งข้อมูลสำรองไป Google Sheets ผ่าน fetch (แก้ปัญหา google is not defined)
+      fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors", // ใช้ no-cors เพื่อให้ยิงผ่านได้โดยไม่ติดนโยบายความปลอดภัย
+        body: JSON.stringify({ 
+          action: "submitOrderBackupOnly", 
+          formData: pD, 
+          orderId: timeId 
+        })
+      }).then(() => console.log("Backup process triggered."));
 
     } catch (error) {
       showError("ระบบ Firebase ขัดข้อง: " + error.message);
