@@ -3,6 +3,7 @@
 <head>
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -10,6 +11,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <style>
+    /**
+     * CoffeeToday System - Master UI Styling
+     * โดย คุณเบลล์ (Khun Bell)
+     * เวอร์ชั่น: Full Nitro Speed + Global Logs (Strict Version)
+     */
+    
     :root { 
       --red: #A91D3A; 
       --dark: #2D3133; 
@@ -27,6 +34,7 @@
       padding-bottom: 50px; 
     }
     
+    /* 🛡️ Login Access Styling */
     #login-overlay { 
       position: fixed; 
       top: 0; 
@@ -80,6 +88,7 @@
       box-shadow: 0 0 20px rgba(169,29,58,0.1); 
     }
     
+    /* 📱 Layout Elements */
     #main-app { 
       display: none; 
     }
@@ -128,18 +137,18 @@
       margin-bottom: 25px; 
     }
 
-    /* ✅ ปรับปรุงช่องค้นหาให้เล็กลง (Compact Design) สำหรับวัยรุ่น */
+    /* ✅ แก้ไขช่องค้นหาให้เล็กลง ทันสมัย (Compact Design) สำหรับวัยรุ่น */
     .search-row {
       background: var(--white);
       border-radius: 12px;
       padding: 8px 18px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       border: 1px solid #EEE;
       box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-      max-width: 500px; /* ลดความกว้าง */
+      max-width: 500px; /* จำกัดความกว้างเพื่อความเพรียวบาง */
     }
     
     .search-input { 
@@ -147,10 +156,11 @@
       outline: none; 
       width: 100%; 
       font-family: 'Prompt'; 
-      font-size: 13px; /* ลดขนาดฟอนต์ */
+      font-size: 13px; /* ขนาดฟอนต์กะทัดรัด */
       color: var(--dark); 
     }
 
+    /* 📊 Analytics Chips */
     .chips-container {
       display: flex; 
       gap: 10px; 
@@ -184,6 +194,7 @@
       box-shadow: 0 8px 20px rgba(169,29,58,0.2); 
     }
 
+    /* 📄 Receipt Components */
     .receipt-card {
       background: white; 
       border-radius: 25px; 
@@ -239,6 +250,7 @@
       color: #555; 
     }
 
+    /* 📦 Approval UI */
     .approve-card { 
       border-top: 8px solid var(--green); 
       padding: 25px 40px; 
@@ -246,24 +258,24 @@
     
     .approve-list { 
       display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-      gap: 15px; 
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+      gap: 20px; 
       margin-top: 15px; 
     }
     
     .approve-item { 
       background: #f0fdf4; 
       border: 1px solid #dcfce7; 
-      padding: 15px 20px; 
-      border-radius: 20px;
+      padding: 20px; 
+      border-radius: 25px;
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      transition: 0.2s;
+      transition: 0.3s;
     }
     
     .approve-item:hover { 
-      transform: translateY(-2px); 
+      transform: translateY(-3px); 
       box-shadow: 0 5px 15px rgba(34,197,94,0.1); 
     }
     
@@ -271,14 +283,15 @@
       background: var(--green); 
       color: white; 
       border: none; 
-      padding: 10px 20px; 
-      border-radius: 12px;
+      padding: 12px 25px; 
+      border-radius: 14px;
       font-family: 'Prompt'; 
       font-weight: 600; 
       cursor: pointer; 
       font-size: 14px;
     }
     
+    /* 🔘 Overlay & Modals */
     .overlay {
       display: none; 
       position: fixed; 
@@ -372,6 +385,7 @@
       100% { transform: translateX(100%); } 
     }
 
+    /* 📊 Data Display Table */
     table { 
       width: 100%; 
       border-collapse: collapse; 
@@ -400,6 +414,7 @@
       transition: 0.5s; 
     }
     
+    /* 📄 Pagination Footer */
     .pagination-footer { 
       display: flex; 
       justify-content: flex-end; 
@@ -479,17 +494,14 @@
 
     @media (max-width: 768px) {
       .container { padding: 0 10px; margin: 15px auto; }
-      .card { padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+      .card { padding: 25px; border-radius: 20px; margin-bottom: 20px; }
       .nav { padding: 15px 20px; flex-wrap: wrap; gap: 10px; justify-content: center; }
       .nav span { font-size: 16px; }
       .chart-grid { grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; } 
       .section-header { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 15px; } 
-      .section-header > div { width: 100%; display: flex; flex-wrap: wrap; gap: 10px; }
-      .filter-panel { width: 100%; flex-wrap: wrap; justify-content: flex-start; }
-      .search-row { padding: 8px 15px; max-width: 100%; }
+      .search-row { max-width: 100%; padding: 8px 15px; }
       th, td { padding: 15px 10px; font-size: 13px; }
-      .btn { padding: 10px 15px; font-size: 13px; flex: 1; text-align: center; }
-      .pagination-footer { flex-wrap: wrap; justify-content: center; gap: 10px; }
+      .btn { padding: 10px 15px; font-size: 13px; flex: 1; }
     }
   </style>
 </head>
@@ -508,6 +520,7 @@
 </div>
 
 <div id="main-app">
+  
   <div class="nav">
     <span><i class="fas fa-coffee" style="color:var(--red); margin-right:12px;"></i> CoffeeToday Management</span>
     <div style="display:flex; align-items:center; gap:15px;">
@@ -520,12 +533,14 @@
   </div>
 
   <div class="container">
+    
     <div class="card approve-card" id="approveCard" style="display:none;">
       <h4 style="margin:0; font-family:'Prompt'; color:var(--green);"><i class="fas fa-clipboard-check"></i> อนุมัติการส่งมอบสินค้า (Approve Orders)</h4>
       <div id="approveList" class="approve-list"></div>
     </div>
 
     <div class="chart-grid">
+      
       <div class="card" id="mainChartCard">
         <div class="section-header">
           <h4 style="margin:0;"><i class="fas fa-chart-bar"></i> สินค้าเมนูขายดี</h4>
@@ -538,30 +553,38 @@
             </button>
           </div>
         </div>
-        <div style="height:260px;"><canvas id="bC"></canvas></div>
+        <div style="height:260px;">
+          <canvas id="bC"></canvas>
+        </div>
       </div>
+      
       <div class="card" id="doughnutCard">
         <h4 style="margin:0 0 25px;"><i class="fas fa-chart-pie"></i> ออเดอร์รายสาขา</h4>
-        <div style="height:260px;"><canvas id="pC_Chart"></canvas></div>
+        <div style="height:260px;">
+          <canvas id="pC_Chart"></canvas>
+        </div>
       </div>
+      
     </div>
 
     <div class="card" id="stockChartCard">
       <h4 style="margin:0 0 25px;"><i class="fas fa-layer-group" style="color:var(--orange);"></i> สถานะคงเหลือล่าสุด (วิเคราะห์จากรายงาน)</h4>
       <p style="font-size:12px; color:#999; margin-top:-15px; margin-bottom:20px;">* กราฟจะแสดงสินค้าที่เหลือน้อยที่สุด 15 อันดับแรก</p>
-      <div style="height:260px;"><canvas id="sC"></canvas></div>
+      <div style="height:260px;">
+        <canvas id="sC"></canvas>
+      </div>
     </div>
 
     <div class="search-row">
-      <div style="flex:1; display:flex; align-items:center; gap:10px;">
+      <div style="flex:1; display:flex; align-items:center; gap:12px;">
         <i class="fas fa-search" style="color:#BBB; font-size:14px;"></i>
-        <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหา (ชื่อ, บิล, เบอร์โทร)..." oninput="pgNum=1; renderTable();">
+        <input type="text" id="orderSearch" class="search-input" placeholder="ค้นหา (ชื่อลูกค้า, บิล ORD-XXXX, สาขา, เบอร์โทร)..." oninput="pgNum=1; renderTable();">
       </div>
       <div style="display:flex; gap:8px;">
-        <button id="deepSearchBtn" class="btn" style="background:var(--dark); color:white; padding:6px 12px; font-size:10px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="executeDeepSearch()">
+        <button id="deepSearchBtn" class="btn" style="background:var(--dark); color:white; padding:8px 15px; font-size:11px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="executeDeepSearch()">
           <i class="fas fa-database"></i> ค้นหาลึก
         </button>
-        <button id="clearSearchBtn" class="btn" style="display:none; background:#EEE; color:#333; padding:6px 12px; font-size:10px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="clearDeepSearch()">
+        <button id="clearSearchBtn" class="btn" style="display:none; background:#EEE; color:#333; padding:8px 15px; font-size:11px; border-radius:10px; white-space:nowrap; border:none; cursor:pointer;" onclick="clearDeepSearch()">
           <i class="fas fa-times"></i> ล้าง
         </button>
       </div>
@@ -674,13 +697,25 @@
 </div>
 
 <script>
-  let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null, pendingApproveId = "";
+  /**
+   * ⚙️ System Engine - CoffeeToday Management
+   * เวอร์ชั่น: Optimized Speed + Full Data View
+   */
+  
+  let bcObj, pcObj, scObj;
+  let allOrders = [];
+  let pgNum = 1;
+  let pgLim = 8;
+  let menuObj = {};
+  let editTargetId = null;
+  let currentCat = null;
+  let pendingApproveId = "";
   let currentDeepSearchQuery = "";
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
 
-  window.onload = () => {
+  window.onload = function() {
     const savedToken = localStorage.getItem(TOKEN_KEY);
     if (savedToken) {
       document.getElementById('login-overlay').style.display = 'none';
@@ -689,15 +724,19 @@
     }
   };
 
+  /** ✅ Authentication Handler */
   function handleLogin() { 
     const lBtn = document.getElementById('loginBtn');
     const pInput = document.getElementById('passInput');
+    
     lBtn.disabled = true; 
     lBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking PIN...';
 
-    fetch(`${GAS_URL}?action=verifyLogin&pass=${pInput.value}`)
-      .then(res => res.json())
-      .then(res => {
+    fetch(GAS_URL + '?action=verifyLogin&pass=' + pInput.value)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(res) {
         if(res.status === 'success'){
           localStorage.setItem(TOKEN_KEY, res.token);
           document.getElementById('login-overlay').style.display = 'none';
@@ -711,8 +750,8 @@
           pInput.focus();
         }
       })
-      .catch(err => {
-        alert("ไม่สามารถเชื่อมต่อ Server ได้");
+      .catch(function(err) {
+        alert("การเชื่อมต่อล้มเหลว กรุณาลองใหม่อีกครั้ง");
         lBtn.disabled = false;
         lBtn.innerHTML = 'Unlock Database';
       });
@@ -726,43 +765,53 @@
   function initApp(token) { 
     loadDashboardData(false, token); 
     loadApproveList(token); 
-    setInterval(() => {
+    
+    setInterval(function() {
+      // Auto-refresh without clearing searches
       loadDashboardData(false, token, currentDeepSearchQuery);
       loadApproveList(token);
     }, 180000); 
   }
 
-  function loadDashboardData(smooth = false, token = null, searchQ = "") { 
+  /** ✅ Data Loading & Filter Engine (Hybrid Logic) */
+  function loadDashboardData(smooth, token, searchQ) { 
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
-    currentDeepSearchQuery = searchQ;
+    currentDeepSearchQuery = searchQ || "";
 
     if(smooth) {
-      document.querySelectorAll('.card').forEach(c => c.classList.add('loading-pulse'));
+      document.querySelectorAll('.card').forEach(function(c) { 
+        c.classList.add('loading-pulse'); 
+      });
     }
     
     const s = document.getElementById('sDate').value;
     const e = document.getElementById('eDate').value;
-    const q = encodeURIComponent(searchQ);
+    const q = encodeURIComponent(currentDeepSearchQuery);
 
-    fetch(`${GAS_URL}?action=managerGetData&token=${currentToken}&s=${s}&e=${e}&q=${q}`)
-      .then(res => res.json())
-      .then(d => {
+    fetch(GAS_URL + '?action=managerGetData&token=' + currentToken + '&s=' + s + '&e=' + e + '&q=' + q)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(d) {
         if(d.status === 'success') {
           allOrders = d.analytics.history;
           renderTable();
           renderCharts(d.analytics.charts);
           renderMenuAccordion(d.menu); 
+          
           document.getElementById('lastUpd').innerText = "Update: " + new Date().toLocaleTimeString();
           
+          const dsBtn = document.getElementById('deepSearchBtn');
+          const clBtn = document.getElementById('clearSearchBtn');
+          
           if (currentDeepSearchQuery) {
-            document.getElementById('deepSearchBtn').style.display = "none";
-            document.getElementById('clearSearchBtn').style.display = "inline-flex";
+            dsBtn.style.display = "none";
+            clBtn.style.display = "inline-flex";
           } else {
-            document.getElementById('deepSearchBtn').style.display = "inline-flex";
-            document.getElementById('clearSearchBtn').style.display = "none";
+            dsBtn.style.display = "inline-flex";
+            clBtn.style.display = "none";
           }
 
-          const dsBtn = document.getElementById('deepSearchBtn');
           if(dsBtn) {
             dsBtn.innerHTML = '<i class="fas fa-database"></i> ค้นหาลึก';
             dsBtn.disabled = false;
@@ -770,22 +819,33 @@
         } else {
           handleLogout();
         }
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
+        
+        document.querySelectorAll('.card').forEach(function(c) { 
+          c.classList.remove('loading-pulse'); 
+        });
       })
-      .catch(err => {
-        console.error("Dashboard Error:", err);
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('loading-pulse'));
+      .catch(function(err) {
+        console.error("Dashboard Load Error:", err);
+        document.querySelectorAll('.card').forEach(function(c) { 
+          c.classList.remove('loading-pulse'); 
+        });
       });
   }
 
+  /** ✅ Server-Side Deep Searching */
   function executeDeepSearch() {
     const q = document.getElementById('orderSearch').value.trim();
-    if (!q) return showToast("กรุณาพิมพ์คำค้นหาก่อน");
+    if (!q) {
+      return showToast("กรุณาพิมพ์คำค้นหาก่อนดำเนินการ");
+    }
+    
     document.getElementById('sDate').value = "";
     document.getElementById('eDate').value = "";
+    
     const btn = document.getElementById('deepSearchBtn');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     btn.disabled = true;
+    
     loadDashboardData(true, null, q);
   }
 
@@ -801,44 +861,68 @@
     loadDashboardData(true, null, ""); 
   }
 
+  /** ✅ Time Conversion Engine (ISO -> Human) */
   function formatPackedTime(pt) {
-    if (!pt || pt === "-") return "-";
+    if (!pt || pt === "-") {
+      return "-";
+    }
+    
     if (typeof pt === 'string' && pt.includes('T') && pt.includes('Z')) {
       const d = new Date(pt);
-      return d.toLocaleDateString('th-TH', {day: '2-digit', month: '2-digit', year: 'numeric'}) + ' ' + d.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+      const datePart = d.toLocaleDateString('th-TH', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      });
+      const timePart = d.toLocaleTimeString('th-TH', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      return datePart + ' ' + timePart;
     }
+    
     return pt;
   }
 
+  /** ✅ Fulfillment Queue Loader */
   function loadApproveList(token) {
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
-    fetch(`${GAS_URL}?action=getOrdersByStatus&status=Packed&token=${currentToken}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(GAS_URL + '?action=getOrdersByStatus&status=Packed&token=' + currentToken)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(data) {
         const card = document.getElementById('approveCard');
         const div = document.getElementById('approveList');
+        
         if(!data || data.length === 0) { 
           card.style.display = 'none'; 
           return; 
         }
         
         card.style.display = 'block';
-        div.innerHTML = data.map(o => {
-          let matchOrder = allOrders.find(x => x.id === o.id);
+        div.innerHTML = data.map(function(o) {
+          let matchOrder = allOrders.find(function(x) { 
+            return x.id === o.id; 
+          });
+          
           let ptStr = matchOrder && matchOrder.packedTime ? matchOrder.packedTime : "-";
           let pTime = formatPackedTime(ptStr);
-          let timeBadge = pTime !== "-" ? `<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:3px 8px; border-radius:6px; display:inline-block; margin-bottom:8px;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ${pTime}</div><br>` : '';
+          
+          let timeBadge = '';
+          if (pTime !== "-") {
+            timeBadge = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:5px 12px; border-radius:8px; display:inline-block; margin-bottom:12px; font-weight:600;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ' + pTime + '</div><br>';
+          }
 
-          return `
-          <div class="approve-item">
-            <div class="approve-info">
-              ${timeBadge}
-              <b style="color:var(--red); cursor:pointer; text-decoration:underline;" onclick="viewOrderDetail('${o.id}')">${o.id}</b> - ${o.branch}<br>
-              <small style="color:#666">${o.items.replace(/\n/g, ', ').substring(0, 40)}...</small>
-            </div>
-            <button class="btn-approve" onclick="approveOrder('${o.id}')">อนุมัติส่งของ</button>
-          </div>
-        `}).join('');
+          return '<div class="approve-item">' +
+            '<div class="approve-info">' +
+              timeBadge +
+              '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:17px;" onclick="viewOrderDetail(\'' + o.id + '\')">' + o.id + '</b> - ' + o.branch + '<br>' +
+              '<small style="color:#666">' + o.items.replace(/\n/g, ', ').substring(0, 45) + '...</small>' +
+            '</div>' +
+            '<button class="btn-approve" onclick="approveOrder(\'' + o.id + '\')">อนุมัติส่งของ</button>' +
+          '</div>';
+        }).join('');
       });
   }
 
@@ -850,235 +934,275 @@
 
   function executeApproveOrder() {
     closeM('confirmModal'); 
-    if(!pendingApproveId) return;
+    if(!pendingApproveId) {
+      return;
+    }
     
     const token = localStorage.getItem(TOKEN_KEY);
-    fetch(`${GAS_URL}?action=setOrderStatus&id=${pendingApproveId}&status=Success&token=${token}`)
-      .then(res => res.json())
-      .then(res => {
+    fetch(GAS_URL + '?action=setOrderStatus&id=' + pendingApproveId + '&status=Success&token=' + token)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(res) {
         if(res.status === 'success') {
           loadApproveList(token); 
           loadDashboardData(false, token, currentDeepSearchQuery); 
-          showToast("✅ อนุมัติสำเร็จ!");
+          showToast("✅ อนุมัติการส่งมอบเรียบร้อย!");
         }
       });
   }
   
+  /** ✅ Ultra Client Search Engine (High Performance) */
   function renderTable() {
-    const query = document.getElementById('orderSearch').value.trim().toLowerCase();
+    const input = document.getElementById('orderSearch');
+    const query = input.value.trim().toLowerCase();
     
-    let filtered = allOrders.filter(o => {
-      if(!query) return true;
+    let filtered = allOrders.filter(function(o) {
+      if(!query) {
+        return true;
+      }
+      
       const orderNum = o.id.replace(/\D/g, ''); 
-      return o.id.toLowerCase().includes(query) || 
-             orderNum.includes(query) || 
-             parseInt(orderNum) == parseInt(query) ||
-             o.customer.toLowerCase().includes(query) ||
-             o.phone.includes(query);
+      const shortNum = parseInt(orderNum).toString(); 
+      
+      // ✅ Multi-Field Searching: ID, Name, Phone, Branch
+      const idMatch = o.id.toLowerCase().includes(query);
+      const numMatch = orderNum.includes(query);
+      const shortNumMatch = (shortNum === query);
+      const customerMatch = o.customer.toLowerCase().includes(query);
+      const phoneMatch = (o.phone && o.phone.toString().includes(query));
+      const branchMatch = (o.branch && o.branch.toLowerCase().includes(query));
+      
+      return idMatch || numMatch || shortNumMatch || customerMatch || phoneMatch || branchMatch;
     });
 
     const data = filtered.slice((pgNum - 1) * pgLim, pgNum * pgLim);
     let html = '';
     
-    data.forEach(o => {
+    data.forEach(function(o) {
       const isPacked = o.status === 'Packed';
       const isSuccess = o.status === 'Success';
       
       let pTime = formatPackedTime(o.packedTime);
-      let timeHtml = (isPacked || isSuccess) && pTime && pTime !== "-" 
-        ? `<div style="font-size:10px; color:#888; margin-top:5px; background:#f3f4f6; padding:3px 8px; border-radius:10px; display:inline-block;"><i class="fas fa-box"></i> แพ็คเมื่อ ${pTime}</div>` 
-        : '';
+      let timeHtml = '';
+      
+      if ((isPacked || isSuccess) && pTime && pTime !== "-") {
+        timeHtml = '<div style="font-size:10px; color:#888; margin-top:6px; background:#f3f4f6; padding:4px 10px; border-radius:10px; display:inline-block; font-weight:500;"><i class="fas fa-box"></i> แพ็คเมื่อ ' + pTime + '</div>';
+      }
 
-      html += `
-      <tr class="${isSuccess ? 'row-ready' : ''}">
-        <td>
-          <b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:15px;" onclick="viewOrderDetail('${o.id}')">${o.id}</b>
-          <div style="margin-top: 5px;">${timeHtml}</div>
-        </td>
-        <td>${o.date}</td>
-        <td><b>${o.branch}</b></td>
-        <td>${o.customer}</td>
-        <td style="font-weight:600; color:var(--blue);">${o.phone || '-'}</td>
-        <td style="font-size:12px; color:#555;">${o.items.replace(/\n/g,'<br>')}</td>
-        <td align="center">
-          <div style="display:flex; gap:15px; justify-content:center; align-items:center;">
-            <div style="text-align:center; min-width: 60px;">
-              <span style="font-size:12px; font-weight:600; color:${isSuccess?'var(--green)': (isPacked?'#3498db':'#AAA')}">${o.status}</span>
-            </div>
-            <button class="page-btn" style="width:30px; height:30px;" onclick="printOrder('${encodeURIComponent(JSON.stringify(o))}')">
-              <i class="fas fa-print" style="font-size:12px;"></i>
-            </button>
-          </div>
-        </td>
-      </tr>`;
+      html += '<tr class="' + (isSuccess ? 'row-ready' : '') + '">' +
+        '<td>' +
+          '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:15px;" onclick="viewOrderDetail(\'' + o.id + '\')">' + o.id + '</b>' +
+          '<div style="margin-top: 5px;">' + timeHtml + '</div>' +
+        '</td>' +
+        '<td>' + o.date + '</td>' +
+        '<td><b>' + o.branch + '</b></td>' +
+        '<td>' + o.customer + '</td>' +
+        '<td style="font-weight:600; color:var(--blue);">' + (o.phone || '-') + '</td>' +
+        '<td style="font-size:12px; color:#555;">' + o.items.replace(/\n/g,'<br>') + '</td>' +
+        '<td align="center">' +
+          '<div style="display:flex; gap:15px; justify-content:center; align-items:center;">' +
+            '<div style="text-align:center; min-width: 65px;">' +
+              '<span style="font-size:12px; font-weight:600; color:' + (isSuccess?'var(--green)': (isPacked?'#3498db':'#AAA')) + '">' + o.status + '</span>' +
+            '</div>' +
+            '<button class="page-btn" style="width:32px; height:32px;" onclick="printOrder(\'' + encodeURIComponent(JSON.stringify(o)) + '\')">' +
+              '<i class="fas fa-print" style="font-size:12px;"></i>' +
+            '</button>' +
+          '</div>' +
+        '</td>' +
+      '</tr>';
     });
     
-    document.getElementById('oB').innerHTML = html || '<tr><td colspan="7" align="center" style="padding:60px;">ไม่พบข้อมูล</td></tr>';
-    document.getElementById('pI').innerText = pgNum + " / " + (Math.ceil(filtered.length/pgLim) || 1);
+    document.getElementById('oB').innerHTML = html || '<tr><td colspan="7" align="center" style="padding:70px; color:#BBB;">ไม่พบข้อมูลออเดอร์ในส่วนนี้...</td></tr>';
+    
+    const totalPages = Math.ceil(filtered.length/pgLim) || 1;
+    document.getElementById('pI').innerText = pgNum + " / " + totalPages;
   }
 
   let currentViewingOrderId = "";
 
+  /** ✅ Receipt Detail Viewer (Expanded UI) */
   function viewOrderDetail(id) {
-    const o = allOrders.find(x => x.id === id);
-    if(!o) return;
+    const o = allOrders.find(function(x) { 
+      return x.id === id; 
+    });
+    
+    if(!o) {
+      return;
+    }
     
     currentViewingOrderId = id;
 
     let tableRows = '';
     const items = o.items.split('\n');
-    items.forEach(line => {
+    
+    items.forEach(function(line) {
       if(line.trim() !== "") {
         const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
         if(match) {
-          tableRows += `<tr><td>${match[1]}</td><td align="center">${match[2]}</td><td align="center"><b>${match[3]}</b></td></tr>`;
+          tableRows += '<tr>';
+          tableRows += '<td>' + match[1] + '</td>';
+          tableRows += '<td align="center">' + match[2] + '</td>';
+          tableRows += '<td align="center"><b>' + match[3] + '</b></td>';
+          tableRows += '</tr>';
         } else {
-          tableRows += `<tr><td colspan="3">${line}</td></tr>`;
+          tableRows += '<tr><td colspan="3">' + line + '</td></tr>';
         }
       }
     });
 
     let pTime = formatPackedTime(o.packedTime);
-    let packedAlert = (o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-" 
-      ? `<div style="grid-column: 1 / -1; background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 10px; border-radius: 10px; text-align: center; margin-top: 5px;">
-           <span style="font-size: 11px; color: #166534; font-weight: 600;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
-         </div>` : '';
+    let packedAlert = '';
     
-    const bodyHtml = `
-      <div class="receipt-info-grid">
-        <div><div class="receipt-label">Order ID</div><div class="receipt-value">${o.id}</div></div>
-        <div style="text-align:right;"><div class="receipt-label">Date</div><div class="receipt-value">${o.date}</div></div>
-        <div><div class="receipt-label">Branch</div><div class="receipt-value">${o.branch}</div></div>
-        <div style="text-align:right;"><div class="receipt-label">Phone</div><div class="receipt-value">${o.phone || '-'}</div></div>
-        ${packedAlert}
-      </div>
-      <table class="receipt-table">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th style="text-align:center;">Stock</th>
-            <th style="text-align:center;">QTY</th>
-          </tr>
-        </thead>
-        <tbody>${tableRows}</tbody>
-      </table>`;
+    if ((o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-") {
+      packedAlert = '<div style="grid-column: 1 / -1; background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 12px; border-radius: 12px; text-align: center; margin-top: 8px;">';
+      packedAlert += '<span style="font-size: 11px; color: #166534; font-weight: 600;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ' + pTime + '</span>';
+      packedAlert += '</div>';
+    }
+    
+    const bodyHtml = '<div class="receipt-info-grid">' +
+        '<div><div class="receipt-label">Order ID</div><div class="receipt-value">' + o.id + '</div></div>' + 
+        '<div style="text-align:right;"><div class="receipt-label">Date</div><div class="receipt-value">' + o.date + '</div></div>' +
+        '<div><div class="receipt-label">Branch</div><div class="receipt-value">' + o.branch + '</div></div>' +
+        '<div style="text-align:right;"><div class="receipt-label">Phone</div><div class="receipt-value">' + (o.phone || '-') + '</div></div>' +
+        packedAlert +
+      '</div>' +
+      '<table class="receipt-table">' +
+        '<thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>' +
+        '<tbody>' + tableRows + '</tbody>' +
+      '</table>';
       
     document.getElementById('receiptBody').innerHTML = bodyHtml;
     document.getElementById('printDate').innerText = new Date().toLocaleString("th-TH");
     document.getElementById('receiptModal').style.display = 'flex';
   }
 
+  /** ✅ A4 PDF Document Generator (Full Scale) */
   function downloadPDF() {
-    const o = allOrders.find(x => x.id === currentViewingOrderId);
-    if(!o) return;
+    const o = allOrders.find(function(x) { 
+      return x.id === currentViewingOrderId; 
+    });
+    
+    if(!o) {
+      return;
+    }
 
     const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
     btn.disabled = true;
 
     let tableRows = '';
     const items = o.items.split('\n');
-    items.forEach(line => {
+    
+    items.forEach(function(line) {
       if(line.trim() !== "") {
         const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
         if(match) {
-          tableRows += `<tr><td style="padding:10px; border-bottom:1px solid #EEE;">${match[1]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;">${match[2]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;"><b>${match[3]}</b></td></tr>`;
+          tableRows += '<tr>';
+          tableRows += '<td style="padding:12px; border-bottom:1px solid #EEE;">' + match[1] + '</td>';
+          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;">' + match[2] + '</td>';
+          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;"><b>' + match[3] + '</b></td>';
+          tableRows += '</tr>';
         } else {
-          tableRows += `<tr><td colspan="3" style="padding:10px; border-bottom:1px solid #EEE;">${line}</td></tr>`;
+          tableRows += '<tr><td colspan="3" style="padding:12px; border-bottom:1px solid #EEE;">' + line + '</td></tr>';
         }
       }
     });
 
     let pTime = formatPackedTime(o.packedTime);
-    let packedAlert = (o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-" 
-      ? `<div style="background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-           <span style="font-size: 13px; color: #166534; font-weight: bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
-         </div>` : '';
+    let packedAlert = '';
+    
+    if ((o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-") {
+      packedAlert = '<div style="background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 25px;">';
+      packedAlert += '<span style="font-size: 13px; color: #166534; font-weight: bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ' + pTime + '</span>';
+      packedAlert += '</div>';
+    }
 
-    const win = window.open('', '', 'width=800,height=600');
-    win.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Export PDF</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
-        <style>
-          body { font-family: Tahoma, sans-serif; padding: 20px; color: #333; }
-          .box { padding: 40px; border: 2px solid #EEE; border-radius: 20px; max-width: 600px; margin: 0 auto; }
-          .header { text-align: center; color: #A91D3A; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
-          .grid { display: flex; justify-content: space-between; margin-bottom: 20px; background: #F9F9F9; padding: 15px; border-radius: 10px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
-          th { text-align: left; padding: 10px; border-bottom: 2px solid #DDD; font-size: 14px; color: #2D3133; }
-          .footer { text-align: center; margin-top: 20px; border-top: 1px dashed #CCC; padding-top: 20px; font-size: 12px; color: #888; }
-        </style>
-      </head>
-      <body>
-        <div id="pdf-content" class="box">
-          <div class="header">ORDER RECEIPT</div>
-          ${packedAlert}
-          <div class="grid">
-            <div>
-              <div style="font-size:11px; color:#999;">ORDER ID</div>
-              <div style="font-size:14px; font-weight:bold;">${o.id}</div>
-              <div style="font-size:11px; color:#999; margin-top:10px;">BRANCH</div>
-              <div style="font-size:14px; font-weight:bold;">${o.branch}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:11px; color:#999;">DATE</div>
-              <div style="font-size:14px; font-weight:bold;">${o.date}</div>
-              <div style="font-size:11px; color:#999; margin-top:10px;">PHONE</div>
-              <div style="font-size:14px; font-weight:bold;">${o.phone || '-'}</div>
-            </div>
-          </div>
-          <table>
-            <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
-            <tbody>${tableRows}</tbody>
-          </table>
-          <div class="footer">
-            <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
-            <p>วันที่พิมพ์: ${new Date().toLocaleString("th-TH")}</p>
-          </div>
-        </div>
-        <script>
-          window.onload = function() {
-            const element = document.getElementById('pdf-content');
-            html2pdf().set({
-              margin: 10,
-              filename: 'Receipt_${o.id}.pdf',
-              image: { type: 'jpeg', quality: 0.98 },
-              html2canvas: { scale: 2, useCORS: true },
-              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(element).save().then(function() {
-              setTimeout(function() { window.close(); }, 1000);
-            });
-          };
-        <\/script>
-      </body>
-      </html>
-    `);
+    const win = window.open('', '', 'width=850,height=900');
+    
+    // กางแท็ก HTML แบบละเอียดบรรทัดต่อบรรทัด
+    win.document.write('<!DOCTYPE html>');
+    win.document.write('<html>');
+    win.document.write('<head>');
+    win.document.write('<title>CoffeeToday Receipt</title>');
+    win.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+    win.document.write('<style>');
+    win.document.write('body{font-family:Tahoma, sans-serif; padding:20px; color:#333;}');
+    win.document.write('.box{padding:45px; border:2px solid #EEE; border-radius:25px; max-width:650px; margin:0 auto;}');
+    win.document.write('.header{text-align:center; color:#A91D3A; font-size:26px; font-weight:bold; margin-bottom:25px;}');
+    win.document.write('.grid{display:flex; justify-content:space-between; margin-bottom:25px; background:#F9F9F9; padding:20px; border-radius:15px;}');
+    win.document.write('table{width:100%; border-collapse:collapse; margin-top:15px; margin-bottom:25px;}');
+    win.document.write('th{text-align:left; padding:12px; border-bottom:2px solid #DDD; font-size:14px; color:#2D3133;}');
+    win.document.write('.footer{text-align:center; margin-top:30px; border-top:1px dashed #CCC; padding-top:25px; font-size:12px; color:#888;}');
+    win.document.write('</style>');
+    win.document.write('</head>');
+    win.document.write('<body>');
+    win.document.write('<div id="pdf-content" class="box">');
+    win.document.write('<div class="header">ORDER RECEIPT</div>');
+    win.document.write(packedAlert);
+    win.document.write('<div class="grid">');
+    win.document.write('<div>');
+    win.document.write('<div style="font-size:11px; color:#999;">ORDER ID</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.id + '</div>');
+    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">BRANCH</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.branch + '</div>');
+    win.document.write('</div>');
+    win.document.write('<div style="text-align:right;">');
+    win.document.write('<div style="font-size:11px; color:#999;">DATE</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.date + '</div>');
+    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">PHONE</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + (o.phone || '-') + '</div>');
+    win.document.write('</div>');
+    win.document.write('</div>');
+    win.document.write('<table>');
+    win.document.write('<thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>');
+    win.document.write('<tbody>' + tableRows + '</tbody>');
+    win.document.write('</table>');
+    win.document.write('<div class="footer">');
+    win.document.write('<p>เอกสารยืนยันการจัดเตรียมสินค้า</p>');
+    win.document.write('<p>วันที่พิมพ์: ' + new Date().toLocaleString("th-TH") + '</p>');
+    win.document.write('</div>');
+    win.document.write('</div>');
+    win.document.write('<script>');
+    win.document.write('window.onload=function(){');
+    win.document.write('const element=document.getElementById("pdf-content");');
+    win.document.write('html2pdf().set({margin:10, filename:"Receipt_' + o.id + '.pdf", image:{type:"jpeg", quality:0.98},');
+    win.document.write('html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
+    win.document.write('}).from(element).save().then(function(){setTimeout(function(){window.close();},1000);});');
+    win.document.write('};');
+    win.document.write('<\/script>');
+    win.document.write('</body>');
+    win.document.write('</html>');
+    
     win.document.close();
 
-    setTimeout(() => {
+    setTimeout(function() {
       btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF';
       btn.disabled = false;
-    }, 1000);
+    }, 1200);
   }
 
+  /** ✅ Branch Summary PDF Generator */
   function downloadSummaryReport() {
-    if(allOrders.length === 0) return alert("ไม่มีข้อมูล");
+    if(allOrders.length === 0) {
+      return alert("ไม่มีข้อมูลในช่วงเวลาที่เลือก...");
+    }
+    
     const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     btn.disabled = true;
 
-    const startDate = document.getElementById('sDate').value || "จุดเริ่มต้น";
+    const startDate = document.getElementById('sDate').value || "เริ่มต้น";
     const endDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
     const branchSummary = {};
-    allOrders.forEach(order => {
+    allOrders.forEach(function(order) {
       const branchName = order.branch || "อื่นๆ";
-      if (!branchSummary[branchName]) branchSummary[branchName] = {};
+      if (!branchSummary[branchName]) {
+        branchSummary[branchName] = {};
+      }
 
-      order.items.split('\n').forEach(line => {
+      order.items.split('\n').forEach(function(line) {
         const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
         if (match) {
           const itemName = match[1].trim();
@@ -1088,250 +1212,400 @@
             branchSummary[branchName][itemName] = { total: 0, stock: stockVal };
           }
           branchSummary[branchName][itemName].total += qtyOrdered;
+          branchSummary[branchName][itemName].stock = stockVal;
         }
       });
     });
 
     let branchTablesHTML = "";
-    Object.keys(branchSummary).sort().forEach(branch => {
+    Object.keys(branchSummary).sort().forEach(function(branch) {
       let itemRows = "";
-      Object.entries(branchSummary[branch]).forEach(([item, data]) => {
-        itemRows += `
-          <tr>
-            <td style="padding:6px 10px; border-bottom:1px solid #EEE; font-size:12px;">${item}</td>
-            <td style="padding:6px 10px; border-bottom:1px solid #EEE; text-align:center; font-size:12px; color:#666;">${data.stock}</td>
-            <td style="padding:6px 10px; border-bottom:1px solid #EEE; text-align:center; font-weight:bold; font-size:12px; color:#A91D3A;">${data.total}</td>
-          </tr>`;
+      Object.entries(branchSummary[branch]).forEach(function(entry) {
+        let item = entry[0]; let data = entry[1];
+        itemRows += '<tr>';
+        itemRows += '<td style="padding:10px; border-bottom:1px solid #EEE; font-size:12px;">' + item + '</td>';
+        itemRows += '<td style="padding:10px; border-bottom:1px solid #EEE; text-align:center; font-size:12px; color:#666;">' + data.stock + '</td>';
+        itemRows += '<td style="padding:10px; border-bottom:1px solid #EEE; text-align:center; font-weight:bold; font-size:12px; color:#A91D3A;">' + data.total + '</td>';
+        itemRows += '</tr>';
       });
 
-      branchTablesHTML += `
-        <div style="page-break-inside:avoid; margin-bottom:20px; border:1px solid #EEE; border-radius:8px; overflow:hidden;">
-          <h2 style="background:#F8F9FA; padding:10px; color:#A91D3A; border-left:5px solid #A91D3A; font-size:16px; margin:0; font-weight:bold;">สาขา: ${branch}</h2>
-          <table style="width:100%; border-collapse:collapse;">
-            <thead>
-              <tr style="background:#FAFAFA; font-size:12px;">
-                <th style="padding:8px 10px; text-align:left; border-bottom:2px solid #EEE; width:50%;">รายการสินค้า</th>
-                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE;">ยอดคงเหลือ</th>
-                <th style="padding:8px 10px; text-align:center; border-bottom:2px solid #EEE;">ยอดรวมสั่งซื้อ</th>
-              </tr>
-            </thead>
-            <tbody>${itemRows}</tbody>
-          </table>
-        </div>`;
+      branchTablesHTML += '<div style="break-inside:avoid; margin-bottom:25px; border:1px solid #EEE; border-radius:12px; overflow:hidden;">' +
+          '<h2 style="background:#F8F9FA; padding:12px; color:#A91D3A; border-left:5px solid #A91D3A; font-size:16px; margin:0; font-weight:bold;">สาขา: ' + branch + '</h2>' +
+          '<table style="width:100%; border-collapse:collapse;">' +
+            '<thead><tr style="background:#FAFAFA; font-size:12px;">' +
+                '<th style="padding:10px; text-align:left; border-bottom:2px solid #EEE; width:50%;">รายการสินค้า</th>' +
+                '<th style="padding:10px; text-align:center; border-bottom:2px solid #EEE;">คงเหลือล่าสุด</th>' +
+                '<th style="padding:10px; text-align:center; border-bottom:2px solid #EEE;">ยอดรวมสั่งซื้อ</th>' +
+            '</tr></thead><tbody>' + itemRows + '</tbody></table></div>';
     });
 
-    const win = window.open('', '', 'width=800,height=600');
-    win.document.write(`
-      <html>
-      <head>
-        <title>Summary PDF</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
-        <style>
-          body { font-family: Tahoma, sans-serif; padding: 20px; color: #333; background: #FFF; }
-          .box { max-width: 800px; margin: 0 auto; }
-          .header { text-align: center; margin-bottom: 20px; }
-          h1 { color: #A91D3A; margin: 0; font-size: 24px; font-weight: bold; }
-          .footer { text-align: center; font-size: 11px; color: #BBB; margin-top: 30px; border-top: 1px dashed #EEE; padding-top: 10px; }
-        </style>
-      </head>
-      <body>
-        <div id="pdf-content" class="box">
-          <div class="header">
-            <h1>CoffeeToday Summary Report</h1>
-            <p>ช่วงวันที่: ${startDate} ถึง ${endDate}</p>
-          </div>
-          ${branchTablesHTML}
-          <div class="footer">พิมพ์เมื่อ: ${new Date().toLocaleString("th-TH")}</div>
-        </div>
-        <script>
-          window.onload = function() {
-            const element = document.getElementById('pdf-content');
-            html2pdf().set({
-              margin: 10,
-              filename: 'Summary.pdf',
-              image: { type: 'jpeg', quality: 0.98 },
-              html2canvas: { scale: 2, useCORS: true },
-              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(element).save().then(function() {
-              setTimeout(function() { window.close(); }, 1000);
-            });
-          };
-        <\/script>
-      </body>
-      </html>
-    `);
+    const win = window.open('', '', 'width=900,height=800');
+    
+    win.document.write('<!DOCTYPE html>');
+    win.document.write('<html>');
+    win.document.write('<head>');
+    win.document.write('<title>Branch Summary</title>');
+    win.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+    win.document.write('<style>');
+    win.document.write('body{font-family:Tahoma, sans-serif; padding:35px; color:#333; background:#FFF;}');
+    win.document.write('.box{max-width:850px; margin:0 auto;}');
+    win.document.write('h1{color:#A91D3A; margin:0 0 10px 0; font-size:26px; font-weight:bold; text-align:center;}');
+    win.document.write('p{color:#888; font-size:14px; margin:0; text-align:center;}');
+    win.document.write('.footer{text-align:center; font-size:11px; color:#BBB; margin-top:35px; border-top:1px dashed #EEE; padding-top:15px;}');
+    win.document.write('</style>');
+    win.document.write('</head>');
+    win.document.write('<body>');
+    win.document.write('<div id="pdf-content" class="box">');
+    win.document.write('<h1>CoffeeToday Summary Report</h1>');
+    win.document.write('<p>ช่วงวันที่: ' + startDate + ' ถึง ' + endDate + '</p>');
+    win.document.write('<br>' + branchTablesHTML);
+    win.document.write('<div class="footer">พิมพ์เมื่อ: ' + new Date().toLocaleString("th-TH") + '</div>');
+    win.document.write('</div>');
+    win.document.write('<script>');
+    win.document.write('window.onload=function(){');
+    win.document.write('const element=document.getElementById("pdf-content");');
+    win.document.write('html2pdf().set({margin:10, filename:"Summary.pdf", image:{type:"jpeg", quality:0.98},');
+    win.document.write('html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
+    win.document.write('}).from(element).save().then(function(){setTimeout(function(){window.close();},1000);});');
+    win.document.write('};');
+    win.document.write('<\/script>');
+    win.document.write('</body>');
+    win.document.write('</html>');
+    
     win.document.close();
 
-    setTimeout(() => {
+    setTimeout(function() {
       btn.innerHTML = '<i class="fas fa-file-invoice"></i> สรุปรายสาขา';
       btn.disabled = false;
-    }, 1000);
+    }, 1200);
   }
 
+  /** ✅ High-Quality Print Interface (Table Style) */
   function printOrder(data) { 
     const o = JSON.parse(decodeURIComponent(data));
     
     let tableRows = '';
     const items = o.items.split('\n');
-    items.forEach(line => {
+    
+    items.forEach(function(line) {
       if(line.trim() !== "") {
         const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
         if(match) {
-          tableRows += `<tr><td style="padding:10px; border-bottom:1px solid #EEE;">${match[1]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;">${match[2]}</td><td align="center" style="padding:10px; border-bottom:1px solid #EEE;"><b>${match[3]}</b></td></tr>`;
+          tableRows += '<tr>';
+          tableRows += '<td style="padding:12px; border-bottom:1px solid #EEE;">' + match[1] + '</td>';
+          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;">' + match[2] + '</td>';
+          tableRows += '<td align="center" style="padding:12px; border-bottom:1px solid #EEE;"><b>' + match[3] + '</b></td>';
+          tableRows += '</tr>';
         } else {
-          tableRows += `<tr><td colspan="3" style="padding:10px; border-bottom:1px solid #EEE;">${line}</td></tr>`;
+          tableRows += '<tr><td colspan="3" style="padding:12px; border-bottom:1px solid #EEE;">' + line + '</td></tr>';
         }
       }
     });
 
     let pTime = formatPackedTime(o.packedTime);
-    let timeHtml = (o.status === 'Packed' || o.status === 'Success') && pTime !== "-" 
-      ? `<div style="background:#f0fdf4; border:1px dashed #bbf7d0; padding:15px; border-radius:10px; text-align:center; margin-bottom:20px;">
-           <span style="color:#166534; font-size:14px; font-weight:bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
-         </div>` : '';
+    let timeHtml = '';
+    
+    if ((o.status === 'Packed' || o.status === 'Success') && pTime !== "-") {
+      timeHtml = '<div style="background:#f0fdf4; border:1px dashed #bbf7d0; padding:18px; border-radius:12px; text-align:center; margin-bottom:25px;">';
+      timeHtml += '<span style="color:#166534; font-size:15px; font-weight:bold;">✓ จัดเตรียมของเสร็จสิ้นเมื่อ: ' + pTime + '</span>';
+      timeHtml += '</div>';
+    }
 
     const win = window.open('','','width=800,height=800'); 
-    win.document.write(`
-      <html>
-        <head>
-          <style>
-            body{font-family:Tahoma, sans-serif; padding:40px; color:#333;} 
-            .box{border:3px solid #EEE; padding:40px; border-radius:20px; max-width:600px; margin:0 auto;} 
-            h1{color:#A91D3A; text-align:center; font-size:24px; margin-bottom:20px;}
-            .grid { display: flex; justify-content: space-between; margin-bottom: 20px; background: #F9F9F9; padding: 15px; border-radius: 10px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th { text-align: left; padding: 10px; border-bottom: 2px solid #DDD; font-size: 14px; color: #2D3133; }
-          </style>
-        </head>
-        <body>
-          <div class="box">
-            <h1>ORDER RECEIPT</h1>
-            ${timeHtml}
-            <div class="grid">
-              <div>
-                <div style="font-size:11px; color:#999;">ORDER ID</div>
-                <div style="font-size:14px; font-weight:bold;">${o.id}</div>
-                <div style="font-size:11px; color:#999; margin-top:10px;">BRANCH</div>
-                <div style="font-size:14px; font-weight:bold;">${o.branch}</div>
-              </div>
-              <div style="text-align:right;">
-                <div style="font-size:11px; color:#999;">DATE</div>
-                <div style="font-size:14px; font-weight:bold;">${o.date}</div>
-                <div style="font-size:11px; color:#999; margin-top:10px;">PHONE</div>
-                <div style="font-size:14px; font-weight:bold;">${o.phone || '-'}</div>
-              </div>
-            </div>
-            <table>
-              <thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>
-              <tbody>${tableRows}</tbody>
-            </table>
-            <div style="text-align: center; margin-top: 40px; border-top: 1px dashed #CCC; padding-top: 20px; font-size: 12px; color: #888;">
-              <p>เอกสารยืนยันการจัดเตรียมสินค้า</p>
-              <p>วันที่พิมพ์: ${new Date().toLocaleString("th-TH")}</p>
-            </div>
-          </div>
-          <script>window.print();<\/script>
-        </body>
-      </html>
-    `); 
+    
+    win.document.write('<html>');
+    win.document.write('<head>');
+    win.document.write('<style>');
+    win.document.write('body{font-family:Tahoma, sans-serif; padding:45px; color:#333;}');
+    win.document.write('.box{border:3px solid #EEE; padding:45px; border-radius:25px; max-width:650px; margin:0 auto;}'); 
+    win.document.write('h1{color:#A91D3A; text-align:center; font-size:26px; margin-bottom:25px;}');
+    win.document.write('.grid{display:flex; justify-content:space-between; margin-bottom:25px; background:#F9F9F9; padding:20px; border-radius:15px;}');
+    win.document.write('table{width:100%; border-collapse:collapse; margin-top:15px;}');
+    win.document.write('th{text-align:left; padding:12px; border-bottom:2px solid #DDD; font-size:14px; color:#2D3133;}');
+    win.document.write('</style>');
+    win.document.write('</head>');
+    win.document.write('<body>');
+    win.document.write('<div class="box">');
+    win.document.write('<h1>ORDER RECEIPT</h1>');
+    win.document.write(timeHtml);
+    win.document.write('<div class="grid">');
+    win.document.write('<div>');
+    win.document.write('<div style="font-size:11px; color:#999;">ORDER ID</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.id + '</div>');
+    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">BRANCH</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.branch + '</div>');
+    win.document.write('</div>');
+    win.document.write('<div style="text-align:right;">');
+    win.document.write('<div style="font-size:11px; color:#999;">DATE</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + o.date + '</div>');
+    win.document.write('<div style="font-size:11px; color:#999; margin-top:12px;">PHONE</div>');
+    win.document.write('<div style="font-size:15px; font-weight:bold;">' + (o.phone || '-') + '</div>');
+    win.document.write('</div>');
+    win.document.write('</div>');
+    win.document.write('<table>');
+    win.document.write('<thead><tr><th>Product</th><th style="text-align:center;">Stock</th><th style="text-align:center;">QTY</th></tr></thead>');
+    win.document.write('<tbody>' + tableRows + '</tbody>');
+    win.document.write('</table>');
+    win.document.write('<div style="text-align:center; margin-top:45px; border-top:1px dashed #CCC; padding-top:25px; font-size:12px; color:#888;">');
+    win.document.write('<p>เอกสารยืนยันการจัดเตรียมสินค้า</p>');
+    win.document.write('<p>วันที่พิมพ์: ' + new Date().toLocaleString("th-TH") + '</p>');
+    win.document.write('</div>');
+    win.document.write('</div>');
+    win.document.write('<script>window.print();<\/script>');
+    win.document.write('</body>');
+    win.document.write('</html>');
+    
     win.document.close(); 
   }
   
+  /** ✅ Chart.js Handlers */
   function renderCharts(c) {
-    if(bcObj) bcObj.destroy(); 
-    if(pcObj) pcObj.destroy(); 
-    if(scObj) scObj.destroy();
+    if(bcObj) {
+      bcObj.destroy();
+    }
+    
+    if(pcObj) {
+      pcObj.destroy();
+    }
+    
+    if(scObj) {
+      scObj.destroy();
+    }
     
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
       data: { 
         labels: c.pL, 
-        datasets: [{ label: 'จำนวนสั่ง', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10, barPercentage: 0.6, categoryPercentage: 0.8 }] 
+        datasets: [{ 
+          label: 'จำนวนสั่ง', 
+          data: c.pV, 
+          backgroundColor: '#A91D3A', 
+          borderRadius: 10, 
+          barPercentage: 0.6, 
+          categoryPercentage: 0.8 
+        }] 
       }, 
       options: { 
-        maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, 
-        scales: { x: { title: { display: true, text: 'จำนวนที่สั่ง (ชิ้น)', font: { family: 'Prompt', size: 10 } } } } 
+        maintainAspectRatio: false, 
+        indexAxis: 'y', 
+        plugins: { 
+          legend: { 
+            display: false 
+          } 
+        }, 
+        scales: { 
+          x: { 
+            title: { 
+              display: true, 
+              text: 'จำนวนที่สั่ง (ชิ้น)', 
+              font: { family: 'Prompt', size: 10 } 
+            } 
+          } 
+        } 
       } 
     });
     
     pcObj = new Chart(document.getElementById('pC_Chart'), { 
       type: 'doughnut', 
-      data: { labels: c.bL, datasets: [{ data: c.bV, backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] }] }, 
-      options: { maintainAspectRatio: false, cutout: '78%' } 
+      data: { 
+        labels: c.bL, 
+        datasets: [{ 
+          data: c.bV, 
+          backgroundColor: ['#2D3133','#A91D3A','#CCC','#DDD','#888','#555'] 
+        }] 
+      }, 
+      options: { 
+        maintainAspectRatio: false, 
+        cutout: '78%' 
+      } 
     });
     
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar', 
-      data: { labels: c.sL ? c.sL.slice(0, 15) : [], datasets: [{ label: 'คงเหลือล่าสุด', data: c.sV ? c.sV.slice(0, 15) : [], backgroundColor: '#f39c12', borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.8 }] },
-      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, 
-        scales: { x: { title: { display: true, text: 'จำนวนคงเหลือล่าสุด (ชิ้น)', font: { family: 'Prompt', size: 10 } } } } 
+      data: { 
+        labels: c.sL ? c.sL.slice(0, 15) : [], 
+        datasets: [{ 
+          label: 'คงเหลือล่าสุด', 
+          data: c.sV ? c.sV.slice(0, 15) : [], 
+          backgroundColor: '#f39c12', 
+          borderRadius: 8, 
+          barPercentage: 0.6, 
+          categoryPercentage: 0.8 
+        }] 
+      },
+      options: { 
+        maintainAspectRatio: false, 
+        indexAxis: 'y', 
+        plugins: { 
+          legend: { 
+            display: false 
+          } 
+        }, 
+        scales: { 
+          x: { 
+            title: { 
+              display: true, 
+              text: 'จำนวนคงเหลือล่าสุด (ชิ้น)', 
+              font: { family: 'Prompt', size: 10 } 
+            } 
+          } 
+        } 
       }
     });
   }
 
+  /** ✅ Menu Configuration Accordion */
   function renderMenuAccordion(d) {
-    if(!d || !d.categories) return;
+    if(!d || !d.categories) {
+      return;
+    }
+    
     menuObj = d; 
-    let chipsHtml = ''; let itemsHtml = ''; let opts = '';
-    if(!currentCat && d.categories.length > 0) currentCat = d.categories[0];
-    d.categories.forEach(cat => {
-      opts += `<option value="${cat}">${cat}</option>`;
-      chipsHtml += `<div class="chip ${cat === currentCat ? 'active' : ''}" onclick="selectCat('${cat}')">${cat} (${d.grouped[cat] ? d.grouped[cat].length : 0})</div>`;
+    let chipsHtml = ''; 
+    let itemsHtml = ''; 
+    let opts = '';
+    
+    if(!currentCat && d.categories.length > 0) {
+      currentCat = d.categories[0];
+    }
+    
+    d.categories.forEach(function(cat) {
+      opts += '<option value="' + cat + '">' + cat + '</option>';
+      
+      let count = d.grouped[cat] ? d.grouped[cat].length : 0;
+      chipsHtml += '<div class="chip ' + (cat === currentCat ? 'active' : '') + '" onclick="selectCat(\'' + cat + '\')">';
+      chipsHtml += cat + ' (' + count + ')';
+      chipsHtml += '</div>';
     });
+    
     if(currentCat && d.grouped[currentCat]) {
-      d.grouped[currentCat].forEach(i => { 
-        itemsHtml += `
-          <div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">
-            <span style="font-weight:600; color:#444;">${i.name}</span>
-            <div style="display:flex; gap:25px; align-items:center;">
-              <label class="switch">
-                <input type="checkbox" ${i.status==='Active'?'checked':''} onchange="toggleItem('${i.rowId}', '${i.name}', '${currentCat}', this)">
-                <span class="slider"></span>
-              </label>
-              <i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${i.rowId}, '${i.name}', '${currentCat}')"></i>
-            </div>
-          </div>`; 
+      d.grouped[currentCat].forEach(function(i) { 
+        itemsHtml += '<div class="cat-item" style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F9F9F9; align-items:center;">';
+        itemsHtml += '<span style="font-weight:600; color:#444;">' + i.name + '</span>';
+        itemsHtml += '<div style="display:flex; gap:25px; align-items:center;">';
+        itemsHtml += '<label class="switch">';
+        itemsHtml += '<input type="checkbox" ' + (i.status==='Active'?'checked':'') + ' onchange="toggleItem(\'' + i.rowId + '\', \'' + i.name + '\', \'' + currentCat + '\', this)">';
+        itemsHtml += '<span class="slider"></span>';
+        itemsHtml += '</label>';
+        itemsHtml += '<i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(' + i.rowId + ', \'' + i.name + '\', \'' + currentCat + '\')"></i>';
+        itemsHtml += '</div>';
+        itemsHtml += '</div>'; 
       });
     }
+    
     document.getElementById('catChips').innerHTML = chipsHtml; 
     document.getElementById('menuItems').innerHTML = itemsHtml; 
     document.getElementById('pCatSelect').innerHTML = opts;
   }
 
-  function selectCat(cat) { currentCat = cat; renderMenuAccordion(menuObj); }
+  function selectCat(cat) { 
+    currentCat = cat; 
+    renderMenuAccordion(menuObj); 
+  }
 
   function toggleItem(id, n, c, el) { 
     const token = localStorage.getItem(TOKEN_KEY);
     const status = el.checked ? 'Active' : 'Inactive';
-    fetch(`${GAS_URL}?action=updateProduct&id=${id}&name=${n}&cat=${c}&status=${status}&token=${token}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast(el.checked ? "✅ เปิดใช้งาน!" : "🌑 ปิดใช้งาน"); });
+    
+    fetch(GAS_URL + '?action=updateProduct&id=' + id + '&name=' + n + '&cat=' + c + '&status=' + status + '&token=' + token)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(d) { 
+        renderMenuAccordion(d); 
+        showToast(el.checked ? "✅ เปิดการใช้งานแล้ว!" : "🌑 ปิดการใช้งานแล้ว"); 
+      });
   }
 
-  function openCatModal() { document.getElementById('cN').value = ''; document.getElementById('cM').style.display = 'flex'; }
-  function closeM(id) { document.getElementById(id).style.display='none'; }
+  function openCatModal() { 
+    document.getElementById('cN').value = ''; 
+    document.getElementById('cM').style.display = 'flex'; 
+  }
+
+  function closeM(id) { 
+    document.getElementById(id).style.display='none'; 
+  }
+
+  /** ✅ Modern Toast Notifications */
   function showToast(msg) {
-    const t = document.createElement('div'); t.innerText = msg;
-    t.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:12px 25px; border-radius:50px; z-index:10000; box-shadow:0 5px 15px rgba(0,0,0,0.2); font-family:'Prompt'; animation: fadeInOut 2s forwards;";
-    document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+    const t = document.createElement('div'); 
+    t.innerText = msg;
+    t.style = "position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:15px 35px; border-radius:50px; z-index:10000; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-family:'Prompt'; font-weight:600; animation: fadeInOut 2.5s forwards;";
+    document.body.appendChild(t); 
+    
+    setTimeout(function() { 
+      t.remove(); 
+    }, 2500);
   }
 
   function saveCat() { 
-    const n = document.getElementById('cN').value; if(!n) return; closeM('cM');
+    const n = document.getElementById('cN').value; 
+    if(!n) {
+      return; 
+    }
+    
+    closeM('cM'); 
     const token = localStorage.getItem(TOKEN_KEY);
-    fetch(`${GAS_URL}?action=addCategory&catName=${n}&token=${token}`).then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); });
+    
+    fetch(GAS_URL + '?action=addCategory&catName=' + n + '&token=' + token)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(d) { 
+        renderMenuAccordion(d); 
+        showToast("✅ เพิ่มหมวดหมู่สำเร็จ!"); 
+      });
   }
 
-  function openProdModal(id=null, n='', c='') { editTargetId = id; document.getElementById('pN').value = n; document.getElementById('pCatSelect').value = c || (menuObj.categories ? menuObj.categories[0] : ''); document.getElementById('pM').style.display = 'flex'; }
+  function openProdModal(id, n, c) { 
+    editTargetId = id || null; 
+    document.getElementById('pN').value = n || ''; 
+    document.getElementById('pCatSelect').value = c || (menuObj.categories ? menuObj.categories[0] : ''); 
+    document.getElementById('pM').style.display = 'flex'; 
+  }
 
   function saveP() { 
-    const name = document.getElementById('pN').value; const cat = document.getElementById('pCatSelect').value; if(!name) return; closeM('pM');
+    const name = document.getElementById('pN').value; 
+    const cat = document.getElementById('pCatSelect').value; 
+    
+    if(!name) {
+      return; 
+    }
+    
+    closeM('pM'); 
     const token = localStorage.getItem(TOKEN_KEY);
-    fetch(`${GAS_URL}?action=updateProduct&id=${editTargetId}&name=${name}&cat=${cat}&status=Active&token=${token}`).then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("✅ บันทึกสินค้าเรียบร้อย!"); });
+    
+    fetch(GAS_URL + '?action=updateProduct&id=' + editTargetId + '&name=' + name + '&cat=' + cat + '&status=Active&token=' + token)
+      .then(function(res) { 
+        return res.json(); 
+      })
+      .then(function(d) { 
+        renderMenuAccordion(d); 
+        showToast("✅ บันทึกข้อมูลสินค้าเรียบร้อย!"); 
+      });
   }
 
-  function changeLimit() { pgLim = parseInt(document.getElementById('rowSel').value); pgNum = 1; renderTable(); }
-  function next() { if(pgNum * pgLim < allOrders.length){ pgNum++; renderTable(); } }
-  function prev() { if(pgNum > 1){ pgNum--; renderTable(); } }
+  /** ✅ Pagination Logic */
+  function changeLimit() { 
+    pgNum = 1; 
+    pgLim = parseInt(document.getElementById('rowSel').value); 
+    renderTable(); 
+  }
+
+  function next() { 
+    const total = Math.ceil(allOrders.length / pgLim);
+    if(pgNum < total){ 
+      pgNum++; 
+      renderTable(); 
+    } 
+  }
+
+  function prev() { 
+    if(pgNum > 1){ 
+      pgNum--; 
+      renderTable(); 
+    } 
+  }
 </script>
 </body>
 </html>
