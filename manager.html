@@ -460,6 +460,18 @@
       });
   }
 
+  /**
+   * ✅ ฟังก์ชันช่วยแปลงเวลาที่มีตัว T หรือ Z (ISO String) ให้เป็นเวลาไทยสวยๆ
+   */
+  function formatPackedTime(pt) {
+    if (!pt || pt === "-") return "-";
+    if (typeof pt === 'string' && pt.includes('T') && pt.includes('Z')) {
+      const d = new Date(pt);
+      return d.toLocaleDateString('th-TH', {day: '2-digit', month: '2-digit', year: 'numeric'}) + ' ' + d.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+    }
+    return pt;
+  }
+
   function loadApproveList(token) {
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
     fetch(`${GAS_URL}?action=getOrdersByStatus&status=Packed&token=${currentToken}`)
@@ -473,15 +485,23 @@
         }
         
         card.style.display = 'block';
-        div.innerHTML = data.map(o => `
+        div.innerHTML = data.map(o => {
+          // ✅ ดึงเวลา PackedTime มาโชว์เหนือ Order ID ในหน้า Approve
+          let matchOrder = allOrders.find(x => x.id === o.id);
+          let ptStr = matchOrder && matchOrder.packedTime ? matchOrder.packedTime : "-";
+          let pTime = formatPackedTime(ptStr);
+          let timeBadge = pTime !== "-" ? `<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:3px 8px; border-radius:6px; display:inline-block; margin-bottom:8px;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ${pTime}</div><br>` : '';
+
+          return `
           <div class="approve-item">
             <div class="approve-info">
+              ${timeBadge}
               <b style="color:var(--red); cursor:pointer; text-decoration:underline;" onclick="viewOrderDetail('${o.id}')">${o.id}</b> - ${o.branch}<br>
               <small style="color:#666">${o.items.replace(/\n/g, ', ').substring(0, 40)}...</small>
             </div>
             <button class="btn-approve" onclick="approveOrder('${o.id}')">อนุมัติส่งของ</button>
           </div>
-        `).join('');
+        `}).join('');
       });
   }
 
@@ -525,8 +545,10 @@
       const isPacked = o.status === 'Packed';
       const isSuccess = o.status === 'Success';
       
-      let timeHtml = (isPacked || isSuccess) && o.packedTime && o.packedTime !== "-" 
-        ? `<div style="font-size:10px; color:#888; margin-top:5px; background:#f3f4f6; padding:3px 8px; border-radius:10px; display:inline-block;"><i class="fas fa-box"></i> แพ็คเมื่อ ${o.packedTime}</div>` 
+      // ✅ แปลงและดึงเวลา PackedTime มาแสดงใต้สถานะ ในตาราง Recent Orders
+      let pTime = formatPackedTime(o.packedTime);
+      let timeHtml = (isPacked || isSuccess) && pTime && pTime !== "-" 
+        ? `<div style="font-size:10px; color:#888; margin-top:5px; background:#f3f4f6; padding:3px 8px; border-radius:10px; display:inline-block;"><i class="fas fa-box"></i> แพ็คเมื่อ ${pTime}</div>` 
         : '';
 
       html += `
@@ -579,9 +601,11 @@
       }
     });
 
-    let packedAlert = (o.status === 'Packed' || o.status === 'Success') && o.packedTime && o.packedTime !== "-" 
+    // ✅ แปลงและดึงเวลาโชว์ในใบเสร็จ
+    let pTime = formatPackedTime(o.packedTime);
+    let packedAlert = (o.status === 'Packed' || o.status === 'Success') && pTime && pTime !== "-" 
       ? `<div style="grid-column: 1 / -1; background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 10px; border-radius: 10px; text-align: center; margin-top: 5px;">
-           <span style="font-size: 11px; color: #166534; font-weight: 600;"><i class="fas fa-check-circle"></i> จัดเตรียมของเสร็จสิ้นเมื่อ: ${o.packedTime}</span>
+           <span style="font-size: 11px; color: #166534; font-weight: 600;"><i class="fas fa-check-circle"></i> จัดเตรียมของเสร็จสิ้นเมื่อ: ${pTime}</span>
          </div>` : '';
     
     const bodyHtml = `
@@ -839,11 +863,19 @@
     if(pcObj) pcObj.destroy(); 
     if(scObj) scObj.destroy();
     
+    // ✅ เพิ่มระยะห่างให้กราฟไม่ติดกันเป็นแพ
     bcObj = new Chart(document.getElementById('bC'), { 
       type: 'bar', 
       data: { 
         labels: c.pL, 
-        datasets: [{ label: 'จำนวนสั่ง', data: c.pV, backgroundColor: '#A91D3A', borderRadius: 10 }] 
+        datasets: [{ 
+          label: 'จำนวนสั่ง', 
+          data: c.pV, 
+          backgroundColor: '#A91D3A', 
+          borderRadius: 10,
+          barPercentage: 0.6,
+          categoryPercentage: 0.8 
+        }] 
       }, 
       options: { 
         maintainAspectRatio: false, 
@@ -869,7 +901,7 @@
       } 
     });
     
-    // ✅ แก้กราฟส้ม (Stock) ไม่ให้แท่งติดกัน
+    // ✅ แยกกราฟแท่งสต๊อกให้เว้นช่องไฟสวยงาม
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar', 
       data: { 
@@ -879,8 +911,8 @@
           data: c.sV ? c.sV.slice(0, 15) : [], 
           backgroundColor: '#f39c12', 
           borderRadius: 8, 
-          // ✅ ลบคำสั่ง barThickness: 20 ออก และใช้ maxBarThickness แทน เพื่อให้แท่งไม่หนาเกินไปและเว้นช่องว่างสวยๆ
-          maxBarThickness: 30 
+          barPercentage: 0.6, 
+          categoryPercentage: 0.8 
         }] 
       },
       options: { 
