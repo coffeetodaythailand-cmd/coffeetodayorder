@@ -15,9 +15,10 @@
   
   <style>
     /**
-     * CoffeeToday System - Master UI Styling (Version 1611+)
-     * ออกแบบโดย: คุณเบลล์ (Khun Bell)
-     * การจัดรูปแบบ: Full Expansion (ห้ามย่อบรรทัด)
+     * CoffeeToday System - Master UI Styling (FULL EXPANDED VERSION)
+     * พัฒนาโดย: คุณเบลล์ (Khun Bell)
+     * จำนวนแถว: 1611+ Lines Support
+     * วัตถุประสงค์: ซ่อมแซม UI ที่ผิดพลาด และเพิ่มประสิทธิภาพการค้นหา
      */
     
     :root { 
@@ -26,12 +27,11 @@
       --green: #22c55e; 
       --white: #FFFFFF;
       --light-gray: #F8F9FA;
-      --border-color: #EEEEEE;
       --blue: #3498db;
       --orange: #f39c12;
+      --border: #EEEEEE;
       --shadow-soft: 0 4px 15px rgba(0,0,0,0.02);
-      --shadow-deep: 0 40px 100px rgba(0,0,0,0.5);
-      --card-radius: 30px;
+      --shadow-md: 0 8px 25px rgba(0,0,0,0.06);
     }
     
     * {
@@ -44,12 +44,12 @@
       background-color: var(--light-gray); 
       margin: 0; 
       padding: 0;
-      padding-bottom: 50px; 
+      padding-bottom: 60px; 
       color: var(--dark);
       overflow-x: hidden;
     }
 
-    /* 🛡️ Login Overlay Section */
+    /* 🛡️ ส่วนควบคุมการเข้าถึง (Login Overlay) */
     #login-overlay { 
       position: fixed; 
       top: 0; 
@@ -61,129 +61,108 @@
       display: flex; 
       align-items: center; 
       justify-content: center; 
-      transition: opacity 0.5s ease;
+      transition: all 0.5s ease;
     }
     
     .login-box { 
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 60px 40px; 
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 70px 50px; 
       border-radius: 40px; 
       width: 90%; 
-      max-width: 420px; 
+      max-width: 440px; 
       text-align: center; 
-      border: 1px solid rgba(255,255,255,0.4);
-      box-shadow: var(--shadow-deep); 
-      animation: fadeInScale 0.6s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 50px 120px rgba(0, 0, 0, 0.6); 
+      animation: loginFadeIn 0.7s ease-out;
     }
     
-    @keyframes fadeInScale {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    @keyframes loginFadeIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     
     .login-box i.fa-shield-alt {
-      font-size: 85px; 
+      font-size: 90px; 
       background: linear-gradient(to bottom, #A91D3A, #7a152a);
       -webkit-background-clip: text; 
       -webkit-text-fill-color: transparent;
       margin-bottom: 25px; 
-      filter: drop-shadow(0 10px 15px rgba(169,29,58,0.3));
-    }
-
-    .login-header {
-      font-family: 'Prompt';
-      font-weight: 600;
-      font-size: 24px;
-      color: #333333;
-      margin-bottom: 10px;
-    }
-
-    .login-sub {
-      color: #666666;
-      font-size: 14px;
-      margin-bottom: 40px;
+      filter: drop-shadow(0 10px 15px rgba(169, 29, 58, 0.25));
     }
 
     .login-input { 
       width: 100%; 
-      padding: 22px; 
-      border: 2px solid #EEEEEE; 
+      padding: 24px; 
+      border: 2px solid var(--border); 
       border-radius: 20px; 
-      margin-bottom: 30px; 
+      margin-bottom: 35px; 
       text-align: center; 
       font-size: 32px; 
       font-weight: bold;
       outline: none; 
       box-sizing: border-box; 
-      background-color: #FFFFFF; 
+      background-color: var(--white); 
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .login-input:focus { 
       border-color: var(--red); 
-      box-shadow: 0 0 25px rgba(169,29,58,0.15); 
-      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(169, 29, 58, 0.12); 
     }
     
-    /* 📱 Main App Structure */
+    /* 📱 การกำหนดสไตล์โครงสร้างแอปหลัก */
     #main-app { 
       display: none; 
-      animation: fadeIn 0.8s ease;
+      animation: contentFadeIn 0.8s ease-in-out;
     }
     
-    @keyframes fadeIn {
+    @keyframes contentFadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
     
     .nav { 
       background-color: var(--white); 
-      padding: 20px 40px; 
-      border-bottom: 1px solid var(--border-color); 
+      padding: 22px 45px; 
+      border-bottom: 1px solid var(--border); 
       position: sticky; 
       top: 0; 
-      z-index: 100; 
+      z-index: 1000; 
       font-weight: 600; 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.04); 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
     }
     
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 18px;
-    }
-    
     .container { 
-      max-width: 1300px; 
-      margin: 35px auto; 
-      padding: 0 25px; 
+      max-width: 1350px; 
+      margin: 40px auto; 
+      padding: 0 30px; 
     }
     
     .card { 
       background-color: var(--white); 
-      padding: 40px; 
-      border-radius: var(--card-radius); 
-      border: 1px solid var(--border-color); 
-      margin-bottom: 35px; 
-      box-shadow: 0 8px 25px rgba(0,0,0,0.04); 
-      transition: transform 0.4s ease, box-shadow 0.4s ease; 
+      padding: 45px; 
+      border-radius: 35px; 
+      border: 1px solid var(--border); 
+      margin-bottom: 40px; 
+      box-shadow: var(--shadow-md); 
+      transition: all 0.4s ease; 
     }
     
     .card:hover {
-      box-shadow: 0 12px 35px rgba(0,0,0,0.06);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
     }
 
     .chart-grid { 
       display: grid; 
-      grid-template-columns: 1.6fr 1fr; 
-      gap: 35px; 
-      margin-bottom: 35px; 
+      grid-template-columns: 1.65fr 1fr; 
+      gap: 40px; 
+      margin-bottom: 40px; 
     }
     
     .section-header { 
@@ -192,36 +171,25 @@
       align-items: center; 
       margin-bottom: 30px; 
     }
-    
-    .section-title {
-      font-family: 'Prompt';
-      font-weight: 600;
-      font-size: 20px;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
 
-    /* ✅ ปรับปรุงช่องค้นหา: Slim & Modern Design */
+    /* ✅ ส่วนระบบค้นหาที่แก้ไขให้กะทัดรัดขึ้น */
     .search-row {
       background-color: var(--white);
-      border-radius: 14px;
+      border-radius: 15px;
       padding: 10px 22px;
       margin-bottom: 30px;
       display: flex;
       align-items: center;
       gap: 15px;
-      border: 1px solid #EEEEEE;
+      border: 1px solid var(--border);
       box-shadow: var(--shadow-soft);
-      max-width: 480px; /* ขนาดกะทัดรัด */
-      transition: all 0.3s;
+      max-width: 520px; /* จำกัดความกว้างเพื่อไม่ให้เละ */
+      transition: all 0.3s ease;
     }
     
     .search-row:focus-within {
       border-color: var(--red);
-      box-shadow: 0 4px 20px rgba(169,29,58,0.08);
-      max-width: 520px;
+      box-shadow: 0 4px 20px rgba(169, 29, 58, 0.08);
     }
     
     .search-input { 
@@ -229,75 +197,55 @@
       outline: none; 
       width: 100%; 
       font-family: 'Prompt'; 
-      font-size: 13px; 
+      font-size: 14px; 
       color: var(--dark); 
-      background: transparent;
+      background-color: transparent;
     }
 
-    /* 📊 Filter Panel Styling */
-    .filter-panel {
+    /* 📊 การตั้งค่า Chips หมวดหมู่ */
+    .chips-container {
       display: flex; 
       gap: 12px; 
-      background-color: #F8F9FA; 
-      padding: 10px 20px; 
-      border-radius: 18px;
+      flex-wrap: wrap; 
+      padding: 10px 5px 30px;
     }
     
-    .filter-input {
-      border: none;
-      background: transparent;
-      font-family: 'Sarabun';
-      font-size: 13px;
-      color: #444;
-      outline: none;
+    .chip {
+      background-color: var(--white); 
+      padding: 12px 25px; 
+      border-radius: 50px;
+      border: 1px solid var(--border); 
+      font-family: 'Prompt'; 
+      font-size: 14px;
+      cursor: pointer; 
+      transition: all 0.3s; 
+      white-space: nowrap; 
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 8px;
+    }
+    
+    .chip:hover { 
+      border-color: var(--red); 
+      color: var(--red); 
+      transform: translateY(-2px);
+    }
+    
+    .chip.active { 
+      background-color: var(--red); 
+      color: var(--white); 
+      border-color: var(--red); 
+      box-shadow: 0 8px 25px rgba(169, 29, 58, 0.25); 
     }
 
-    /* 📄 Receipt UI Elements */
-    .receipt-card {
-      background-color: #FFFFFF; 
-      border-radius: 25px; 
-      width: 95%; 
-      max-width: 460px;
-      padding: 40px; 
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-      max-height: 88vh; 
-      overflow-y: auto; 
-      border-top: 12px solid var(--red);
-      position: relative;
-    }
-    
-    .receipt-info-grid { 
-      display: grid; 
-      grid-template-columns: 1fr 1fr; 
-      gap: 18px; 
-      margin: 25px 0; 
-      background-color: #F9F9F9; 
-      padding: 20px; 
-      border-radius: 15px; 
-    }
-    
-    .receipt-label { 
-      font-size: 10px; 
-      color: #AAAAAA; 
-      text-transform: uppercase; 
-      letter-spacing: 0.5px;
-    }
-    
-    .receipt-value { 
-      font-size: 14px; 
-      font-weight: 600; 
-      color: #333333; 
-    }
-
-    /* 📦 Approval Board Components */
+    /* 📦 การตั้งค่าส่วนการอนุมัติ (Approval Section) */
     .approve-card { 
       border-top: 10px solid var(--green); 
-      padding: 30px 45px; 
+      padding: 35px 50px; 
     }
     
     .approve-list { 
       display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); 
       gap: 25px; 
       margin-top: 20px; 
     }
@@ -306,19 +254,54 @@
       background-color: #f0fdf4; 
       border: 1px solid #dcfce7; 
       padding: 22px; 
-      border-radius: 28px;
+      border-radius: 25px;
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.3s;
     }
     
     .approve-item:hover { 
-      transform: translateY(-5px); 
-      box-shadow: 0 10px 25px rgba(34,197,94,0.12); 
+      transform: translateY(-4px); 
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.15); 
     }
 
-    /* 📊 Table Aesthetics */
+    /* 📄 โครงสร้าง Modal Windows (ซ่อมส่วนที่เละ) */
+    .overlay {
+      display: none; 
+      position: fixed; 
+      z-index: 9999; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(0, 0, 0, 0.75); 
+      backdrop-filter: blur(10px); 
+      -webkit-backdrop-filter: blur(10px);
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px;
+    }
+
+    .modal-card {
+      background-color: #FFFFFF; 
+      padding: 55px; 
+      border-radius: 40px;
+      width: 100%; 
+      max-width: 480px; /* กำหนดขนาดเพื่อไม่ให้ยืด */
+      text-align: left;
+      border-top: 15px solid var(--red); 
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: modalSlideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    @keyframes modalSlideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 📊 การจัดการตารางข้อมูล */
     table { 
       width: 100%; 
       border-collapse: collapse; 
@@ -340,24 +323,29 @@
       border-bottom: 1px solid #F3F4F6; 
       font-size: 14px; 
       vertical-align: middle; 
+      transition: background 0.2s;
+    }
+    
+    tr:hover td {
+      background-color: #FAFAFA;
     }
     
     .row-ready { 
       background-color: #f0fdf4 !important; 
     }
 
-    /* 🔘 Buttons & Interactions */
+    /* 🔘 ส่วนควบคุมปุ่มกด */
     .btn { 
-      padding: 14px 30px; 
+      padding: 14px 32px; 
       border-radius: 18px; 
       border: none; 
       font-family: 'Prompt'; 
       font-weight: 600; 
       cursor: pointer; 
-      transition: all 0.3s; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
       display: inline-flex; 
       align-items: center; 
-      gap: 10px; 
+      gap: 12px; 
       justify-content: center;
       outline: none;
     }
@@ -365,48 +353,63 @@
     .btn-red { 
       background-color: var(--red); 
       color: var(--white); 
-      box-shadow: 0 10px 20px rgba(169,29,58,0.2); 
+      box-shadow: 0 10px 25px rgba(169, 29, 58, 0.2); 
     }
     
     .btn-red:hover { 
-      transform: translateY(-3px); 
-      box-shadow: 0 15px 30px rgba(169,29,58,0.3); 
-      background-color: #8a172f;
+      transform: translateY(-4px); 
+      box-shadow: 0 15px 35px rgba(169, 29, 58, 0.3); 
+      filter: brightness(1.1);
     }
     
-    .btn-sm {
-      padding: 8px 18px;
-      font-size: 12px;
-      border-radius: 12px;
+    .btn-approve { 
+      background-color: var(--green); 
+      color: white; 
+      border: none; 
+      padding: 12px 28px; 
+      border-radius: 15px;
+      font-family: 'Prompt'; 
+      font-weight: 600; 
+      cursor: pointer; 
+      font-size: 14px;
     }
 
-    /* 📱 Responsive Adjustments */
+    /* 🌫️ Skeleton Loading Pulse */
+    .loading-pulse { 
+      position: relative; 
+      overflow: hidden; 
+      background-color: #f6f7f8 !important; 
+    }
+    
+    .loading-pulse::after { 
+      content: ""; 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent); 
+      animation: skeletonMove 1.6s infinite; 
+    }
+    
+    @keyframes skeletonMove { 
+      0% { transform: translateX(-100%); } 
+      100% { transform: translateX(100%); } 
+    }
+
+    /* 📱 สื่อสารแบบตอบสนอง (Responsive Design) */
     @media (max-width: 1024px) {
       .chart-grid { grid-template-columns: 1fr; }
-      .container { padding: 0 15px; }
+      .container { padding: 0 20px; }
     }
 
     @media (max-width: 768px) {
-      .nav { padding: 15px 25px; }
-      .card { padding: 25px; border-radius: 22px; }
-      .section-header { flex-direction: column; align-items: flex-start; gap: 18px; }
+      .nav { padding: 15px 30px; }
+      .card { padding: 25px; border-radius: 25px; }
+      .section-header { flex-direction: column; align-items: flex-start; gap: 20px; }
       .search-row { max-width: 100%; }
-      th, td { padding: 15px 12px; font-size: 12px; }
-    }
-    
-    /* 🌫️ Animations */
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.4; }
-      100% { opacity: 1; }
-    }
-    
-    .dot-pulse {
-      width: 8px; 
-      height: 8px; 
-      background-color: var(--green); 
-      border-radius: 50%; 
-      animation: blink 2s infinite;
+      th, td { padding: 15px 12px; font-size: 13px; }
+      .btn { padding: 12px 20px; font-size: 13px; flex: 1; }
     }
   </style>
 </head>
@@ -414,15 +417,31 @@
 
 <div id="login-overlay">
   <div class="login-box">
-    <div style="margin-bottom: 10px;">
+    <div style="margin-bottom: 15px;">
       <i class="fas fa-shield-alt"></i>
     </div>
-    <div class="login-header">Database Unlocked</div>
-    <div class="login-sub">CoffeeToday Management System Terminal</div>
+    <div style="font-family:'Prompt'; font-weight: 600; font-size: 26px; color: #2D3133; margin-bottom: 8px;">
+      Access Control
+    </div>
+    <div style="color: #888888; font-size: 14px; margin-bottom: 45px;">
+      Authorized Personnel Only
+    </div>
     <form onsubmit="event.preventDefault(); handleLogin();">
-      <input type="password" id="passInput" class="login-input" placeholder="••••" autofocus maxlength="4">
-      <button type="submit" id="loginBtn" class="btn btn-red" style="width:100%; padding:22px; font-size:18px;">
-        <i class="fas fa-key"></i> UNLOCK SYSTEM
+      <input 
+        type="password" 
+        id="passInput" 
+        class="login-input" 
+        placeholder="••••" 
+        maxlength="4"
+        autofocus
+      >
+      <button 
+        type="submit" 
+        id="loginBtn" 
+        class="btn btn-red" 
+        style="width:100%; padding:22px; font-size:20px; border-radius: 22px;"
+      >
+        <i class="fas fa-unlock-alt"></i> UNLOCK SYSTEM
       </button>
     </form>
   </div>
@@ -431,17 +450,22 @@
 <div id="main-app">
   
   <div class="nav">
-    <div class="nav-brand">
-      <i class="fas fa-coffee" style="color:var(--red); font-size: 22px;"></i> 
-      <span style="font-family: 'Prompt';">CoffeeToday Manager</span>
+    <div style="display:flex; align-items:center; gap:15px;">
+      <i class="fas fa-coffee" style="color:var(--red); font-size: 24px;"></i> 
+      <span style="font-family: 'Prompt'; font-size: 18px; font-weight: 600;">CoffeeToday Management</span>
     </div>
-    <div style="display:flex; align-items:center; gap:20px;">
-      <div style="display:flex; align-items:center; gap:10px; background:#f0fdf4; padding:10px 20px; border-radius:50px; color:#15803d; font-size:12px; font-weight:600;">
-        <div class="dot-pulse"></div> 
-        <span id="syncText">Live Stream (3m)</span>
+    <div style="display:flex; align-items:center; gap:22px;">
+      <div style="display:flex; align-items:center; gap:10px; background:#f0fdf4; padding:10px 22px; border-radius:50px; color:#15803d; font-size:12px; font-weight:700; border: 1px solid #dcfce7;">
+        <div style="width:8px; height:8px; background:var(--green); border-radius:50%; animation: blink 2s infinite;"></div> 
+        <span id="syncText">Network Active (Live)</span>
       </div>
-      <button onclick="handleLogout()" style="background:none; border:none; color:#CCCCCC; cursor:pointer; font-size:20px; transition:0.3s;" title="ออกจากระบบ">
-        <i class="fas fa-power-off"></i>
+      <button 
+        onclick="handleLogout()" 
+        style="background:none; border:none; color:#BBBBBB; cursor:pointer; font-size:20px; transition: 0.3s;"
+        onmouseover="this.style.color='var(--red)'"
+        onmouseout="this.style.color='#BBBBBB'"
+      >
+        <i class="fas fa-sign-out-alt"></i>
       </button>
     </div>
   </div>
@@ -449,9 +473,9 @@
   <div class="container">
     
     <div class="card approve-card" id="approveCard" style="display:none;">
-      <div class="section-header" style="margin-bottom: 15px;">
-        <h4 class="section-title" style="color: var(--green);">
-          <i class="fas fa-check-double"></i> อนุมัติการส่งมอบ (Approve Queue)
+      <div class="section-header" style="margin-bottom: 20px;">
+        <h4 style="margin:0; font-family:'Prompt'; font-weight: 600; color: var(--green); display: flex; align-items: center; gap: 12px;">
+          <i class="fas fa-clipboard-check"></i> อนุมัติการส่งมอบ (Ready for Success)
         </h4>
       </div>
       <div id="approveList" class="approve-list"></div>
@@ -461,27 +485,29 @@
       
       <div class="card" id="mainChartCard">
         <div class="section-header">
-          <h4 class="section-title"><i class="fas fa-chart-line"></i> สินค้าขายดี 10 อันดับ</h4>
+          <h4 style="margin:0; font-family:'Prompt';"><i class="fas fa-fire" style="color:var(--red);"></i> สินค้าขายดี 10 อันดับ</h4>
           <div class="filter-panel">
             <input type="date" id="sDate" class="filter-input">
-            <span style="color:#CCC;">-</span>
+            <span style="color:#DDD; font-weight: bold;">-</span>
             <input type="date" id="eDate" class="filter-input">
-            <button class="btn btn-red btn-sm" onclick="applyDateFilter()">กรอง</button>
+            <button class="btn btn-red btn-sm" onclick="applyDateFilter()">
+              <i class="fas fa-filter"></i> กรอง
+            </button>
             <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="background-color:var(--blue); color:white;">
               <i class="fas fa-file-invoice"></i> รายงานสาขา
             </button>
           </div>
         </div>
-        <div style="height:280px; position: relative;">
+        <div style="height:300px; position: relative;">
           <canvas id="bC"></canvas>
         </div>
       </div>
       
       <div class="card" id="doughnutCard">
-        <h4 class="section-title" style="margin-bottom: 30px;">
-          <i class="fas fa-pie-chart"></i> สัดส่วนสาขา
-        </h4>
-        <div style="height:280px; position: relative;">
+        <div class="section-header" style="margin-bottom: 40px;">
+          <h4 style="margin:0; font-family:'Prompt';"><i class="fas fa-chart-pie"></i> สัดส่วนสาขา</h4>
+        </div>
+        <div style="height:300px; position: relative;">
           <canvas id="pC_Chart"></canvas>
         </div>
       </div>
@@ -490,49 +516,69 @@
 
     <div class="card" id="stockChartCard">
       <div class="section-header">
-        <h4 class="section-title" style="color: var(--orange);">
-          <i class="fas fa-boxes-stacked"></i> วิเคราะห์สต๊อกสินค้า (ใกล้หมด)
+        <h4 style="margin:0; font-family:'Prompt'; color: var(--orange);">
+          <i class="fas fa-layer-group"></i> สถานะสินค้าใกล้หมด (Inventory Alert)
         </h4>
       </div>
-      <p style="font-size:12px; color:#999999; margin-top:-20px; margin-bottom:25px;">
-        * แสดงรายการที่เหลือน้อยที่สุด 15 อันดับแรกจากการแจ้งงาน
+      <p style="font-size:12px; color:#999; margin-top:-20px; margin-bottom:30px;">
+        * รายการที่คงเหลือน้อยที่สุด 15 อันดับแรก อ้างอิงจากรายงานล่าสุดของแต่ละสาขา
       </p>
-      <div style="height:280px; position: relative;">
+      <div style="height:300px; position: relative;">
         <canvas id="sC"></canvas>
       </div>
     </div>
 
     <div class="search-row">
       <div style="flex:1; display:flex; align-items:center; gap:12px;">
-        <i class="fas fa-search" style="color:#BBBBBB; font-size:15px;"></i>
-        <input type="text" id="orderSearch" class="search-input" placeholder="พิมพ์ชื่อ, เลขบิล (เช่น 1), สาขา, เบอร์โทร..." oninput="pgNum=1; renderTable();">
+        <i class="fas fa-search" style="color:#CCCCCC; font-size:16px;"></i>
+        <input 
+          type="text" 
+          id="orderSearch" 
+          class="search-input" 
+          placeholder="พิมพ์เลขบิล (เช่น 1), ชื่อลูกค้า, สาขา หรือเบอร์โทร..." 
+          oninput="pgNum=1; renderTable();"
+        >
       </div>
       <div style="display:flex; gap:10px;">
-        <button id="deepSearchBtn" class="btn" style="background-color:var(--dark); color:white; padding:8px 15px; font-size:11px; border-radius:12px; white-space:nowrap;" onclick="executeDeepSearch()">
-          <i class="fas fa-magnifying-glass-plus"></i> ค้นหาลึก
+        <button 
+          id="deepSearchBtn" 
+          class="btn" 
+          style="background-color:var(--dark); color:white; padding:10px 20px; font-size:12px; border-radius:12px; white-space:nowrap; border:none; cursor:pointer;" 
+          onclick="executeDeepSearch()"
+        >
+          <i class="fas fa-database"></i> ค้นหาลึกจากฐานข้อมูล
         </button>
-        <button id="clearSearchBtn" class="btn" style="display:none; background-color:#EEEEEE; color:#333333; padding:8px 15px; font-size:11px; border-radius:12px; white-space:nowrap;" onclick="clearDeepSearch()">
-          <i class="fas fa-rotate-left"></i> ล้าง
+        <button 
+          id="clearSearchBtn" 
+          class="btn" 
+          style="display:none; background-color:#EEEEEE; color:#333333; padding:10px 20px; font-size:12px; border-radius:12px; white-space:nowrap; border:none; cursor:pointer;" 
+          onclick="clearDeepSearch()"
+        >
+          <i class="fas fa-times-circle"></i> ล้างการค้นหา
         </button>
       </div>
     </div>
 
     <div class="card" id="tableCard">
       <div class="section-header">
-        <h3 class="section-title" style="font-size:22px;"><i class="fas fa-clock-rotate-left"></i> ประวัติออเดอร์ล่าสุด</h3>
-        <div id="lastUpd" style="font-size:12px; color:#AAAAAA;">Update: -</div>
+        <h3 style="margin:0; font-family:'Prompt'; font-size:24px; color: #2D3133;">
+          <i class="fas fa-history" style="margin-right: 12px; color: var(--red);"></i> Recent Orders History
+        </h3>
+        <div id="lastUpd" style="font-size:13px; color:#AAAAAA; background: #F8F9FA; padding: 8px 15px; border-radius: 10px;">
+          Update: -
+        </div>
       </div>
       <div style="overflow-x:auto;">
         <table id="oT">
           <thead>
             <tr>
-              <th style="width: 140px;">Order ID</th>
-              <th style="width: 160px;">วัน/เวลา</th>
-              <th>ชื่อสาขา</th>
-              <th>ลูกค้า</th>
-              <th>เบอร์โทร</th>
-              <th>รายการสินค้า</th>
-              <th align="center" style="width:160px;">สถานะ</th>
+              <th style="width: 150px;">Order Reference</th>
+              <th style="width: 170px;">วันที่และเวลา</th>
+              <th>สาขาปลายทาง</th>
+              <th>ชื่อผู้สั่งซื้อ</th>
+              <th>เบอร์โทรศัพท์</th>
+              <th>รายการสินค้า (QTY)</th>
+              <th align="center" style="width:170px;">การจัดการ / พิมพ์</th>
             </tr>
           </thead>
           <tbody id="oB">
@@ -541,25 +587,31 @@
       </div>
       
       <div class="pagination-footer">
-        <div style="margin-right: auto; color: #999; font-size: 13px;">
-          แสดงข้อมูลออเดอร์ในระบบ
+        <div style="margin-right: auto; font-weight: 600; color: #999;">
+          CoffeeToday Database Terminal
         </div>
-        <span style="font-size: 13px; color: #666;">Rows per page:</span>
+        <span style="color: #666;">Rows per page:</span>
         <select id="rowSel" class="styled-select" onchange="changeLimit()">
           <option value="8">8 รายการ</option>
           <option value="15">15 รายการ</option>
           <option value="30">30 รายการ</option>
           <option value="50">50 รายการ</option>
         </select>
-        <button class="page-btn" onclick="prev()"><i class="fas fa-chevron-left"></i></button> 
-        <span id="pI" style="font-weight:600; min-width:50px; text-align:center;">1 / 1</span> 
-        <button class="page-btn" onclick="next()"><i class="fas fa-chevron-right"></i></button>
+        <button class="page-btn" onclick="prev()">
+          <i class="fas fa-chevron-left"></i>
+        </button> 
+        <span id="pI" style="font-weight:700; min-width:60px; text-align:center; color: var(--red);">1 / 1</span> 
+        <button class="page-btn" onclick="next()">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
     </div>
 
-    <div class="section-header" style="margin-top: 50px; margin-bottom: 20px;">
-      <h2 class="section-title" style="font-size: 24px;"><i class="fas fa-sliders"></i> จัดการระบบเมนูสินค้า</h2>
-      <div style="display:flex; gap:12px;">
+    <div class="section-header" style="margin-top: 60px; margin-bottom: 25px;">
+      <h2 style="margin:0; font-family:'Prompt'; font-size: 26px; display: flex; align-items: center; gap: 15px;">
+        <i class="fas fa-tools" style="color: #333;"></i> แผงควบคุมรายการเมนู
+      </h2>
+      <div style="display:flex; gap:15px;">
         <button class="btn btn-dark btn-sm" onclick="openCatModal()" style="background-color:#333333; color:white;">
           <i class="fas fa-folder-plus"></i> เพิ่มหมวดหมู่
         </button>
@@ -571,8 +623,11 @@
 
     <div id="catChips" class="chips-container"></div>
     
-    <div id="menuItems" class="card" style="padding: 15px 40px; min-height: 120px; border-top: 6px solid var(--red);">
-      <div style="text-align:center; padding:40px; color:#CCC;">กรุณาเลือกหมวดหมู่...</div>
+    <div id="menuItems" class="card" style="padding: 20px 50px; min-height: 150px; border-top: 8px solid var(--red);">
+      <div style="text-align:center; padding:50px; color:#CCCCCC;">
+        <i class="fas fa-mouse-pointer" style="font-size: 30px; margin-bottom: 15px;"></i><br>
+        กรุณาเลือกหมวดหมู่สินค้าเพื่อจัดการรายการ
+      </div>
     </div>
 
   </div>
@@ -581,22 +636,24 @@
 <div id="receiptModal" class="overlay">
   <div class="receipt-card">
     <div id="pdf-content">
-      <div style="text-align:center; margin-bottom:20px;">
-        <h2 style="margin:0; font-family:'Prompt'; color:var(--red); letter-spacing:2px; font-weight:bold;">OFFICIAL RECEIPT</h2>
-        <div style="height:2px; background:#A91D3A; width:50px; margin:10px auto;"></div>
+      <div style="text-align:center; margin-bottom:25px;">
+        <div style="font-family:'Prompt'; font-weight: 800; font-size: 28px; color:var(--red); letter-spacing:3px;">
+          ORDER RECEIPT
+        </div>
+        <div style="height:3px; background:var(--red); width:60px; margin:12px auto;"></div>
       </div>
       <div id="receiptBody"></div>
-      <div style="margin-top: 40px; text-align: center; border-top: 1px dashed #cccccc; padding-top: 20px; font-size: 11px; color: #999999;">
-        <p style="margin: 5px 0;">เอกสารตรวจสอบการจัดเตรียมพัสดุ</p>
-        <p style="margin: 5px 0;">วันที่พิมพ์เอกสาร: <span id="printDate"></span></p>
-        <p style="margin: 5px 0; font-weight: bold; color: #666;">© CoffeeToday Shop System 2026</p>
+      <div style="margin-top: 45px; text-align: center; border-top: 1.5px dashed #dddddd; padding-top: 25px; font-size: 11px; color: #AAAAAA;">
+        <p style="margin: 5px 0;">เอกสารตรวจสอบรายการจัดเตรียมพัสดุ</p>
+        <p style="margin: 5px 0;">วันและเวลาที่พิมพ์: <span id="printDate"></span></p>
+        <p style="margin: 10px 0; font-weight: bold; color: #666;">© CoffeeToday Shop System 2026</p>
       </div>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 30px;">
-      <button id="dlBtn" class="btn" style="background-color:var(--green); color:white; padding:18px;" onclick="downloadPDF()">
+    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 40px;">
+      <button id="dlBtn" class="btn" style="background-color:var(--green); color:white; padding:20px; font-size: 16px;" onclick="downloadPDF()">
         <i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)
       </button>
-      <button class="btn btn-red" style="padding:15px;" onclick="closeM('receiptModal')">
+      <button class="btn btn-red" style="padding:18px; background-color: #f8f9fa; color: #555; border: 1px solid #ddd;" onclick="closeM('receiptModal')">
         <i class="fas fa-times"></i> ปิดหน้าต่างนี้
       </button>
     </div>
@@ -604,31 +661,41 @@
 </div>
 
 <div id="confirmModal" class="overlay">
-  <div class="modal-card" style="text-align: center; max-width: 420px;">
-    <div style="margin-bottom: 25px;">
-      <i class="fas fa-circle-check" style="font-size: 75px; color: var(--green); filter: drop-shadow(0 5px 15px rgba(34,197,94,0.3));"></i>
+  <div class="modal-card" style="text-align: center; max-width: 440px;">
+    <div style="margin-bottom: 30px;">
+      <i class="fas fa-check-circle" style="font-size: 85px; color: var(--green); filter: drop-shadow(0 8px 20px rgba(34, 197, 148, 0.3));"></i>
     </div>
-    <h2 style="margin:0; font-family:'Prompt'; color:var(--dark); font-size: 24px;">อนุมัติการส่งมอบ</h2>
-    <p style="color: #777777; margin: 20px 0 35px; font-size: 15px; line-height: 1.6;">
-      คุณกำลังจะอนุมัติให้สถานะออเดอร์ <br><b id="confirmOrderId" style="color: var(--red); font-size: 22px;"></b><br> เป็น "จัดส่งสำเร็จ" ใช่หรือไม่?
+    <h2 style="margin:0; font-family:'Prompt'; color:var(--dark); font-size: 26px;">ยืนยันการจัดส่ง</h2>
+    <p style="color: #666666; margin: 25px 0 40px; font-size: 16px; line-height: 1.6;">
+      คุณต้องการอนุมัติให้สถานะของออเดอร์ <br>
+      <b id="confirmOrderId" style="color: var(--red); font-size: 24px;"></b> <br> 
+      เป็น "จัดส่งเรียบร้อย" ใช่หรือไม่?
     </p>
-    <div style="display: flex; gap: 15px;">
-      <button class="btn" style="flex: 1; background-color: #F5F5F5; color: #333333;" onclick="closeM('confirmModal')">ยกเลิก</button>
-      <button class="btn" style="flex: 1; background-color: var(--green); color: white;" onclick="executeApproveOrder()">ยืนยันอนุมัติ</button>
+    <div style="display: flex; gap: 20px;">
+      <button class="btn" style="flex: 1; background-color: #F8F9FA; color: #555555; border: 1px solid #EEE;" onclick="closeM('confirmModal')">ยกเลิก</button>
+      <button class="btn" style="flex: 1; background-color: var(--green); color: white; box-shadow: 0 8px 20px rgba(34, 197, 94, 0.2);" onclick="executeApproveOrder()">ยืนยันอนุมัติ</button>
     </div>
   </div>
 </div>
 
 <div id="cM" class="overlay">
   <div class="modal-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-      <h3 style="margin:0; font-family:'Prompt';">สร้างหมวดหมู่ใหม่</h3>
-      <i class="fas fa-folder-open" style="color:var(--red); font-size:20px;"></i>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+      <h3 style="margin:0; font-family:'Prompt'; font-size: 22px;">สร้างหมวดหมู่ใหม่</h3>
+      <i class="fas fa-folder-plus" style="color:var(--red); font-size:24px;"></i>
     </div>
-    <label style="font-size:12px; color:#999; margin-bottom:8px; display:block;">ชื่อหมวดหมู่สินค้า</label>
-    <input type="text" id="cN" class="login-input" style="font-size:18px; text-align:left; padding:15px 25px;" placeholder="ระบุชื่อหมวดหมู่ เช่น กาแฟ TD...">
-    <div style="display:flex; gap:15px; margin-top:10px;">
-      <button class="btn" style="flex:1; background-color:#F5F5F5;" onclick="closeM('cM')">กลับ</button>
+    <div style="margin-bottom: 25px;">
+      <label style="font-size:12px; color:#999; margin-bottom:10px; display:block; font-weight: bold; text-transform: uppercase;">ชื่อหมวดหมู่สินค้า</label>
+      <input 
+        type="text" 
+        id="cN" 
+        class="login-input" 
+        style="font-size:20px; text-align:left; padding:18px 25px; margin-bottom: 0;" 
+        placeholder="เช่น เมนูกาแฟ TD..."
+      >
+    </div>
+    <div style="display:flex; gap:20px;">
+      <button class="btn" style="flex:1; background-color:#F8F9FA; color: #666;" onclick="closeM('cM')">ย้อนกลับ</button>
       <button class="btn btn-red" style="flex:1;" onclick="saveCat()">บันทึกข้อมูล</button>
     </div>
   </div>
@@ -636,23 +703,29 @@
 
 <div id="pM" class="overlay">
   <div class="modal-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-      <h3 style="margin:0; font-family:'Prompt';">ข้อมูลรายการสินค้า</h3>
-      <i class="fas fa-tag" style="color:var(--red); font-size:20px;"></i>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:35px;">
+      <h3 style="margin:0; font-family:'Prompt'; font-size: 22px;">รายละเอียดสินค้า</h3>
+      <i class="fas fa-edit" style="color:var(--red); font-size:24px;"></i>
     </div>
     
-    <div style="margin-bottom:20px;">
-      <label style="font-size:11px; color:#AAAAAA; text-transform:uppercase; font-weight:bold;">หมวดหมู่หลัก</label>
-      <select id="pCatSelect" class="login-input" style="font-size:16px; margin-top:8px; padding:15px; text-align:left;"></select>
+    <div style="margin-bottom:25px;">
+      <label style="font-size:11px; color:#999999; text-transform:uppercase; font-weight:bold; letter-spacing: 1px;">หมวดหมู่หลัก (Main Category)</label>
+      <select id="pCatSelect" class="login-input" style="font-size:16px; margin-top:10px; padding:18px; text-align:left; margin-bottom: 0;"></select>
     </div>
     
-    <div style="margin-bottom:30px;">
-      <label style="font-size:11px; color:#AAAAAA; text-transform:uppercase; font-weight:bold;">ชื่อสินค้า / ขนาดบรรจุ</label>
-      <input type="text" id="pN" class="login-input" style="font-size:16px; margin-top:8px; padding:15px; text-align:left;" placeholder="เช่น กาแฟ TD-1 (250g)">
+    <div style="margin-bottom:40px;">
+      <label style="font-size:11px; color:#999999; text-transform:uppercase; font-weight:bold; letter-spacing: 1px;">ชื่อสินค้าและขนาดบรรจุ</label>
+      <input 
+        type="text" 
+        id="pN" 
+        class="login-input" 
+        style="font-size:16px; margin-top:10px; padding:18px; text-align:left; margin-bottom: 0;" 
+        placeholder="ระบุชื่อสินค้า เช่น TD-1 (250g)"
+      >
     </div>
     
-    <div style="display:flex; gap:15px;">
-      <button class="btn" style="flex:1; background-color:#F5F5F5;" onclick="closeM('pM')">ยกเลิก</button>
+    <div style="display:flex; gap:20px;">
+      <button class="btn" style="flex:1; background-color:#F8F9FA; color: #666;" onclick="closeM('pM')">ยกเลิก</button>
       <button class="btn btn-red" style="flex:1;" onclick="saveP()">บันทึกรายการ</button>
     </div>
   </div>
@@ -660,50 +733,59 @@
 
 <script>
   /**
-   * ⚙️ System Application Logic - Nitro Engine
-   * เวอร์ชั่น: Client-First Performance + Ultimate Data Recovery
+   * ⚙️ ระบบปฏิบัติการ CoffeeToday Management (Nitro Core)
+   * เวอร์ชั่น: High-Precision Search + UI Stability
+   * จำนวนบรรทัดเป้าหมาย: > 1611 Lines
    */
   
-  // การกำหนดค่าตัวแปรหลัก
+  // การกำหนดค่าตัวแปรระดับ Global สำหรับจัดการสถานะกราฟและข้อมูล
   let bcObj = null; 
   let pcObj = null; 
   let scObj = null;
+  
+  // ข้อมูลออเดอร์และสถานะการแบ่งหน้า
   let allOrders = [];
   let pgNum = 1;
   let pgLim = 8;
+  
+  // สถานะการจัดการเมนู
   let menuObj = {};
   let editTargetId = null;
   let currentCat = null;
+  
+  // สถานะการค้นหาลึก
   let pendingApproveId = "";
   let currentDeepSearchQuery = ""; 
   
-  // Endpoint สำหรับคุยกับหลังบ้าน
+  // จุดเชื่อมต่อ API ของ Google Apps Script
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
 
   /**
-   * ✅ เริ่มต้นระบบเมื่อโหลดหน้าเสร็จ
+   * ✅ เริ่มต้นระบบเมื่อโหลดหน้าสำเร็จ
    */
   window.onload = function() {
     
+    console.log("CoffeeToday Management Initializing...");
     const savedToken = localStorage.getItem(TOKEN_KEY);
     
     if (savedToken) {
       
+      // ถ้ามี Token แล้ว ให้ข้ามหน้าล็อคอิน
       document.getElementById('login-overlay').style.display = 'none';
       document.getElementById('main-app').style.display = 'block';
       initApp(savedToken);
       
     } else {
       
-      // Focus ไปที่ช่องใส่รหัสทันที
+      // โฟกัสไปที่ช่องรหัสผ่านทันที
       document.getElementById('passInput').focus();
       
     }
   };
 
   /**
-   * ✅ ฟังก์ชันจัดการการล็อคอิน
+   * ✅ ฟังก์ชันจัดการการล็อคอินเข้าสู่ฐานข้อมูล
    */
   function handleLogin() { 
     
@@ -711,13 +793,14 @@
     const pInput = document.getElementById('passInput');
     
     if (pInput.value.length < 4) {
-      return alert("กรุณากรอกรหัสผ่านให้ครบ 4 หลัก");
+      alert("กรุณากรอกรหัสผ่าน PIN ให้ครบถ้วน");
+      return;
     }
     
     lBtn.disabled = true; 
-    lBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> เข้าถึงระบบ...';
+    lBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> เข้าสู่ระบบ...';
 
-    // ยิง API ไปเช็ครหัสหลังบ้าน
+    // ยิงคำสั่ง API ไปตรวจสอบรหัสผ่านที่ฝั่งเซิร์ฟเวอร์
     fetch(GAS_URL + '?action=verifyLogin&pass=' + pInput.value)
       .then(function(res) { 
         return res.json(); 
@@ -727,19 +810,21 @@
         if(res.status === 'success') {
           
           localStorage.setItem(TOKEN_KEY, res.token);
+          
+          // เอฟเฟกต์การสลับหน้าแบบนุ่มนวล
           document.getElementById('login-overlay').style.opacity = '0';
           
           setTimeout(function() {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             initApp(res.token);
-          }, 500);
+          }, 400);
           
         } else {
           
-          alert(res.message);
+          alert("รหัสผ่านไม่ถูกต้อง: " + res.message);
           lBtn.disabled = false;
-          lBtn.innerHTML = '<i class="fas fa-key"></i> UNLOCK SYSTEM';
+          lBtn.innerHTML = '<i class="fas fa-unlock-alt"></i> UNLOCK SYSTEM';
           pInput.value = '';
           pInput.focus();
           
@@ -747,39 +832,40 @@
       })
       .catch(function(err) {
         
-        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
+        alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
         lBtn.disabled = false;
-        lBtn.innerHTML = '<i class="fas fa-key"></i> UNLOCK SYSTEM';
+        lBtn.innerHTML = '<i class="fas fa-unlock-alt"></i> UNLOCK SYSTEM';
         
       });
   }
 
   /**
-   * ✅ ออกจากระบบ
+   * ✅ ฟังก์ชันออกจากระบบ
    */
   function handleLogout() {
     
-    if (!confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-      return;
+    if (confirm("คุณต้องการออกจากระบบการจัดการใช่หรือไม่?")) {
+      localStorage.removeItem(TOKEN_KEY);
+      location.reload();
     }
     
-    localStorage.removeItem(TOKEN_KEY);
-    location.reload();
   }
 
   /**
-   * ✅ เตรียมความพร้อมข้อมูลเริ่มต้น
+   * ✅ การตั้งค่าระบบหลักและลูปการ Sync ข้อมูล
    */
   function initApp(token) { 
     
-    // โหลดข้อมูลครั้งแรก
+    // โหลดข้อมูลครั้งแรกทันที
     loadDashboardData(false, token); 
     loadApproveList(token); 
     
-    // ตั้งเวลาลูปรีเฟรชทุก 3 นาที (180,000 ms)
+    // ตั้งค่า Interval สำหรับ Live Sync ทุก 3 นาที (180,000 มิลลิวินาที)
     setInterval(function() {
       
-      // ดึงข้อมูลโดยไม่ล้างผลลัพธ์การค้นหาปัจจุบัน
+      console.log("Automatic Syncing Data...");
+      
+      // ดึงข้อมูลใหม่โดยไม่ล้างคำค้นหาที่แอดมินพิมพ์ค้างไว้
       loadDashboardData(false, token, currentDeepSearchQuery);
       loadApproveList(token);
       
@@ -787,25 +873,33 @@
   }
 
   /**
-   * ✅ ฟังก์ชันดึงข้อมูล Dashboard (Hybrid Mode: 24h Graph + Unfinished Backlogs)
+   * ✅ ฟังก์ชันโหลดข้อมูล Dashboard (Hybrid Mode: 24h Graph)
    */
   function loadDashboardData(smooth, token, searchQ) { 
     
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
     currentDeepSearchQuery = searchQ || "";
 
+    // เปิดเอฟเฟกต์โหลดข้อมูลแบบ Pulse
     if(smooth) {
-      document.querySelectorAll('.card').forEach(function(c) { 
-        c.classList.add('loading-pulse'); 
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(function(card) { 
+        card.classList.add('loading-pulse'); 
       });
     }
     
-    const s = document.getElementById('sDate').value;
-    const e = document.getElementById('eDate').value;
-    const q = encodeURIComponent(currentDeepSearchQuery);
+    const sDateValue = document.getElementById('sDate').value;
+    const eDateValue = document.getElementById('eDate').value;
+    const searchEncoded = encodeURIComponent(currentDeepSearchQuery);
 
-    // ยิงคำสั่งดึงข้อมูล Analytics
-    fetch(GAS_URL + '?action=managerGetData&token=' + currentToken + '&s=' + s + '&e=' + e + '&q=' + q)
+    const fetchUrl = GAS_URL + 
+                     '?action=managerGetData' + 
+                     '&token=' + currentToken + 
+                     '&s=' + sDateValue + 
+                     '&e=' + eDateValue + 
+                     '&q=' + searchEncoded;
+
+    fetch(fetchUrl)
       .then(function(res) { 
         return res.json(); 
       })
@@ -814,33 +908,36 @@
         if(d.status === 'success') {
           
           allOrders = d.analytics.history;
+          
+          // เรียกฟังก์ชันเรนเดอร์ข้อมูลหน้าจอ
           renderTable();
           renderCharts(d.analytics.charts);
           renderMenuAccordion(d.menu); 
           
-          // บันทึกเวลาที่อัปเดตล่าสุด
-          const now = new Date();
-          document.getElementById('lastUpd').innerText = "Last Sync: " + now.toLocaleTimeString();
+          // อัปเดตเวลาการ Sync ล่าสุด
+          const timeNow = new Date();
+          const timeStr = timeNow.toLocaleTimeString();
+          document.getElementById('lastUpd').innerText = "Last Updated: " + timeStr;
           
-          // จัดการการแสดงผลของปุ่มค้นหาลึก
-          const dsBtn = document.getElementById('deepSearchBtn');
-          const clBtn = document.getElementById('clearSearchBtn');
+          // จัดการการสลับปุ่มโหมดค้นหา
+          const btnDeepSearch = document.getElementById('deepSearchBtn');
+          const btnClearSearch = document.getElementById('clearSearchBtn');
           
           if (currentDeepSearchQuery !== "") {
             
-            dsBtn.style.display = "none";
-            clBtn.style.display = "inline-flex";
+            btnDeepSearch.style.display = "none";
+            btnClearSearch.style.display = "inline-flex";
             
           } else {
             
-            dsBtn.style.display = "inline-flex";
-            clBtn.style.display = "none";
+            btnDeepSearch.style.display = "inline-flex";
+            btnClearSearch.style.display = "none";
             
           }
 
-          if(dsBtn) {
-            dsBtn.innerHTML = '<i class="fas fa-database"></i> ค้นหาลึก';
-            dsBtn.disabled = false;
+          if(btnDeepSearch) {
+            btnDeepSearch.innerHTML = '<i class="fas fa-database"></i> ค้นหาลึกจากฐานข้อมูล';
+            btnDeepSearch.disabled = false;
           }
           
         } else if (d.status === 'expired') {
@@ -849,130 +946,146 @@
           
         }
         
-        // ลบเอฟเฟกต์ Loading ออก
-        document.querySelectorAll('.card').forEach(function(c) { 
-          c.classList.remove('loading-pulse'); 
+        // ปิดเอฟเฟกต์โหลดข้อมูล
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(function(card) { 
+          card.classList.remove('loading-pulse'); 
         });
         
       })
       .catch(function(err) {
         
-        console.error("Dashboard Load Error:", err);
-        document.querySelectorAll('.card').forEach(function(c) { 
-          c.classList.remove('loading-pulse'); 
+        console.error("Dashboard Load Failure:", err);
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(function(card) { 
+          card.classList.remove('loading-pulse'); 
         });
         
       });
   }
 
   /**
-   * ✅ ฟังก์ชัน Deep Search เจาะเข้าฐานข้อมูลหลักย้อนหลัง
+   * ✅ ฟังก์ชัน Deep Search เจาะเข้าฐานข้อมูลส่วนกลาง
    */
   function executeDeepSearch() {
     
-    const q = document.getElementById('orderSearch').value.trim();
+    const input = document.getElementById('orderSearch');
+    const queryValue = input.value.trim();
     
-    if (q === "") {
-      return showToast("กรุณาระบุคำค้นหาก่อนดำเนินการ");
+    if (queryValue === "") {
+      showToast("⚠️ กรุณาระบุคำค้นหา (เลขบิล, ชื่อ หรือเบอร์โทร)");
+      return;
     }
     
-    // ล้างตัวกรองวันที่ก่อนค้นหาลึก
+    // รีเซ็ตการกรองวันที่เมื่อเข้าสู่โหมดค้นหาลึก
     document.getElementById('sDate').value = "";
     document.getElementById('eDate').value = "";
     
     const btn = document.getElementById('deepSearchBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเจาะข้อมูล...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเจาะประวัติ...';
     btn.disabled = true;
     
-    // สั่งโหลดข้อมูลโหมด Search
-    loadDashboardData(true, null, q);
+    // เริ่มต้นกระบวนการดึงข้อมูลจากเซิร์ฟเวอร์
+    loadDashboardData(true, null, queryValue);
   }
 
   function clearDeepSearch() {
-    document.getElementById('orderSearch').value = "";
+    const input = document.getElementById('orderSearch');
+    input.value = "";
     loadDashboardData(true, null, ""); 
   }
 
   function applyDateFilter() {
-    document.getElementById('orderSearch').value = "";
+    const input = document.getElementById('orderSearch');
+    input.value = "";
     loadDashboardData(true, null, ""); 
   }
 
   /**
-   * ✅ ฟังก์ชันแปลงเวลา ISO (ภาษาคอม) ให้เป็นเวลาไทยอ่านง่าย (GMT+7)
+   * ✅ ฟังก์ชันแปลงเวลาภาษาคอมเป็นเวลาไทย (GMT+7)
    */
-  function formatPackedTime(pt) {
+  function formatPackedTime(packedTimeValue) {
     
-    if (!pt || pt === "-" || pt === "") {
+    if (!packedTimeValue || packedTimeValue === "-" || packedTimeValue === "") {
       return "-";
     }
     
-    // ตรวจสอบว่าเป็นรูปแบบ T/Z หรือไม่
-    if (typeof pt === 'string' && pt.indexOf('T') !== -1 && pt.indexOf('Z') !== -1) {
+    // ตรวจสอบโครงสร้างเวลา ISO (T...Z)
+    if (typeof packedTimeValue === 'string' && 
+        packedTimeValue.indexOf('T') !== -1 && 
+        packedTimeValue.indexOf('Z') !== -1) {
       
-      const d = new Date(pt);
+      const dateObject = new Date(packedTimeValue);
       
-      const day = ("0" + d.getDate()).slice(-2);
-      const month = ("0" + (d.getMonth() + 1)).slice(-2);
-      const year = d.getFullYear() + 543; // แปลงเป็น พ.ศ.
+      const dd = ("0" + dateObject.getDate()).slice(-2);
+      const mm = ("0" + (dateObject.getMonth() + 1)).slice(-2);
+      const yyyy = dateObject.getFullYear() + 543; // แปลง พ.ศ.
       
-      const hour = ("0" + d.getHours()).slice(-2);
-      const minute = ("0" + d.getMinutes()).slice(-2);
+      const hours = ("0" + dateObject.getHours()).slice(-2);
+      const minutes = ("0" + dateObject.getMinutes()).slice(-2);
       
-      return day + "/" + month + "/" + year + " " + hour + ":" + minute;
+      return dd + "/" + mm + "/" + yyyy + " " + hours + ":" + minutes;
     }
     
-    return pt;
+    return packedTimeValue;
   }
 
   /**
-   * ✅ ดึงรายชื่อออเดอร์ที่พนักงานแพ็คเสร็จแล้วมารอให้ผู้จัดการยืนยัน
+   * ✅ โหลดรายการที่แพ็คสำเร็จมารอการอนุมัติ (Approve Queue)
    */
   function loadApproveList(token) {
     
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
+    const apiUrl = GAS_URL + '?action=getOrdersByStatus&status=Packed&token=' + currentToken;
     
-    fetch(GAS_URL + '?action=getOrdersByStatus&status=Packed&token=' + currentToken)
+    fetch(apiUrl)
       .then(function(res) { 
         return res.json(); 
       })
       .then(function(data) {
         
-        const card = document.getElementById('approveCard');
-        const div = document.getElementById('approveList');
+        const approveCardElement = document.getElementById('approveCard');
+        const approveListContainer = document.getElementById('approveList');
         
         if(!data || data.length === 0) { 
-          card.style.display = 'none'; 
+          approveCardElement.style.display = 'none'; 
           return; 
         }
         
-        card.style.display = 'block';
+        approveCardElement.style.display = 'block';
         
-        // วนลูปสร้างการ์ดออเดอร์แต่ละใบ
-        div.innerHTML = data.map(function(o) {
+        // สร้าง UI สำหรับแต่ละรายการออเดอร์ที่รออนุมัติ
+        const listItems = data.map(function(order) {
           
-          let matchOrder = allOrders.find(function(x) { 
-            return x.id === o.id; 
+          let matched = allOrders.find(function(item) { 
+            return item.id === order.id; 
           });
           
-          let ptStr = matchOrder && matchOrder.packedTime ? matchOrder.packedTime : "-";
-          let pTime = formatPackedTime(ptStr);
+          let pTimeValue = (matched && matched.packedTime) ? matched.packedTime : "-";
+          let pTimeFormatted = formatPackedTime(pTimeValue);
           
-          let timeBadge = '';
-          if (pTime !== "-") {
-            timeBadge = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:6px 14px; border-radius:10px; display:inline-block; margin-bottom:15px; font-weight:bold;"><i class="fas fa-box-open"></i> บรรจุสินค้าเสร็จสิ้น: ' + pTime + '</div><br>';
+          let timeBadgeHtml = '';
+          if (pTimeFormatted !== "-") {
+            timeBadgeHtml = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:7px 15px; border-radius:12px; display:inline-block; margin-bottom:15px; font-weight:700;">' +
+                            '<i class="fas fa-box-open"></i> ตรวจสอบพัสดุเสร็จ: ' + pTimeFormatted + 
+                            '</div><br>';
           }
 
-          return '<div class="approve-item">' +
-            '<div class="approve-info">' +
-              timeBadge +
-              '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:18px;" onclick="viewOrderDetail(\'' + o.id + '\')">' + o.id + '</b> - ' + o.branch + '<br>' +
-              '<small style="color:#666; font-size: 13px;">' + o.items.replace(/\n/g, ', ').substring(0, 48) + '...</small>' +
-            '</div>' +
-            '<button class="btn-approve" onclick="approveOrder(\'' + o.id + '\')">อนุมัติจัดส่ง</button>' +
-          '</div>';
+          let itemRow = '<div class="approve-item">';
+          itemRow += '<div class="approve-info">';
+          itemRow += timeBadgeHtml;
+          itemRow += '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:18px;" onclick="viewOrderDetail(\'' + order.id + '\')">' + order.id + '</b>';
+          itemRow += ' - ' + order.branch + '<br>';
+          itemRow += '<small style="color:#666; font-size: 13px;">' + order.items.replace(/\n/g, ', ').substring(0, 50) + '...</small>';
+          itemRow += '</div>';
+          itemRow += '<button class="btn-approve" onclick="approveOrder(\'' + order.id + '\')">อนุมัติจัดส่ง</button>';
+          itemRow += '</div>';
           
-        }).join('');
+          return itemRow;
+          
+        });
+        
+        approveListContainer.innerHTML = listItems.join('');
       });
   }
 
@@ -983,7 +1096,7 @@
   }
 
   /**
-   * ✅ สั่งอัปเดตสถานะเป็น Success เมื่อแอดมินกดยืนยัน
+   * ✅ ยืนยันสถานะ Success และอัปเดตระบบ
    */
   function executeApproveOrder() {
     
@@ -994,8 +1107,9 @@
     }
     
     const token = localStorage.getItem(TOKEN_KEY);
+    const updateUrl = GAS_URL + '?action=setOrderStatus&id=' + pendingApproveId + '&status=Success&token=' + token;
     
-    fetch(GAS_URL + '?action=setOrderStatus&id=' + pendingApproveId + '&status=Success&token=' + token)
+    fetch(updateUrl)
       .then(function(res) { 
         return res.json(); 
       })
@@ -1005,522 +1119,570 @@
           
           loadApproveList(token); 
           loadDashboardData(false, token, currentDeepSearchQuery); 
-          showToast("✅ ยืนยันการจัดส่งออเดอร์ " + pendingApproveId + " สำเร็จ!");
+          showToast("✅ ยืนยันการจัดเตรียมพัสดุ " + pendingApproveId + " สำเร็จ!");
           
         } else {
           
-          alert("ไม่สามารถยืนยันได้: " + res.message);
+          alert("ไม่สามารถยืนยันสถานะได้: " + res.message);
           
         }
       });
   }
   
-  /** * ✅ Ultra High-Speed Client Search Filter (ห้ามย่อลอจิก) 
+  /** * ✅ ระบบกรองข้อมูลตารางออเดอร์ในหน้าจอ (Expanded Logic) 
    */
   function renderTable() {
     
-    const input = document.getElementById('orderSearch');
-    const query = input.value.trim().toLowerCase();
+    const searchInput = document.getElementById('orderSearch');
+    const queryLower = searchInput.value.trim().toLowerCase();
     
-    // ลอจิกการกรองที่รองรับทุกความต้องการ
-    let filtered = allOrders.filter(function(o) {
+    // อัลกอริทึมการกรองที่รองรับทั้ง ID สั้นและเลขหลัก
+    let filteredOrders = allOrders.filter(function(order) {
       
-      if(query === "") {
+      if(queryLower === "") {
         return true;
       }
       
-      const oIdRaw = o.id.toLowerCase();
-      const oIdNum = o.id.replace(/\D/g, ''); 
-      const oIdShort = parseInt(oIdNum).toString(); // เช่น '1' สำหรับ ORD-0001
+      const fullId = order.id.toLowerCase();
+      const numOnlyId = order.id.replace(/\D/g, ''); 
+      const shortId = parseInt(numOnlyId).toString(); // แปลง '0001' เป็น '1'
       
-      const name = o.customer.toLowerCase();
-      const branch = o.branch ? o.branch.toLowerCase() : "";
-      const phone = o.phone ? o.phone.toString() : "";
+      const customerName = order.customer.toLowerCase();
+      const branchName = order.branch ? order.branch.toLowerCase() : "";
+      const phoneNum = order.phone ? order.phone.toString() : "";
       
-      // ✅ ค้นหาเจอทั้ง ID แบบสั้น, เลข 9 หลัก หรือชื่อ
-      const matchId = (oIdRaw.indexOf(query) !== -1);
-      const matchNum = (oIdNum.indexOf(query) !== -1);
-      const matchShort = (oIdShort === query);
-      const matchName = (name.indexOf(query) !== -1);
-      const matchPhone = (phone.indexOf(query) !== -1);
-      const matchBranch = (branch.indexOf(query) !== -1);
+      // ✅ กฎการค้นหา: เจอ ID สั้น, เจอเลขต่อท้าย, เจอชื่อ หรือเจอเบอร์
+      const isIdMatch = (fullId.indexOf(queryLower) !== -1);
+      const isNumMatch = (numOnlyId.indexOf(queryLower) !== -1);
+      const isShortIdMatch = (shortId === queryLower);
+      const isCustomerMatch = (customerName.indexOf(queryLower) !== -1);
+      const isPhoneMatch = (phoneNum.indexOf(queryLower) !== -1);
+      const isBranchMatch = (branchName.indexOf(queryLower) !== -1);
       
-      return matchId || matchNum || matchShort || matchName || matchPhone || matchBranch;
+      return isIdMatch || isNumMatch || isShortIdMatch || isCustomerMatch || isPhoneMatch || isBranchMatch;
     });
 
-    const totalOrders = filtered.length;
-    const startIdx = (pgNum - 1) * pgLim;
-    const dataToShow = filtered.slice(startIdx, startIdx + pgLim);
+    const totalCount = filteredOrders.length;
+    const offset = (pgNum - 1) * pgLim;
+    const pagedData = filteredOrders.slice(offset, offset + pgLim);
     
-    let tableHtml = '';
+    let rowsHtml = '';
     
-    dataToShow.forEach(function(o) {
+    pagedData.forEach(function(item) {
       
-      const isPacked = (o.status === 'Packed');
-      const isSuccess = (o.status === 'Success');
+      const isPackedStatus = (item.status === 'Packed');
+      const isSuccessStatus = (item.status === 'Success');
       
-      let pTime = formatPackedTime(o.packedTime);
-      let timeHtml = '';
+      const pTimeFormatted = formatPackedTime(item.packedTime);
+      let timeStampHtml = '';
       
-      if ((isPacked || isSuccess) && pTime !== "-") {
-        timeHtml = '<div style="font-size:10px; color:#888; margin-top:8px; background:#f3f4f6; padding:5px 12px; border-radius:12px; display:inline-block; font-weight:600;">';
-        timeHtml += '<i class="fas fa-box"></i> ' + pTime;
-        timeHtml += '</div>';
+      if ((isPackedStatus || isSuccessStatus) && pTimeFormatted !== "-") {
+        timeStampHtml = '<div style="font-size:10px; color:#888; margin-top:10px; background:#f3f4f6; padding:6px 14px; border-radius:15px; display:inline-block; font-weight:700;">';
+        timeStampHtml += '<i class="fas fa-box"></i> ' + pTimeFormatted;
+        timeStampHtml += '</div>';
       }
 
-      let statusColor = '#AAAAAA';
-      if (isSuccess) statusColor = 'var(--green)';
-      else if (isPacked) statusColor = 'var(--blue)';
+      let colorStatus = '#999999';
+      if (isSuccessStatus) {
+        colorStatus = 'var(--green)';
+      } else if (isPackedStatus) {
+        colorStatus = 'var(--blue)';
+      }
 
-      tableHtml += '<tr class="' + (isSuccess ? 'row-ready' : '') + '">';
-      tableHtml += '<td>';
-      tableHtml += '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:16px;" onclick="viewOrderDetail(\'' + o.id + '\')">' + o.id + '</b>';
-      tableHtml += '<br>' + timeHtml;
-      tableHtml += '</td>';
-      tableHtml += '<td style="color:#666;">' + o.date + '</td>';
-      tableHtml += '<td><b style="color:#333;">' + o.branch + '</b></td>';
-      tableHtml += '<td style="font-weight:600;">' + o.customer + '</td>';
-      tableHtml += '<td style="font-weight:700; color:var(--blue);">' + (o.phone || '-') + '</td>';
-      tableHtml += '<td style="font-size:12px; color:#555; line-height:1.4;">' + o.items.replace(/\n/g,'<br>') + '</td>';
-      tableHtml += '<td align="center">';
-      tableHtml += '<div style="display:flex; gap:18px; justify-content:center; align-items:center;">';
-      tableHtml += '<div style="text-align:center; min-width: 75px;">';
-      tableHtml += '<span style="font-size:12px; font-weight:bold; color:' + statusColor + '">' + o.status + '</span>';
-      tableHtml += '</div>';
-      tableHtml += '<button class="page-btn" style="width:36px; height:36px; background:#FFF; border:1px solid #EEE;" onclick="printOrder(\'' + encodeURIComponent(JSON.stringify(o)) + '\')">';
-      tableHtml += '<i class="fas fa-print" style="font-size:14px; color:#666;"></i>';
-      tableHtml += '</button>';
-      tableHtml += '</div>';
-      tableHtml += '</td>';
-      tableHtml += '</tr>';
+      rowsHtml += '<tr class="' + (isSuccessStatus ? 'row-ready' : '') + '">';
+      rowsHtml += '<td>';
+      rowsHtml += '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:16px;" onclick="viewOrderDetail(\'' + item.id + '\')">' + item.id + '</b>';
+      rowsHtml += '<br>' + timeStampHtml;
+      rowsHtml += '</td>';
+      rowsHtml += '<td style="color:#777;">' + item.date + '</td>';
+      rowsHtml += '<td><b style="color:#2D3133;">' + item.branch + '</b></td>';
+      rowsHtml += '<td style="font-weight:600;">' + item.customer + '</td>';
+      rowsHtml += '<td style="font-weight:700; color:var(--blue);">' + (item.phone || '-') + '</td>';
+      rowsHtml += '<td style="font-size:12px; color:#555; line-height:1.5;">' + item.items.replace(/\n/g,'<br>') + '</td>';
+      rowsHtml += '<td align="center">';
+      rowsHtml += '<div style="display:flex; gap:20px; justify-content:center; align-items:center;">';
+      rowsHtml += '<div style="text-align:center; min-width: 80px;">';
+      rowsHtml += '<span style="font-size:12px; font-weight:bold; color:' + colorStatus + '">' + item.status + '</span>';
+      rowsHtml += '</div>';
+      rowsHtml += '<button class="page-btn" style="width:38px; height:38px; background:#FFF; border:1px solid #EEE;" onclick="printOrder(\'' + encodeURIComponent(JSON.stringify(item)) + '\')">';
+      rowsHtml += '<i class="fas fa-print" style="font-size:14px; color:#444;"></i>';
+      rowsHtml += '</button>';
+      rowsHtml += '</div>';
+      rowsHtml += '</td>';
+      rowsHtml += '</tr>';
     });
     
-    const container = document.getElementById('oB');
-    if (totalOrders === 0) {
-      container.innerHTML = '<tr><td colspan="7" align="center" style="padding:100px; color:#BBBBBB; font-style:italic;">ไม่พบข้อมูลออเดอร์ที่คุณกำลังค้นหา...</td></tr>';
+    const tableBody = document.getElementById('oB');
+    if (totalCount === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7" align="center" style="padding:120px; color:#CCCCCC; font-style:italic; font-size: 16px;">ไม่พบรายการที่ค้นหาในระบบปฏิบัติการนี้...</td></tr>';
     } else {
-      container.innerHTML = tableHtml;
+      tableBody.innerHTML = rowsHtml;
     }
     
-    // อัปเดตข้อมูลหน้า
-    const totalPages = Math.ceil(totalOrders / pgLim) || 1;
-    document.getElementById('pI').innerText = pgNum + " / " + totalPages;
+    // อัปเดตตัวเลขหน้าปัจจุบัน
+    const maxPages = Math.ceil(totalCount / pgLim) || 1;
+    const indicator = document.getElementById('pI');
+    indicator.innerText = pgNum + " / " + maxPages;
   }
 
-  /** ✅ Receipt Detail Viewer (Expanded Line-by-Line HTML) */
-  function viewOrderDetail(id) {
+  let currentViewingOrderId = "";
+
+  /** ✅ ตัวจัดการการแสดงผลใบออเดอร์ดิจิทัล (expanded html strings) */
+  function viewOrderDetail(orderId) {
     
-    const o = allOrders.find(function(x) { 
-      return x.id === id; 
+    const foundOrder = allOrders.find(function(order) { 
+      return order.id === orderId; 
     });
     
-    if(!o) {
+    if(!foundOrder) {
       return;
     }
     
-    currentViewingOrderId = id;
+    currentViewingOrderId = orderId;
 
-    let rows = '';
-    const items = o.items.split('\n');
+    let rowsList = '';
+    const itemListArray = foundOrder.items.split('\n');
     
-    items.forEach(function(line) {
-      if(line.trim() !== "") {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
-        if(match) {
-          rows += '<tr>';
-          rows += '<td style="padding:15px 10px; border-bottom:1px solid #f9f9f9; color:#444;">' + match[1] + '</td>';
-          rows += '<td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; color:#888;">' + match[2] + '</td>';
-          rows += '<td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:var(--red);">' + match[3] + '</td>';
-          rows += '</tr>';
+    itemListArray.forEach(function(itemLine) {
+      if(itemLine.trim() !== "") {
+        const regexMatch = itemLine.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(regexMatch) {
+          rowsList += '<tr>';
+          rowsList += '<td style="padding:16px 12px; border-bottom:1px solid #f9f9f9; color:#333;">' + regexMatch[1] + '</td>';
+          rowsList += '<td align="center" style="padding:16px 12px; border-bottom:1px solid #f9f9f9; color:#999;">' + regexMatch[2] + '</td>';
+          rowsList += '<td align="center" style="padding:16px 12px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:var(--red); font-size: 16px;">' + regexMatch[3] + '</td>';
+          rowsList += '</tr>';
         } else {
-          rows += '<tr><td colspan="3" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; color:#777; font-size:13px;">' + line + '</td></tr>';
+          rowsList += '<tr><td colspan="3" style="padding:16px 12px; border-bottom:1px solid #f9f9f9; color:#888; font-size:13px;">' + itemLine + '</td></tr>';
         }
       }
     });
 
-    let pTime = formatPackedTime(o.packedTime);
-    let alertBox = '';
+    const formattedPTime = formatPackedTime(foundOrder.packedTime);
+    let alertHtml = '';
     
-    if ((o.status === 'Packed' || o.status === 'Success') && pTime !== "-") {
-      alertBox += '<div style="grid-column: 1 / -1; background-color: #f0fdf4; border: 1.5px dashed #bbf7d0; padding: 15px; border-radius: 15px; text-align: center; margin-top: 10px;">';
-      alertBox += '<span style="font-size: 13px; color: #166534; font-weight: 700;">';
-      alertBox += '<i class="fas fa-check-circle" style="margin-right:8px;"></i> บรรจุสินค้าเสร็จสมบูรณ์เมื่อ: ' + pTime;
-      alertBox += '</span>';
-      alertBox += '</div>';
+    if ((foundOrder.status === 'Packed' || foundOrder.status === 'Success') && formattedPTime !== "-") {
+      alertHtml += '<div style="grid-column: 1 / -1; background-color: #ecfdf5; border: 2px dashed #a7f3d0; padding: 18px; border-radius: 18px; text-align: center; margin-top: 15px;">';
+      alertHtml += '<span style="font-size: 14px; color: #065f46; font-weight: 800;">';
+      alertHtml += '<i class="fas fa-check-double" style="margin-right:10px;"></i> รายการตรวจสอบพัสดุสำเร็จ: ' + formattedPTime;
+      alertHtml += '</span>';
+      alertHtml += '</div>';
     }
     
-    const content = '<div class="receipt-info-grid">' +
-        '<div><div class="receipt-label">Order ID</div><div class="receipt-value">' + o.id + '</div></div>' + 
-        '<div style="text-align:right;"><div class="receipt-label">Order Date</div><div class="receipt-value">' + o.date + '</div></div>' +
-        '<div><div class="receipt-label">Branch Store</div><div class="receipt-value">' + o.branch + '</div></div>' +
-        '<div style="text-align:right;"><div class="receipt-label">Contact</div><div class="receipt-value">' + (o.phone || '-') + '</div></div>' +
-        alertBox +
+    const modalContent = '<div class="receipt-info-grid">' +
+        '<div><div class="receipt-label">Ref ID</div><div class="receipt-value">' + foundOrder.id + '</div></div>' + 
+        '<div style="text-align:right;"><div class="receipt-label">Log Date</div><div class="receipt-value">' + foundOrder.date + '</div></div>' +
+        '<div><div class="receipt-label">Branch Store</div><div class="receipt-value">' + foundOrder.branch + '</div></div>' +
+        '<div style="text-align:right;"><div class="receipt-label">Phone No.</div><div class="receipt-value">' + (foundOrder.phone || '-') + '</div></div>' +
+        alertHtml +
       '</div>' +
       '<table class="receipt-table">' +
         '<thead><tr style="background:#F9FAFB;">' +
-        '<th style="border-radius:10px 0 0 10px;">Product Name</th>' +
-        '<th style="text-align:center;">In Stock</th>' +
-        '<th style="text-align:center; border-radius:0 10px 10px 0;">Qty Ordered</th>' +
+        '<th style="border-radius:12px 0 0 12px;">Product Details</th>' +
+        '<th style="text-align:center;">Last Stock</th>' +
+        '<th style="text-align:center; border-radius:0 12px 12px 0;">Qty</th>' +
         '</tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
+        '<tbody>' + rowsList + '</tbody>' +
       '</table>';
       
-    document.getElementById('receiptBody').innerHTML = content;
-    document.getElementById('printDate').innerText = new Date().toLocaleString("th-TH");
-    document.getElementById('receiptModal').style.display = 'flex';
+    const receiptContainer = document.getElementById('receiptBody');
+    const printDateElement = document.getElementById('printDate');
+    
+    receiptContainer.innerHTML = modalContent;
+    printDateElement.innerText = new Date().toLocaleString("th-TH");
+    
+    const modal = document.getElementById('receiptModal');
+    modal.style.display = 'flex';
   }
 
-  /** ✅ High-Resolution PDF Generator (กางโค้ดทุกบรรทัด) */
+  /** ✅ ระบบผลิตไฟล์ PDF ความละเอียดสูง (Expanded Row Strategy) */
   function downloadPDF() {
     
-    const o = allOrders.find(function(x) { 
-      return x.id === currentViewingOrderId; 
+    const targetOrder = allOrders.find(function(order) { 
+      return order.id === currentViewingOrderId; 
     });
     
-    if(!o) return;
+    if(!targetOrder) {
+      return;
+    }
 
-    const btn = document.getElementById('dlBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> บีบอัดข้อมูลหน้ากระดาษ A4...';
-    btn.disabled = true;
+    const btnDownload = document.getElementById('dlBtn');
+    btnDownload.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Rendering PDF Engine...';
+    btnDownload.disabled = true;
 
-    let tableRows = '';
-    const items = o.items.split('\n');
+    let rowsBuilder = '';
+    const itemsArray = targetOrder.items.split('\n');
     
-    items.forEach(function(line) {
-      if(line.trim() !== "") {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
-        if(match) {
-          tableRows += '<tr>';
-          tableRows += '<td style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#333;">' + match[1] + '</td>';
-          tableRows += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#666;">' + match[2] + '</td>';
-          tableRows += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:16px; font-weight:bold; color:#A91D3A;">' + match[3] + '</td>';
-          tableRows += '</tr>';
+    itemsArray.forEach(function(rowLine) {
+      if(rowLine.trim() !== "") {
+        const parts = rowLine.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(parts) {
+          rowsBuilder += '<tr>';
+          rowsBuilder += '<td style="padding:18px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#333;">' + parts[1] + '</td>';
+          rowsBuilder += '<td align="center" style="padding:18px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#777;">' + parts[2] + '</td>';
+          rowsBuilder += '<td align="center" style="padding:18px; border-bottom:1px solid #EEEEEE; font-size:18px; font-weight:bold; color:#A91D3A;">' + parts[3] + '</td>';
+          rowsBuilder += '</tr>';
         } else {
-          tableRows += '<tr><td colspan="3" style="padding:15px; border-bottom:1px solid #EEEEEE; color:#999;">' + line + '</td></tr>';
+          rowsBuilder += '<tr><td colspan="3" style="padding:18px; border-bottom:1px solid #EEEEEE; color:#999; font-style:italic;">' + rowLine + '</td></tr>';
         }
       }
     });
 
-    let pTime = formatPackedTime(o.packedTime);
-    let timeStampAlert = '';
+    const ThaiTimeNow = formatPackedTime(targetOrder.packedTime);
+    let alertBanner = '';
     
-    if ((o.status === 'Packed' || o.status === 'Success') && pTime !== "-") {
-      timeStampAlert += '<div style="background-color: #f0fdf4; border: 1.5px dashed #bbf7d0; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 30px;">';
-      timeStampAlert += '<span style="font-size: 14px; color: #166534; font-weight: bold;">✓ ยืนยันการจัดเตรียมพัสดุเสร็จสิ้นเมื่อ: ' + pTime + '</span>';
-      timeStampAlert += '</div>';
+    if ((targetOrder.status === 'Packed' || targetOrder.status === 'Success') && ThaiTimeNow !== "-") {
+      alertBanner += '<div style="background-color: #f0fdf4; border: 2px dashed #10b981; padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 35px;">';
+      alertBanner += '<span style="font-size: 15px; color: #065f46; font-weight: bold;">✓ รายการจัดเตรียมสินค้าเสร็จสมบูรณ์เมื่อ: ' + ThaiTimeNow + '</span>';
+      alertBanner += '</div>';
     }
 
-    const win = window.open('', '', 'width=900,height=950');
+    const pdfWindow = window.open('', '', 'width=950,height=1000');
     
-    // กางโค้ดโครงสร้าง HTML สำหรับ PDF ทีละแถว (Expansion Strategy)
-    win.document.write('<!DOCTYPE html>');
-    win.document.write('<html>');
-    win.document.write('<head>');
-    win.document.write('<title>Official_Receipt_' + o.id + '</title>');
-    win.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
-    win.document.write('<style>');
-    win.document.write('body { font-family: "Tahoma", sans-serif; padding: 40px; color: #333333; line-height: 1.6; }');
-    win.document.write('.container-box { padding: 60px; border: 2px solid #EEEEEE; border-radius: 30px; max-width: 700px; margin: 0 auto; background: #FFFFFF; }');
-    win.document.write('.header-title { text-align: center; color: #A91D3A; font-size: 32px; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px; }');
-    win.document.write('.header-sub { text-align: center; color: #AAAAAA; font-size: 14px; margin-bottom: 40px; text-transform: uppercase; }');
-    win.document.write('.data-grid { display: flex; justify-content: space-between; margin-bottom: 35px; background: #F9F9F9; padding: 25px; border-radius: 20px; }');
-    win.document.write('.data-label { font-size: 11px; color: #999999; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }');
-    win.document.write('.data-value { font-size: 16px; font-weight: bold; color: #2D3133; }');
-    win.document.write('table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 40px; }');
-    win.document.write('th { text-align: left; padding: 15px; border-bottom: 2px solid #333333; font-size: 15px; color: #333333; }');
-    win.document.write('.footer-note { text-align: center; margin-top: 40px; border-top: 1px dashed #DDDDDD; padding-top: 30px; font-size: 13px; color: #BBBBBB; }');
-    win.document.write('</style>');
-    win.document.write('</head>');
-    win.document.write('<body>');
-    win.document.write('<div id="render-target" class="container-box">');
-    win.document.write('<div class="header-title">COFFEETODAY</div>');
-    win.document.write('<div class="header-sub">Order Confirmation Receipt</div>');
-    win.document.write(timeStampAlert);
-    win.document.write('<div class="data-grid">');
-    win.document.write('<div>');
-    win.document.write('<div class="data-label">Reference ID</div>');
-    win.document.write('<div class="data-value">' + o.id + '</div>');
-    win.document.write('<div style="height:20px;"></div>');
-    win.document.write('<div class="data-label">Branch Store</div>');
-    win.document.write('<div class="data-value">' + o.branch + '</div>');
-    win.document.write('</div>');
-    win.document.write('<div style="text-align:right;">');
-    win.document.write('<div class="data-label">Issue Date</div>');
-    win.document.write('<div class="data-value">' + o.date + '</div>');
-    win.document.write('<div style="height:20px;"></div>');
-    win.document.write('<div class="data-label">Contact Phone</div>');
-    win.document.write('<div class="data-value">' + (o.phone || '-') + '</div>');
-    win.document.write('</div>');
-    win.document.write('</div>');
-    win.document.write('<table>');
-    win.document.write('<thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead>');
-    win.document.write('<tbody>' + tableRows + '</tbody>');
-    win.document.write('</table>');
-    win.document.write('<div class="footer-note">');
-    win.document.write('<p>เอกสารฉบับนี้ใช้สำหรับยืนยันการจัดเตรียมสินค้าของ CoffeeToday เท่านั้น</p>');
-    win.document.write('<p>Generated at: ' + new Date().toLocaleString("th-TH") + '</p>');
-    win.document.write('</div>');
-    win.document.write('</div>');
-    win.document.write('<script>');
-    win.document.write('window.onload = function() {');
-    win.document.write('  const element = document.getElementById("render-target");');
-    win.document.write('  html2pdf().set({');
-    win.document.write('    margin: 10,');
-    win.document.write('    filename: "CT_Receipt_' + o.id + '.pdf",');
-    win.document.write('    image: { type: "jpeg", quality: 0.98 },');
-    win.document.write('    html2canvas: { scale: 2, useCORS: true },');
-    win.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }');
-    win.document.write('  }).from(element).save().then(function() {');
-    win.document.write('    setTimeout(function() { window.close(); }, 1200);');
-    win.document.write('  });');
-    win.document.write('};');
-    win.document.write('<\/script>');
-    win.document.write('</body>');
-    win.document.write('</html>');
+    // กางโค้ดโครงสร้างเอกสาร PDF ทีละแถวอย่างละเอียด
+    pdfWindow.document.write('<!DOCTYPE html>');
+    pdfWindow.document.write('<html lang="th">');
+    pdfWindow.document.write('<head>');
+    pdfWindow.document.write('<title>Order_Manifest_' + targetOrder.id + '</title>');
+    pdfWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+    pdfWindow.document.write('<style>');
+    pdfWindow.document.write('body { font-family: "Tahoma", sans-serif; padding: 45px; color: #333333; background: #FFFFFF; }');
+    pdfWindow.document.write('.main-container { padding: 65px; border: 3px solid #F0F0F0; border-radius: 35px; max-width: 750px; margin: 0 auto; }');
+    pdfWindow.document.write('.title-main { text-align: center; color: #A91D3A; font-size: 34px; font-weight: bold; margin-bottom: 5px; letter-spacing: 2px; }');
+    pdfWindow.document.write('.title-sub { text-align: center; color: #999999; font-size: 14px; margin-bottom: 45px; text-transform: uppercase; font-weight: 600; }');
+    pdfWindow.document.write('.grid-data { display: flex; justify-content: space-between; margin-bottom: 40px; background-color: #FAFAFA; padding: 30px; border-radius: 25px; }');
+    pdfWindow.document.write('.grid-col-label { font-size: 12px; color: #AAAAAA; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }');
+    pdfWindow.document.write('.grid-col-value { font-size: 17px; font-weight: bold; color: #111111; }');
+    pdfWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 50px; }');
+    pdfWindow.document.write('th { text-align: left; padding: 18px; border-bottom: 3px solid #111111; font-size: 16px; color: #000; background: #FFF; }');
+    pdfWindow.document.write('.document-footer { text-align: center; margin-top: 50px; border-top: 1.5px dashed #EEEEEE; padding-top: 35px; font-size: 13px; color: #BBBBBB; }');
+    pdfWindow.document.write('</style>');
+    pdfWindow.document.write('</head>');
+    pdfWindow.document.write('<body>');
+    pdfWindow.document.write('<div id="print-area" class="main-container">');
+    pdfWindow.document.write('<div class="title-main">COFFEETODAY SHOP</div>');
+    pdfWindow.document.write('<div class="title-sub">Official Inventory Order Manifest</div>');
+    pdfWindow.document.write(alertBanner);
+    pdfWindow.document.write('<div class="grid-data">');
+    pdfWindow.document.write('<div>');
+    pdfWindow.document.write('<div class="grid-col-label">Manifest Number</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.id + '</div>');
+    pdfWindow.document.write('<div style="height:25px;"></div>');
+    pdfWindow.document.write('<div class="grid-col-label">Branch Store Name</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.branch + '</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('<div style="text-align:right;">');
+    pdfWindow.document.write('<div class="grid-col-label">Log Generation Date</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.date + '</div>');
+    pdfWindow.document.write('<div style="height:25px;"></div>');
+    pdfWindow.document.write('<div class="grid-col-label">Store Contact Phone</div>');
+    pdfWindow.document.write('<div class="grid-col-value">' + (targetOrder.phone || '-') + '</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('<table>');
+    pdfWindow.document.write('<thead><tr><th>Product Manifesto</th><th style="text-align:center;">Last Record</th><th style="text-align:center;">Qty</th></tr></thead>');
+    pdfWindow.document.write('<tbody>' + rowsBuilder + '</tbody>');
+    pdfWindow.document.write('</table>');
+    pdfWindow.document.write('<div class="document-footer">');
+    pdfWindow.document.write('<p>เอกสารฉบับนี้ถูกสร้างขึ้นโดยระบบอัตโนมัติของทาง CoffeeToday Management Terminal</p>');
+    pdfWindow.document.write('<p>System Generated at: ' + new Date().toLocaleString("th-TH") + '</p>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('</div>');
+    pdfWindow.document.write('<script>');
+    pdfWindow.document.write('window.onload = function() {');
+    pdfWindow.document.write('  const element = document.getElementById("print-area");');
+    pdfWindow.document.write('  html2pdf().set({');
+    pdfWindow.document.write('    margin: 10,');
+    pdfWindow.document.write('    filename: "CoffeeToday_' + targetManifestId + '.pdf",');
+    pdfWindow.document.write('    image: { type: "jpeg", quality: 1.0 },');
+    pdfWindow.document.write('    html2canvas: { scale: 2.5, useCORS: true },');
+    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }');
+    pdfWindow.document.write('  }).from(element).save().then(function() {');
+    pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1500);');
+    pdfWindow.document.write('  });');
+    pdfWindow.document.write('};');
+    pdfWindow.document.write('<\/script>');
+    pdfWindow.document.write('</body>');
+    pdfWindow.document.write('</html>');
     
-    win.document.close();
+    pdfWindow.document.close();
 
-    // รีเซ็ตสถานะปุ่ม
+    // รีเซ็ตสถานะปุ่มดาวน์โหลด
     setTimeout(function() {
-      btn.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)';
-      btn.disabled = false;
-    }, 1500);
+      btnDownload.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)';
+      btnDownload.disabled = false;
+    }, 2000);
   }
 
-  /** ✅ รายงานสรุปสาขา (Branch Summary) แบบสะใจบรรทัด */
+  /** ✅ ฟังก์ชันสร้างรายงานสรุปรายสาขา */
   function downloadSummaryReport() {
     
     if(allOrders.length === 0) {
-      return alert("ไม่มีข้อมูลออเดอร์ในช่วงเวลาที่เลือกกรอง...");
+      alert("ไม่พบข้อมูลในช่วงเวลาที่ระบุ กรุณาตรวจสอบตัวกรองอีกครั้ง");
+      return;
     }
     
-    const btn = document.getElementById('summaryBtn');
-    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> กำลังรวบรวมข้อมูล...';
-    btn.disabled = true;
+    const btnSummary = document.getElementById('summaryBtn');
+    btnSummary.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Report...';
+    btnSummary.disabled = true;
 
-    const startDate = document.getElementById('sDate').value || "Starting Date";
-    const endDate = document.getElementById('eDate').value || "Current Moment";
+    const startFilter = document.getElementById('sDate').value || "Start Point";
+    const endFilter = document.getElementById('eDate').value || "Current State";
 
-    // จัดกลุ่มข้อมูลตามสาขา
-    const summaryData = {};
+    // ประมวลผลข้อมูลรายสาขา (Grouping Engine)
+    const groupedSummary = {};
     allOrders.forEach(function(order) {
       
-      const bName = order.branch || "อื่นๆ";
-      if (!summaryData[bName]) {
-        summaryData[bName] = {};
+      const storeName = order.branch || "Unknown Store";
+      if (!groupedSummary[storeName]) {
+        groupedSummary[storeName] = {};
       }
 
-      const lines = order.items.split('\n');
-      lines.forEach(function(line) {
+      const itemLines = order.items.split('\n');
+      itemLines.forEach(function(line) {
         
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
-        if (match) {
+        const lineMatch = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
+        if (lineMatch) {
           
-          const itemName = match[1].trim();
-          const stockVal = match[2].trim();
-          const qty = parseFloat(match[3]);
+          const name = lineMatch[1].trim();
+          const stock = lineMatch[2].trim();
+          const qtyVal = parseFloat(lineMatch[3]);
           
-          if(!summaryData[bName][itemName]) {
-            summaryData[bName][itemName] = { total: 0, stock: stockVal };
+          if(!groupedSummary[storeName][name]) {
+            groupedSummary[storeName][name] = { sum: 0, lastStock: stock };
           }
           
-          summaryData[bName][itemName].total += qty;
-          summaryData[bName][itemName].stock = stockVal;
+          groupedSummary[storeName][name].sum += qtyVal;
+          groupedSummary[storeName][name].lastStock = stock;
         }
         
       });
     });
 
-    let branchHTML = "";
-    const sortedBranches = Object.keys(summaryData).sort();
+    let reportHtml = "";
+    const storeKeys = Object.keys(groupedSummary).sort();
     
-    sortedBranches.forEach(function(branch) {
+    storeKeys.forEach(function(store) {
       
-      let itemsList = "";
-      const branchItems = summaryData[branch];
+      let itemRowsHtml = "";
+      const itemsInStore = groupedSummary[store];
+      const productNames = Object.keys(itemsInStore).sort();
       
-      Object.keys(branchItems).forEach(function(name) {
+      productNames.forEach(function(pName) {
         
-        const data = branchItems[name];
-        itemsList += '<tr>';
-        itemsList += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; font-size:13px;">' + name + '</td>';
-        itemsList += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; text-align:center; font-size:13px; color:#777;">' + data.stock + '</td>';
-        itemsList += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; text-align:center; font-weight:bold; font-size:14px; color:#A91D3A;">' + data.total + '</td>';
-        itemsList += '</tr>';
+        const data = itemsInStore[pName];
+        itemRowsHtml += '<tr>';
+        itemRowsHtml += '<td style="padding:14px; border-bottom:1px solid #EEEEEE; font-size:13px;">' + pName + '</td>';
+        itemRowsHtml += '<td style="padding:14px; border-bottom:1px solid #EEEEEE; text-align:center; font-size:13px; color:#888;">' + data.lastStock + '</td>';
+        itemRowsHtml += '<td style="padding:14px; border-bottom:1px solid #EEEEEE; text-align:center; font-weight:bold; font-size:15px; color:var(--red);">' + data.sum + '</td>';
+        itemRowsHtml += '</tr>';
         
       });
 
-      branchHTML += '<div style="break-inside:avoid; margin-bottom:35px; border:1px solid #EEEEEE; border-radius:15px; overflow:hidden;">';
-      branchHTML += '<h2 style="background-color:#F8F9FA; padding:15px 20px; color:#A91D3A; border-left:8px solid #A91D3A; font-size:18px; margin:0; font-weight:bold;">สาขา: ' + branch + '</h2>';
-      branchHTML += '<table style="width:100%; border-collapse:collapse;">';
-      branchHTML += '<thead><tr style="background:#FAFAFA; font-size:12px;">';
-      branchHTML += '<th style="padding:12px; text-align:left; border-bottom:2px solid #EEEEEE; width:55%;">รายการสินค้า</th>';
-      branchHTML += '<th style="padding:12px; text-align:center; border-bottom:2px solid #EEEEEE;">คงเหลือปัจจุบัน</th>';
-      branchHTML += '<th style="padding:12px; text-align:center; border-bottom:2px solid #EEEEEE;">ยอดสั่งรวม</th>';
-      branchHTML += '</tr></thead><tbody>' + itemsList + '</tbody></table></div>';
+      reportHtml += '<div style="break-inside:avoid; margin-bottom:40px; border:2px solid #EEEEEE; border-radius:20px; overflow:hidden; background:#FFF;">';
+      reportHtml += '<h3 style="background-color:#FAFAFA; padding:20px 25px; color:#A91D3A; border-left:10px solid #A91D3A; font-size:19px; margin:0; font-weight:bold;">สาขา: ' + store + '</h3>';
+      reportHtml += '<table style="width:100%; border-collapse:collapse;">';
+      reportHtml += '<thead><tr style="background:#FDFDFD; font-size:12px; color:#999;">';
+      reportHtml += '<th style="padding:15px; text-align:left; border-bottom:2.5px solid #F0F0F0; width:58%;">รายการเมนูสินค้า</th>';
+      reportHtml += '<th style="padding:15px; text-align:center; border-bottom:2.5px solid #F0F0F0;">สต๊อกคงเหลือ</th>';
+      reportHtml += '<th style="padding:15px; text-align:center; border-bottom:2.5px solid #F0F0F0;">ยอดสั่งรวม</th>';
+      reportHtml += '</tr></thead><tbody>' + itemRowsHtml + '</tbody></table></div>';
       
     });
 
-    const win = window.open('', '', 'width=950,height=900');
+    const summaryWindow = window.open('', '', 'width=1000,height=950');
     
-    win.document.write('<!DOCTYPE html><html><head><title>Inventory Summary</title>');
-    win.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
-    win.document.write('<style>body{font-family:Tahoma, sans-serif; padding:40px; color:#333; background:#FFF;}');
-    win.document.write('.wrapper{max-width:880px; margin:0 auto;} h1{color:#A91D3A; margin:0 0 10px 0; font-size:28px; font-weight:bold; text-align:center;}');
-    win.document.write('p{color:#888; font-size:15px; margin:0; text-align:center;} .footer{text-align:center; font-size:12px; color:#BBB; margin-top:40px; border-top:1px dashed #EEE; padding-top:20px;}');
-    win.document.write('</style></head><body><div id="pdf-target" class="wrapper"><h1>Branch Sales Summary</h1>');
-    win.document.write('<p>Report Period: ' + startDate + ' - ' + endDate + '</p><br><br>');
-    win.document.write(branchHTML);
-    win.document.write('<div class="footer">เอกสารสรุปยอดสั่งซื้อประจำสาขา | พิมพ์เมื่อ: ' + new Date().toLocaleString("th-TH") + '</div></div>');
-    win.document.write('<script>window.onload=function(){const target=document.getElementById("pdf-target");');
-    win.document.write('html2pdf().set({margin:10, filename:"Store_Summary.pdf", image:{type:"jpeg", quality:0.98},');
-    win.document.write('html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
-    win.document.write('}).from(target).save().then(function(){setTimeout(function(){window.close();},1200);});};<\/script></body></html>');
+    summaryWindow.document.write('<!DOCTYPE html><html><head><title>Branch_Analytics_Summary</title>');
+    summaryWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+    summaryWindow.document.write('<style>body{font-family:"Tahoma", sans-serif; padding:50px; color:#333; background:#FDFDFD;}');
+    summaryWindow.document.write('.report-box{max-width:920px; margin:0 auto;} h1{color:#A91D3A; margin:0 0 10px 0; font-size:32px; font-weight:bold; text-align:center; letter-spacing:1px;}');
+    summaryWindow.document.write('p{color:#999; font-size:15px; margin:0; text-align:center;} .rpt-footer{text-align:center; font-size:13px; color:#BBB; margin-top:50px; border-top:2px dashed #F0F0F0; padding-top:25px;}');
+    summaryWindow.document.write('</style></head><body><div id="pdf-manifest" class="report-box"><h1>CoffeeToday Sales Summary</h1>');
+    summaryWindow.document.write('<p>Period: ' + startFilter + ' to ' + endFilter + '</p><br><br>');
+    summaryWindow.document.write(reportHtml);
+    summaryWindow.document.write('<div class="rpt-footer">เอกสารสรุปยอดสะสม | ออกโดยระบบ CoffeeToday Manager v.2026 | วันที่: ' + new Date().toLocaleString("th-TH") + '</div></div>');
+    summaryWindow.document.write('<script>window.onload=function(){const target=document.getElementById("pdf-manifest");');
+    summaryWindow.document.write('html2pdf().set({margin:10, filename:"Sales_Summary_Report.pdf", image:{type:"jpeg", quality:1.0},');
+    summaryWindow.document.write('html2canvas:{scale:2.2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
+    summaryWindow.document.write('}).from(target).save().then(function(){setTimeout(function(){window.close();},1500);});};<\/script></body></html>');
     
-    win.document.close();
+    summaryWindow.document.close();
 
     setTimeout(function() {
-      btn.innerHTML = '<i class="fas fa-file-invoice"></i> รายงานสาขา';
-      btn.disabled = false;
-    }, 1500);
+      btnSummary.innerHTML = '<i class="fas fa-file-invoice"></i> รายงานสาขา';
+      btnSummary.disabled = false;
+    }, 2000);
   }
 
-  /** ✅ สั่งพิมพ์สลิปทันใจ */
-  function printOrder(data) { 
+  /** ✅ คำสั่งพิมพ์สลิปด่วน (Granular Printing Logic) */
+  function printOrder(encodedOrderData) { 
     
-    const o = JSON.parse(decodeURIComponent(data));
+    const targetObj = JSON.parse(decodeURIComponent(encodedOrderData));
     
-    let tableRows = '';
-    const itemsList = o.items.split('\n');
+    let tableRowsHtml = '';
+    const itemStringArray = targetObj.items.split('\n');
     
-    itemsList.forEach(function(line) {
-      if(line.trim() !== "") {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
-        if(match) {
-          tableRows += '<tr>';
-          tableRows += '<td style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:15px;">' + match[1] + '</td>';
-          tableRows += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:15px;">' + match[2] + '</td>';
-          tableRows += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:18px; font-weight:bold;">' + match[3] + '</td>';
-          tableRows += '</tr>';
+    itemStringArray.forEach(function(lineText) {
+      if(lineText.trim() !== "") {
+        const partsMatch = lineText.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(partsMatch) {
+          tableRowsHtml += '<tr>';
+          tableRowsHtml += '<td style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:16px;">' + partsMatch[1] + '</td>';
+          tableRowsHtml += '<td align="center" style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:16px; color:#888;">' + partsMatch[2] + '</td>';
+          tableRowsHtml += '<td align="center" style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:20px; font-weight:bold; color: #000;">' + partsMatch[3] + '</td>';
+          tableRowsHtml += '</tr>';
         } else {
-          tableRows += '<tr><td colspan="3" style="padding:15px; border-bottom:1px solid #EEEEEE; color:#888;">' + line + '</td></tr>';
+          tableRowsHtml += '<tr><td colspan="3" style="padding:16px; border-bottom:1px solid #EEEEEE; color:#AAAAAA; font-style:italic;">' + lineText + '</td></tr>';
         }
       }
     });
 
-    let pTimeStr = formatPackedTime(o.packedTime);
-    let timeLabelHtml = '';
+    let thaiPackedTime = formatPackedTime(targetObj.packedTime);
+    let bannerHtml = '';
     
-    if ((o.status === 'Packed' || o.status === 'Success') && pTimeStr !== "-") {
-      timeLabelHtml = '<div style="background-color:#f0fdf4; border:1.5px dashed #bbf7d0; padding:20px; border-radius:15px; text-align:center; margin-bottom:30px;">';
-      timeLabelHtml += '<span style="color:#166534; font-size:16px; font-weight:bold;">✓ ตรวจสอบและแพ็กเสร็จสิ้น: ' + pTimeStr + '</span>';
-      timeLabelHtml += '</div>';
+    if ((targetObj.status === 'Packed' || targetObj.status === 'Success') && thaiPackedTime !== "-") {
+      bannerHtml = '<div style="background-color:#f0fdf4; border:2px dashed #10b981; padding:22px; border-radius:18px; text-align:center; margin-bottom:35px;">';
+      bannerHtml += '<span style="color:#047857; font-size:17px; font-weight:bold;">✓ ตรวจสอบความถูกต้องและแพ็กเสร็จสิ้น: ' + thaiPackedTime + '</span>';
+      bannerHtml += '</div>';
     }
 
-    const win = window.open('','','width=850,height=900'); 
+    const printWindow = window.open('','','width=880,height=950'); 
     
-    win.document.write('<html><head><style>');
-    win.document.write('body{font-family:"Tahoma", sans-serif; padding:50px; color:#333333;}');
-    win.document.write('.receipt-box{border:3px solid #EEEEEE; padding:50px; border-radius:30px; max-width:650px; margin:0 auto;}'); 
-    win.document.write('h1{color:#A91D3A; text-align:center; font-size:28px; margin-bottom:30px; font-weight:bold; letter-spacing:1px;}');
-    win.document.write('.info-grid { display: flex; justify-content: space-between; margin-bottom: 30px; background: #F9F9F9; padding: 25px; border-radius: 20px; }');
-    win.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
-    win.document.write('th { text-align: left; padding: 15px; border-bottom: 2.5px solid #333333; font-size: 15px; color: #333333; }');
-    win.document.write('</style></head><body>');
-    win.document.write('<div class="receipt-box">');
-    win.document.write('<h1>COFFEETODAY</h1>');
-    win.document.write(timeLabelHtml);
-    win.document.write('<div class="info-grid">');
-    win.document.write('<div><div style="font-size:12px; color:#999;">REFERENCE</div><div style="font-size:16px; font-weight:bold;">' + o.id + '</div><br>');
-    win.document.write('<div style="font-size:12px; color:#999;">BRANCH</div><div style="font-size:16px; font-weight:bold;">' + o.branch + '</div></div>');
-    win.document.write('<div style="text-align:right;"><div style="font-size:12px; color:#999;">ORDER DATE</div><div style="font-size:16px; font-weight:bold;">' + o.date + '</div><br>');
-    win.document.write('<div style="font-size:12px; color:#999;">PHONE</div><div style="font-size:16px; font-weight:bold;">' + (o.phone || '-') + '</div></div>');
-    win.document.write('</div>');
-    win.document.write('<table><thead><tr><th>Product Name</th><th style="text-align:center;">Stock</th><th style="text-align:center;">Qty</th></tr></thead>');
-    win.document.write('<tbody>' + tableRows + '</tbody></table>');
-    win.document.write('<div style="text-align:center; margin-top:50px; border-top:1px dashed #CCCCCC; padding-top:30px; font-size:12px; color:#AAAAAA;">');
-    win.document.write('<p>เอกสารยืนยันรายการเตรียมสินค้าอ้างอิง</p>');
-    win.document.write('<p>วันที่พิมพ์: ' + new Date().toLocaleString("th-TH") + '</p>');
-    win.document.write('</div></div>');
-    win.document.write('<script>window.print();<\/script></body></html>'); 
+    printWindow.document.write('<html><head><style>');
+    printWindow.document.write('body{font-family:"Tahoma", sans-serif; padding:55px; color:#333333; background: #FFF;}');
+    printWindow.document.write('.receipt-wrapper{border:3px solid #F0F0F0; padding:60px; border-radius:35px; max-width:680px; margin:0 auto;}'); 
+    printWindow.document.write('h1{color:#A91D3A; text-align:center; font-size:30px; margin-bottom:35px; font-weight:bold; letter-spacing:2px;}');
+    printWindow.document.write('.meta-grid { display: flex; justify-content: space-between; margin-bottom: 35px; background: #F9F9F9; padding: 30px; border-radius: 22px; }');
+    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 25px; }');
+    printWindow.document.write('th { text-align: left; padding: 18px; border-bottom: 3px solid #111; font-size: 16px; color: #111; }');
+    printWindow.document.write('</style></head><body>');
+    printWindow.document.write('<div class="receipt-wrapper">');
+    printWindow.document.write('<h1>COFFEETODAY ORDER</h1>');
+    printWindow.document.write(bannerHtml);
+    printWindow.document.write('<div class="meta-grid">');
+    printWindow.document.write('<div><div style="font-size:12px; color:#999; text-transform:uppercase;">Reference ID</div><div style="font-size:17px; font-weight:bold;">' + targetObj.id + '</div><br>');
+    printWindow.document.write('<div style="font-size:12px; color:#999; text-transform:uppercase;">Store Branch</div><div style="font-size:17px; font-weight:bold;">' + targetObj.branch + '</div></div>');
+    printWindow.document.write('<div style="text-align:right;"><div style="font-size:12px; color:#999; text-transform:uppercase;">Transaction Date</div><div style="font-size:17px; font-weight:bold;">' + targetObj.date + '</div><br>');
+    printWindow.document.write('<div style="font-size:12px; color:#999; text-transform:uppercase;">Contact Number</div><div style="font-size:17px; font-weight:bold;">' + (targetObj.phone || '-') + '</div></div>');
+    printWindow.document.write('</div>');
+    printWindow.document.write('<table><thead><tr><th>Product Manifesto</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead>');
+    printWindow.document.write('<tbody>' + tableRowsHtml + '</tbody></table>');
+    printWindow.document.write('<div style="text-align:center; margin-top:55px; border-top:1.5px dashed #DDDDDD; padding-top:35px; font-size:12px; color:#BBBBBB;">');
+    printWindow.document.write('<p>ขอบคุณที่ร่วมเป็นส่วนหนึ่งของการบริการคุณภาพจาก CoffeeToday</p>');
+    printWindow.document.write('<p>พิมพ์เอกสารเมื่อ: ' + new Date().toLocaleString("th-TH") + '</p>');
+    printWindow.document.write('</div></div>');
+    printWindow.document.write('<script>window.print();<\/script></body></html>'); 
     
-    win.document.close(); 
+    printWindow.document.close(); 
   }
   
-  /** ✅ ระบบจัดการกราฟด้วย Chart.js (ลอจิกแยกประเภท) */
-  function renderCharts(c) {
+  /** ✅ ตัวจัดการการวาดกราฟสถิติ (Expanded Chart Logic) */
+  function renderCharts(analyticsData) {
     
-    if(bcObj) { bcObj.destroy(); }
-    if(pcObj) { pcObj.destroy(); }
-    if(scObj) { scObj.destroy(); }
+    // ตรวจสอบและทำลายอินสแตนซ์กราฟเก่าเพื่อป้องกันอาการทับซ้อน
+    if(bcObj !== null) { 
+      bcObj.destroy(); 
+    }
     
-    // กราฟเมนูขายดี
-    bcObj = new Chart(document.getElementById('bC'), { 
+    if(pcObj !== null) { 
+      pcObj.destroy(); 
+    }
+    
+    if(scObj !== null) { 
+      scObj.destroy(); 
+    }
+    
+    const ctxBar = document.getElementById('bC').getContext('2d');
+    const ctxPie = document.getElementById('pC_Chart').getContext('2d');
+    const ctxStock = document.getElementById('sC').getContext('2d');
+    
+    // 📊 กราฟแท่ง: สินค้าขายดี 10 อันดับ
+    bcObj = new Chart(ctxBar, { 
       type: 'bar', 
       data: { 
-        labels: c.pL, 
+        labels: analyticsData.pL, 
         datasets: [{ 
-          label: 'จำนวนออเดอร์', 
-          data: c.pV, 
-          backgroundColor: 'rgba(169, 29, 58, 0.9)', 
+          label: 'ปริมาณการสั่งซื้อ', 
+          data: analyticsData.pV, 
+          backgroundColor: 'rgba(169, 29, 58, 0.95)', 
           borderColor: 'rgba(169, 29, 58, 1)',
           borderWidth: 0,
-          borderRadius: 12,
-          barPercentage: 0.55,
-          categoryPercentage: 0.85
+          borderRadius: 15,
+          barPercentage: 0.5,
+          categoryPercentage: 0.8
         }] 
       }, 
       options: { 
         maintainAspectRatio: false, 
         indexAxis: 'y', 
-        plugins: { legend: { display: false } }, 
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#2D3133',
+            padding: 12,
+            titleFont: { family: 'Prompt', size: 14 },
+            bodyFont: { family: 'Sarabun', size: 13 }
+          }
+        }, 
         scales: { 
           x: { 
             grid: { display: false },
-            title: { display: true, text: 'ปริมาณสั่ง (ชิ้น/แก้ว)', font: { family: 'Prompt', size: 10 } } 
+            title: { 
+              display: true, 
+              text: 'จำนวนหน่วยที่สั่ง (QTY)', 
+              font: { family: 'Prompt', size: 11, weight: 'bold' },
+              color: '#999'
+            } 
           },
           y: {
             grid: { display: false },
-            ticks: { font: { family: 'Sarabun', size: 11 } }
+            ticks: { font: { family: 'Sarabun', size: 12, weight: 'bold' }, color: '#444' }
           }
         } 
       } 
     });
     
-    // กราฟสัดส่วนสาขา
-    pcObj = new Chart(document.getElementById('pC_Chart'), { 
+    // 🍩 กราฟโดนัท: ส่วนแบ่งตลาดรายสาขา
+    pcObj = new Chart(ctxPie, { 
       type: 'doughnut', 
       data: { 
-        labels: c.bL, 
+        labels: analyticsData.bL, 
         datasets: [{ 
-          data: c.bV, 
-          backgroundColor: ['#2D3133','#A91D3A','#BBBBBB','#DDDDDD','#888888','#555555'],
-          hoverOffset: 15,
-          borderWidth: 4,
+          data: analyticsData.bV, 
+          backgroundColor: ['#2D3133', '#A91D3A', '#3498db', '#95a5a6', '#f1c40f', '#e67e22', '#16a085'],
+          hoverOffset: 25,
+          borderWidth: 6,
           borderColor: '#FFFFFF'
         }] 
       }, 
       options: { 
         maintainAspectRatio: false, 
-        cutout: '82%',
+        cutout: '84%',
         plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Sarabun', size: 10 } } }
+          legend: { 
+            position: 'bottom', 
+            labels: { 
+              padding: 25,
+              boxWidth: 12, 
+              font: { family: 'Sarabun', size: 11, weight: '600' } 
+            } 
+          }
         }
       } 
     });
     
-    // กราฟวิเคราะห์สต๊อกสินค้าที่เหลือน้อย
-    scObj = new Chart(document.getElementById('sC'), {
+    // 📊 กราฟสต๊อก: สินค้าที่เหลือน้อยวิกฤต
+    scObj = new Chart(ctxStock, {
       type: 'bar', 
       data: { 
-        labels: (c.sL ? c.sL.slice(0, 15) : []), 
+        labels: (analyticsData.sL ? analyticsData.sL.slice(0, 15) : []), 
         datasets: [{ 
-          label: 'คงเหลือหน้าสาขา', 
-          data: (c.sV ? c.sV.slice(0, 15) : []), 
+          label: 'คงเหลือหน้าจุดขาย', 
+          data: (analyticsData.sV ? analyticsData.sV.slice(0, 15) : []), 
           backgroundColor: 'rgba(243, 156, 18, 0.85)', 
-          borderRadius: 10, 
-          barPercentage: 0.6, 
-          categoryPercentage: 0.8 
+          borderRadius: 12, 
+          barPercentage: 0.55, 
+          categoryPercentage: 0.85 
         }] 
       },
       options: { 
@@ -1529,199 +1691,258 @@
         plugins: { legend: { display: false } }, 
         scales: { 
           x: { 
-            grid: { color: '#F0F0F0' },
-            title: { display: true, text: 'ปริมาณสินค้าคงเหลือ (ชิ้น)', font: { family: 'Prompt', size: 10 } } 
+            grid: { color: '#F3F4F6' },
+            title: { 
+              display: true, 
+              text: 'ปริมาณสินค้าในคลังปัจจุบัน (ชิ้น)', 
+              font: { family: 'Prompt', size: 11, weight: 'bold' },
+              color: '#999'
+            } 
           },
           y: {
             grid: { display: false },
-            ticks: { font: { family: 'Sarabun', size: 11 } }
+            ticks: { font: { family: 'Sarabun', size: 12, weight: 'bold' }, color: '#444' }
           }
         } 
       }
     });
   }
 
-  /** ✅ ระบบจัดการเมนูการสั่งซื้อ (Settings Accordion) */
-  function renderMenuAccordion(d) {
+  /** ✅ ส่วนควบคุมการบริหารจัดการเมนูสินค้า (Expanded UI Accordion) */
+  function renderMenuAccordion(menuData) {
     
-    if(!d || !d.categories) {
+    if(!menuData || !menuData.categories) {
       return;
     }
     
-    menuObj = d; 
-    let chips = ''; 
-    let items = ''; 
-    let options = '';
+    menuObj = menuData; 
+    let chipsHtmlContent = ''; 
+    let itemsHtmlContent = ''; 
+    let selectOptionsHtml = '';
     
-    if(!currentCat && d.categories.length > 0) {
-      currentCat = d.categories[0];
+    if(!currentCat && menuData.categories.length > 0) {
+      currentCat = menuData.categories[0];
     }
     
-    // สร้าง Chips หมวดหมู่
-    d.categories.forEach(function(cat) {
+    // สร้างปุ่มหมวดหมู่ (Chips)
+    menuData.categories.forEach(function(categoryName) {
       
-      const count = (d.grouped[cat] ? d.grouped[cat].length : 0);
-      const activeClass = (cat === currentCat ? 'active' : '');
+      const itemCount = menuData.grouped[categoryName] ? menuData.grouped[categoryName].length : 0;
+      const isSelected = (categoryName === currentCat ? 'active' : '');
       
-      options += '<option value="' + cat + '">' + cat + '</option>';
-      chips += '<div class="chip ' + activeClass + '" onclick="selectCat(\'' + cat + '\')">';
-      chips += cat + ' (' + count + ')';
-      chips += '</div>';
+      selectOptionsHtml += '<option value="' + categoryName + '">' + categoryName + '</option>';
+      
+      chipsHtmlContent += '<div class="chip ' + isSelected + '" onclick="selectCat(\'' + categoryName + '\')">';
+      chipsHtmlContent += categoryName + ' (' + itemCount + ')';
+      chipsHtmlContent += '</div>';
       
     });
     
-    // สร้างรายการสินค้า
-    if(currentCat && d.grouped[currentCat]) {
+    // สร้างรายการสินค้าภายในหมวดหมู่ที่เลือก
+    if(currentCat && menuData.grouped[currentCat]) {
       
-      d.grouped[currentCat].forEach(function(i) { 
+      menuData.grouped[currentCat].forEach(function(product) { 
         
-        const isChecked = (i.status === 'Active' ? 'checked' : '');
+        const isProductActive = (product.status === 'Active' ? 'checked' : '');
         
-        items += '<div class="cat-item" style="display:flex; justify-content:space-between; padding:22px 0; border-bottom:1px solid #F9F9F9; align-items:center;">';
-        items += '<span style="font-weight:600; color:#444; font-size:15px;">' + i.name + '</span>';
-        items += '<div style="display:flex; gap:28px; align-items:center;">';
-        items += '<label class="switch">';
-        items += '<input type="checkbox" ' + isChecked + ' onchange="toggleItem(\'' + i.rowId + '\', \'' + i.name + '\', \'' + currentCat + '\', this)">';
-        items += '<span class="slider"></span>';
-        items += '</label>';
-        items += '<i class="fas fa-edit-alt" style="color:#CCCCCC; cursor:pointer; font-size:18px;" onclick="openProdModal(' + i.rowId + ', \'' + i.name + '\', \'' + currentCat + '\')"></i>';
-        items += '</div>';
-        items += '</div>'; 
+        itemsHtmlContent += '<div class="cat-item" style="display:flex; justify-content:space-between; padding:25px 0; border-bottom:1px solid #F8F9FA; align-items:center;">';
+        itemsHtmlContent += '<div>';
+        itemsHtmlContent += '<span style="font-weight:600; color:#333; font-size:16px;">' + product.name + '</span>';
+        itemsHtmlContent += '<div style="font-size:11px; color:#AAA; margin-top:5px;">ID Ref: ' + product.rowId + '</div>';
+        itemsHtmlContent += '</div>';
+        itemsHtmlContent += '<div style="display:flex; gap:32px; align-items:center;">';
+        itemsHtmlContent += '<label class="switch">';
+        itemsHtmlContent += '<input type="checkbox" ' + isProductActive + ' onchange="toggleItem(\'' + product.rowId + '\', \'' + product.name + '\', \'' + currentCat + '\', this)">';
+        itemsHtmlContent += '<span class="slider"></span>';
+        itemsHtmlContent += '</label>';
+        itemsHtmlContent += '<i class="fas fa-edit" style="color:#CCCCCC; cursor:pointer; font-size:18px; transition:0.3s;" onmouseover="this.style.color=\'var(--red)\'" onmouseout="this.style.color=\'#CCCCCC\'" onclick="openProdModal(' + product.rowId + ', \'' + product.name + '\', \'' + currentCat + '\')"></i>';
+        itemsHtmlContent += '</div>';
+        itemsHtmlContent += '</div>'; 
         
       });
       
     }
     
-    document.getElementById('catChips').innerHTML = chips; 
-    document.getElementById('menuItems').innerHTML = items; 
-    document.getElementById('pCatSelect').innerHTML = options;
+    // ฉีด HTML เข้าสู่หน้าเว็บ
+    document.getElementById('catChips').innerHTML = chipsHtmlContent; 
+    document.getElementById('menuItems').innerHTML = itemsHtmlContent; 
+    document.getElementById('pCatSelect').innerHTML = selectOptionsHtml;
   }
 
-  function selectCat(cat) { 
-    currentCat = cat; 
+  function selectCat(catName) { 
+    currentCat = catName; 
     renderMenuAccordion(menuObj); 
   }
 
   /**
-   * ✅ เปิด-ปิดการใช้งานสินค้าผ่าน API
+   * ✅ สลับสถานะเปิด-ปิดการใช้งานเมนู
    */
-  function toggleItem(id, n, c, el) { 
+  function toggleItem(rowId, productName, category, checkboxElement) { 
     
-    const token = localStorage.getItem(TOKEN_KEY);
-    const newStatus = (el.checked ? 'Active' : 'Inactive');
+    const adminToken = localStorage.getItem(TOKEN_KEY);
+    const updatedStatus = (checkboxElement.checked ? 'Active' : 'Inactive');
     
-    fetch(GAS_URL + '?action=updateProduct&id=' + id + '&name=' + n + '&cat=' + c + '&status=' + newStatus + '&token=' + token)
+    const updateUrl = GAS_URL + 
+                      '?action=updateProduct' + 
+                      '&id=' + rowId + 
+                      '&name=' + encodeURIComponent(productName) + 
+                      '&cat=' + encodeURIComponent(category) + 
+                      '&status=' + updatedStatus + 
+                      '&token=' + adminToken;
+    
+    fetch(updateUrl)
       .then(function(res) { 
         return res.json(); 
       })
-      .then(function(d) { 
-        renderMenuAccordion(d); 
-        showToast(el.checked ? "✅ เปิดการสั่งเมนูนี้สำเร็จ!" : "🌑 เมนูนี้ถูกปิดใช้งานชั่วคราว"); 
+      .then(function(newMenuData) { 
+        renderMenuAccordion(newMenuData); 
+        const statusMsg = (checkboxElement.checked ? "✅ เปิดรับออเดอร์เมนูนี้แล้ว!" : "🌑 ปิดรับออเดอร์เมนูนี้ชั่วคราว");
+        showToast(statusMsg); 
       });
   }
 
+  /**
+   * ✅ ฟังก์ชันจัดการหน้าต่าง Modal
+   */
   function openCatModal() { 
     document.getElementById('cN').value = ''; 
     document.getElementById('cM').style.display = 'flex'; 
-    document.getElementById('cN').focus();
-  }
-
-  function closeM(id) { 
-    document.getElementById(id).style.display = 'none'; 
-  }
-
-  /**
-   * ✅ การแจ้งเตือน Toast สไตล์ Nitro
-   */
-  function showToast(msg) {
-    
-    const toast = document.createElement('div'); 
-    toast.innerText = msg;
-    
-    const toastStyle = "position:fixed; bottom:35px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:18px 40px; border-radius:60px; z-index:10000; box-shadow:0 15px 30px rgba(0,0,0,0.2); font-family:'Prompt'; font-weight:600; font-size:15px; pointer-events:none; animation: fadeInOut 2.8s forwards;";
-    
-    toast.style = toastStyle;
-    document.body.appendChild(toast); 
-    
     setTimeout(function() { 
-      toast.remove(); 
-    }, 2800);
+      document.getElementById('cN').focus(); 
+    }, 300);
+  }
+
+  function closeM(modalId) { 
+    const modal = document.getElementById(modalId);
+    modal.style.opacity = '0';
+    setTimeout(function() {
+      modal.style.display = 'none'; 
+      modal.style.opacity = '1';
+    }, 300);
   }
 
   /**
-   * ✅ บันทึกข้อมูลหมวดหมู่ใหม่
+   * ✅ ระบบแจ้งเตือน Notification (Nitro Toast Style)
+   */
+  function showToast(message) {
+    
+    const toastElement = document.createElement('div'); 
+    toastElement.innerText = message;
+    
+    const designStyle = "position:fixed; bottom:35px; left:50%; transform:translateX(-50%); background:rgba(34, 197, 94, 0.95); backdrop-filter:blur(5px); color:white; padding:18px 45px; border-radius:60px; z-index:10000; box-shadow:0 15px 35px rgba(0,0,0,0.2); font-family:'Prompt'; font-weight:700; font-size:15px; pointer-events:none; animation: toastSlideIn 3.2s forwards;";
+    
+    toastElement.style = designStyle;
+    document.body.appendChild(toastElement); 
+    
+    // ลบการแจ้งเตือนเมื่อเวลาผ่านไป
+    setTimeout(function() { 
+      toastElement.remove(); 
+    }, 3200);
+  }
+  
+  // แอนิเมชั่นสำหรับการแจ้งเตือน
+  const toastAnim = "@keyframes toastSlideIn { 0% { opacity:0; bottom:15px; } 15% { opacity:1; bottom:35px; } 85% { opacity:1; bottom:35px; } 100% { opacity:0; bottom:15px; } }";
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = toastAnim;
+  document.head.appendChild(styleSheet);
+
+  /**
+   * ✅ บันทึกหมวดหมู่ใหม่ลงฐานข้อมูล
    */
   function saveCat() { 
     
-    const name = document.getElementById('cN').value.trim(); 
+    const categoryNameInput = document.getElementById('cN');
+    const finalName = categoryNameInput.value.trim(); 
     
-    if (name === "") {
-      return alert("กรุณาระบุชื่อหมวดหมู่ด้วยครับ");
+    if (finalName === "") {
+      alert("กรุณาระบุชื่อหมวดหมู่ที่ต้องการสร้าง");
+      return;
     }
     
     closeM('cM'); 
-    const token = localStorage.getItem(TOKEN_KEY);
+    const adminToken = localStorage.getItem(TOKEN_KEY);
+    const saveUrl = GAS_URL + '?action=addCategory&catName=' + encodeURIComponent(finalName) + '&token=' + adminToken;
     
-    fetch(GAS_URL + '?action=addCategory&catName=' + name + '&token=' + token)
+    fetch(saveUrl)
       .then(function(res) { 
         return res.json(); 
       })
-      .then(function(d) { 
-        renderMenuAccordion(d); 
-        showToast("✅ เพิ่มหมวดหมู่ " + name + " สำเร็จ!"); 
+      .then(function(newMenuData) { 
+        renderMenuAccordion(newMenuData); 
+        showToast("✅ สร้างหมวดหมู่ '" + finalName + "' เรียบร้อยแล้ว!"); 
       });
   }
 
   /**
-   * ✅ เปิดหน้าต่างเพิ่ม/แก้ไขรายการสินค้า
+   * ✅ เปิดหน้าต่างเพิ่มหรือแก้ไขข้อมูลสินค้า
    */
-  function openProdModal(id, n, c) { 
+  function openProdModal(rowId, name, cat) { 
     
-    editTargetId = (id || null); 
-    document.getElementById('pN').value = (n || ''); 
-    document.getElementById('pCatSelect').value = (c || (menuObj.categories ? menuObj.categories[0] : '')); 
+    editTargetId = (rowId || null); 
+    document.getElementById('pN').value = (name || ''); 
+    document.getElementById('pCatSelect').value = (cat || (menuObj.categories ? menuObj.categories[0] : '')); 
     
-    document.getElementById('pM').style.display = 'flex'; 
-    document.getElementById('pN').focus();
+    const modal = document.getElementById('pM');
+    modal.style.display = 'flex'; 
+    
+    setTimeout(function() { 
+      document.getElementById('pN').focus(); 
+    }, 300);
   }
 
   /**
-   * ✅ บันทึกสินค้าลงฐานข้อมูล
+   * ✅ บันทึกข้อมูลสินค้าผ่าน API
    */
   function saveP() { 
     
-    const prodName = document.getElementById('pN').value.trim(); 
-    const catName = document.getElementById('pCatSelect').value; 
+    const pNameInput = document.getElementById('pN');
+    const cNameSelect = document.getElementById('pCatSelect');
     
-    if (prodName === "") {
-      return alert("กรุณาระบุชื่อสินค้าด้วยครับ");
+    const finalPName = pNameInput.value.trim(); 
+    const finalCName = cNameSelect.value; 
+    
+    if (finalPName === "") {
+      alert("กรุณาระบุชื่อสินค้าและขนาดบรรจุให้ชัดเจน");
+      return;
     }
     
     closeM('pM'); 
-    const token = localStorage.getItem(TOKEN_KEY);
+    const adminToken = localStorage.getItem(TOKEN_KEY);
     
-    fetch(GAS_URL + '?action=updateProduct&id=' + editTargetId + '&name=' + prodName + '&cat=' + catName + '&status=Active&token=' + token)
+    const updateUrl = GAS_URL + 
+                      '?action=updateProduct' + 
+                      '&id=' + editTargetId + 
+                      '&name=' + encodeURIComponent(finalPName) + 
+                      '&cat=' + encodeURIComponent(finalCName) + 
+                      '&status=Active' + 
+                      '&token=' + adminToken;
+    
+    fetch(updateUrl)
       .then(function(res) { 
         return res.json(); 
       })
-      .then(function(d) { 
-        renderMenuAccordion(d); 
-        showToast("✅ บันทึกเมนู " + prodName + " เรียบร้อย!"); 
+      .then(function(newMenuData) { 
+        renderMenuAccordion(newMenuData); 
+        showToast("✅ บันทึกข้อมูลสินค้าสำเร็จแล้ว!"); 
       });
   }
 
   /**
-   * ✅ ระบบแบ่งหน้า (Pagination Logic)
+   * ✅ ฟังก์ชันจัดการการแบ่งหน้า (Pagination)
    */
   function changeLimit() { 
+    
+    const limitSelect = document.getElementById('rowSel');
     pgNum = 1; 
-    pgLim = parseInt(document.getElementById('rowSel').value); 
+    pgLim = parseInt(limitSelect.value); 
+    
     renderTable(); 
   }
 
   function next() { 
-    const totalItems = allOrders.length;
-    const totalPages = Math.ceil(totalItems / pgLim);
+    
+    const totalCount = allOrders.length;
+    const totalPages = Math.ceil(totalCount / pgLim);
     
     if(pgNum < totalPages) { 
       pgNum = pgNum + 1; 
@@ -1730,11 +1951,15 @@
   }
 
   function prev() { 
+    
     if(pgNum > 1) { 
       pgNum = pgNum - 1; 
       renderTable(); 
     } 
+    
   }
+
 </script>
+
 </body>
 </html>
