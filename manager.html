@@ -14,12 +14,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <style>
-    /**
-     * CoffeeToday System - Master UI Styling (Version Final 1671+)
-     * ออกแบบโดย: คุณเบลล์ (Khun Bell)
-     * การจัดรูปแบบ: Full Expansion + Drag & Drop System
-     */
-    
+    /*
+      =========================================================================
+      CORE CSS VARIABLES & STYLING
+      =========================================================================
+    */
     :root { 
       --red: #A91D3A; 
       --dark: #2D3133; 
@@ -49,7 +48,11 @@
       overflow-x: hidden;
     }
 
-    /* 🛡️ Login Overlay Section */
+    /*
+      =========================================================================
+      LOGIN OVERLAY SECTION
+      =========================================================================
+    */
     #login-overlay { 
       position: fixed; 
       top: 0; 
@@ -127,7 +130,11 @@
       transform: translateY(-2px);
     }
     
-    /* 📱 Main App Structure */
+    /*
+      =========================================================================
+      MAIN APP STRUCTURE & NAVIGATION
+      =========================================================================
+    */
     #main-app { 
       display: none; 
       animation: fadeIn 0.8s ease;
@@ -165,6 +172,11 @@
       padding: 0 30px; 
     }
     
+    /*
+      =========================================================================
+      CARD & GRID SYSTEM
+      =========================================================================
+    */
     .card { 
       background-color: var(--white); 
       padding: 40px; 
@@ -203,7 +215,11 @@
       gap: 12px;
     }
 
-    /* ✅ ปรับปรุงช่องค้นหา: Slim & Modern Design */
+    /*
+      =========================================================================
+      SEARCH & FILTER PANEL
+      =========================================================================
+    */
     .search-row {
       background-color: var(--white);
       border-radius: 14px;
@@ -234,7 +250,6 @@
       background: transparent;
     }
 
-    /* 📊 Filter Panel Styling */
     .filter-panel {
       display: flex; 
       gap: 12px; 
@@ -252,7 +267,11 @@
       outline: none;
     }
 
-    /* 📄 Receipt UI Elements */
+    /*
+      =========================================================================
+      RECEIPT & MODAL STYLING
+      =========================================================================
+    */
     .receipt-card {
       background-color: #FFFFFF; 
       border-radius: 25px; 
@@ -289,7 +308,11 @@
       color: #333333; 
     }
 
-    /* 📦 Approval Board Components */
+    /*
+      =========================================================================
+      APPROVAL BOARD COMPONENTS
+      =========================================================================
+    */
     .approve-card { 
       border-top: 10px solid var(--green); 
       padding: 30px 45px; 
@@ -318,7 +341,11 @@
       box-shadow: 0 10px 25px rgba(34,197,94,0.12); 
     }
 
-    /* 📄 โครงสร้าง Modal Windows */
+    /*
+      =========================================================================
+      MODAL OVERLAY SYSTEM
+      =========================================================================
+    */
     .overlay {
       display: none; 
       position: fixed; 
@@ -353,7 +380,11 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* 📊 การจัดการตารางข้อมูล */
+    /*
+      =========================================================================
+      TABLE & DATA GRID
+      =========================================================================
+    */
     table { 
       width: 100%; 
       border-collapse: collapse; 
@@ -386,7 +417,11 @@
       background-color: #f0fdf4 !important; 
     }
 
-    /* 🔘 ส่วนควบคุมปุ่มกด */
+    /*
+      =========================================================================
+      BUTTONS & CONTROLS
+      =========================================================================
+    */
     .btn { 
       padding: 14px 32px; 
       border-radius: 18px; 
@@ -432,7 +467,11 @@
       border-radius: 12px;
     }
 
-    /* 🔘 ปุ่ม Drag & Drop */
+    /*
+      =========================================================================
+      DRAG & DROP CHIPS
+      =========================================================================
+    */
     .chips-container {
       display: flex; 
       gap: 12px; 
@@ -447,7 +486,7 @@
       border: 1px solid var(--border); 
       font-family: 'Prompt'; 
       font-size: 14px;
-      cursor: grab; /* เปลี่ยนเป็นมือจับ */
+      cursor: grab; 
       transition: all 0.3s; 
       white-space: nowrap; 
       box-shadow: var(--shadow-soft);
@@ -479,7 +518,11 @@
       transform: scale(0.95);
     }
 
-    /* Switch ควบคุมเมนู */
+    /*
+      =========================================================================
+      TOGGLE SWITCH STYLING
+      =========================================================================
+    */
     .switch { 
       position: relative; 
       display: inline-block; 
@@ -526,7 +569,11 @@
       transform: translateX(22px); 
     }
 
-    /* 🌫️ Skeleton Loading Pulse */
+    /*
+      =========================================================================
+      SKELETON LOADING EFFECTS
+      =========================================================================
+    */
     .loading-pulse { 
       position: relative; 
       overflow: hidden; 
@@ -549,7 +596,11 @@
       100% { transform: translateX(100%); } 
     }
     
-    /* 📄 Pagination Footer */
+    /*
+      =========================================================================
+      PAGINATION & FOOTER
+      =========================================================================
+    */
     .pagination-footer { 
       display: flex; 
       justify-content: flex-end; 
@@ -589,7 +640,11 @@
       cursor: pointer; 
     }
 
-    /* 📱 สื่อสารแบบตอบสนอง (Responsive Design) */
+    /*
+      =========================================================================
+      RESPONSIVE DESIGN (MEDIA QUERIES)
+      =========================================================================
+    */
     @media (max-width: 1024px) {
       .chart-grid { grid-template-columns: 1fr; }
       .container { padding: 0 20px; }
@@ -600,7 +655,6 @@
       .card { padding: 25px; border-radius: 25px; }
       .section-header { flex-direction: column; align-items: flex-start; gap: 15px; width: 100%; }
       
-      /* ✅ ซ่อม UI ส่วน Filter ให้ปัดบรรทัดและพอดีจอมือถือ */
       .filter-panel { 
         width: 100%; 
         flex-wrap: wrap; 
@@ -614,7 +668,7 @@
         border-radius: 10px;
         text-align: center;
       }
-      .filter-panel span { display: none; } /* ซ่อนขีด - บนมือถือกันเกะกะ */
+      .filter-panel span { display: none; } 
       .filter-panel .btn-sm { 
         width: 48%; 
         padding: 12px; 
@@ -627,7 +681,11 @@
       .btn { padding: 12px 20px; font-size: 13px; flex: 1; text-align: center; }
     }
     
-    /* 🌫️ Animations */
+    /*
+      =========================================================================
+      STATUS ANIMATIONS
+      =========================================================================
+    */
     @keyframes blink {
       0% { opacity: 1; }
       50% { opacity: 0.4; }
@@ -748,7 +806,7 @@
         </h4>
       </div>
       <p style="font-size:12px; color:#999999; margin-top:-20px; margin-bottom:25px;">
-        * แสดงรายการที่เหลือน้อยที่สุด 15 อันดับแรกจากการแจ้งงาน
+        * แสดงรายการที่เหลือน้อยที่สุด 15 อันดับแรกจากการแจ้งงานล่าสุดแยกตามสาขา
       </p>
       <div style="height:280px; position: relative;">
         <canvas id="sC"></canvas>
@@ -932,8 +990,10 @@
 
 <script>
   /**
+   * ==========================================================================
    * ⚙️ System Application Logic - Nitro Core Engine
-   * เวอร์ชั่น: High-Precision Drag & Drop System
+   * เวอร์ชั่น: High-Precision Drag & Drop System + Branch Stock Update
+   * ==========================================================================
    */
   
   let bcObj = null; 
@@ -1047,6 +1107,7 @@
 
   /**
    * ✅ ฟังก์ชันดึงข้อมูล Dashboard (ประมวลผลกราฟด้วยเวลา Local)
+   * 💡 อัปเดต: เพิ่มการแงะข้อมูลสต็อกตามสาขา
    */
   function loadDashboardData(smooth, token, searchQ) { 
     
@@ -1082,7 +1143,7 @@
           renderTable();
           
           // ==========================================
-          // การคำนวณกราฟแบบ Local Time (แก้ปัญหา Timezone)
+          // การคำนวณกราฟแบบ Local Time & Branch Stock
           // ==========================================
           let finalChartData = d.analytics.charts;
           
@@ -1090,7 +1151,7 @@
              
              let branchSum = {};
              let productSum = {};
-             let stockSum = {};
+             let stockSum = {}; // เก็บข้อมูล [สาขา] สินค้า
              
              // ตั้งเป้าเป็นเที่ยงคืนของเครื่องคุณเบลล์ปัจจุบัน
              let todayMidnight = new Date();
@@ -1104,7 +1165,7 @@
                 
                 let orderDateObj = new Date(dtParts[2], dtParts[1]-1, dtParts[0], timeParts[0], timeParts[1]);
                 
-                // ถ้ายอดเกิดหลังเที่ยงคืนวันนี้ ให้นับเข้ากราฟ
+                // ถ้ายอดเกิดหลังเที่ยงคืนวันนี้ ให้นับเข้ากราฟวงกลมและแท่งขายดี
                 if (orderDateObj >= todayMidnight) { 
                    
                    let bNameStr = ord.branch || "อื่นๆ";
@@ -1120,12 +1181,19 @@
                          let qtyVal = qtyReg ? parseFloat(qtyReg[1]) : 0;
                          productSum[nameOnlyStr] = (productSum[nameOnlyStr] || 0) + qtyVal;
                          
+                         // 💡 แงะสต็อกล่าสุดพร้อมแปะชื่อสาขา
                          let stockReg = lineStr.match(/เหลือ:([^,)]+)/);
                          if (stockReg) {
                             let stockStr = stockReg[1].trim();
                             let stockNumReg = stockStr.match(/[\d.]+/);
                             let numVal = stockNumReg ? parseFloat(stockNumReg[0]) : 0;
-                            stockSum[nameOnlyStr] = numVal;
+                            
+                            let branchKeyStr = "[" + bNameStr + "] " + nameOnlyStr;
+                            
+                            // เก็บเฉพาะค่าใหม่ที่สุด
+                            if(stockSum[branchKeyStr] === undefined) {
+                               stockSum[branchKeyStr] = numVal;
+                            }
                          }
                       }
                    });
@@ -1609,171 +1677,7 @@
     pdfWindow.document.write('</body>');
     pdfWindow.document.write('</html>');
     
-    pdfWindow.document.close();
-
-    setTimeout(function() {
-      btnDownload.innerHTML = '<i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)';
-      btnDownload.disabled = false;
-    }, 1500);
-  }
-
-  function downloadSummaryReport() {
-    
-    if(allOrders.length === 0) {
-      alert("ไม่พบข้อมูลออเดอร์ในช่วงเวลาที่เลือก");
-      return;
-    }
-    
-    const btnSummary = document.getElementById('summaryBtn');
-    btnSummary.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing Report...';
-    btnSummary.disabled = true;
-
-    const startFilter = document.getElementById('sDate').value || "Start Point";
-    const endFilter = document.getElementById('eDate').value || "Current Moment";
-
-    const groupedSummary = {};
-    allOrders.forEach(function(order) {
-      
-      const storeName = order.branch || "Unknown Store";
-      if (!groupedSummary[storeName]) {
-        groupedSummary[storeName] = {};
-      }
-
-      const itemLines = order.items.split('\n');
-      itemLines.forEach(function(line) {
-        
-        const lineMatch = line.match(/(.+) \(เหลือ:(.+), สั่ง:([\d.]+)\)/);
-        if (lineMatch) {
-          
-          const name = lineMatch[1].trim();
-          const stock = lineMatch[2].trim();
-          const qtyVal = parseFloat(lineMatch[3]);
-          
-          if(!groupedSummary[storeName][name]) {
-            groupedSummary[storeName][name] = { sum: 0, lastStock: stock };
-          }
-          
-          groupedSummary[storeName][name].sum += qtyVal;
-          groupedSummary[storeName][name].lastStock = stock;
-        }
-        
-      });
-    });
-
-    let reportHtml = "";
-    const storeKeys = Object.keys(groupedSummary).sort();
-    
-    storeKeys.forEach(function(store) {
-      
-      let itemRowsHtml = "";
-      const itemsInStore = groupedSummary[store];
-      const productNames = Object.keys(itemsInStore).sort();
-      
-      productNames.forEach(function(pName) {
-        
-        const data = itemsInStore[pName];
-        itemRowsHtml += '<tr>';
-        itemRowsHtml += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; font-size:13px;">' + pName + '</td>';
-        itemRowsHtml += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; text-align:center; font-size:13px; color:#777;">' + data.lastStock + '</td>';
-        itemRowsHtml += '<td style="padding:12px; border-bottom:1px solid #EEEEEE; text-align:center; font-weight:bold; font-size:14px; color:var(--red);">' + data.sum + '</td>';
-        itemRowsHtml += '</tr>';
-        
-      });
-
-      reportHtml += '<div style="break-inside:avoid; margin-bottom:35px; border:1px solid #EEEEEE; border-radius:15px; overflow:hidden;">';
-      reportHtml += '<h2 style="background-color:#F8F9FA; padding:15px 20px; color:#A91D3A; border-left:8px solid #A91D3A; font-size:18px; margin:0; font-weight:bold;">สาขา: ' + store + '</h2>';
-      reportHtml += '<table style="width:100%; border-collapse:collapse;">';
-      reportHtml += '<thead><tr style="background:#FAFAFA; font-size:12px; color:#999;">';
-      reportHtml += '<th style="padding:12px; text-align:left; border-bottom:2px solid #EEEEEE; width:55%;">รายการสินค้า</th>';
-      reportHtml += '<th style="padding:12px; text-align:center; border-bottom:2px solid #EEEEEE;">คงเหลือ</th>';
-      reportHtml += '<th style="padding:12px; text-align:center; border-bottom:2px solid #EEEEEE;">ยอดสั่งรวม</th>';
-      reportHtml += '</tr></thead><tbody>' + itemRowsHtml + '</tbody></table></div>';
-      
-    });
-
-    const summaryWindow = window.open('', '', 'width=950,height=900');
-    
-    summaryWindow.document.write('<!DOCTYPE html><html><head><title>Branch_Analytics_Summary</title>');
-    summaryWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
-    summaryWindow.document.write('<style>body{font-family:"Tahoma", sans-serif; padding:45px; color:#333; background:#FFF;}');
-    summaryWindow.document.write('.report-box{max-width:880px; margin:0 auto;} h1{color:#A91D3A; margin:0 0 10px 0; font-size:30px; font-weight:bold; text-align:center; letter-spacing:1px;}');
-    summaryWindow.document.write('p{color:#999; font-size:15px; margin:0; text-align:center;} .rpt-footer{text-align:center; font-size:12px; color:#BBB; margin-top:45px; border-top:2px dashed #F0F0F0; padding-top:20px;}');
-    summaryWindow.document.write('</style></head><body><div id="pdf-manifest" class="report-box"><h1>CoffeeToday Sales Summary</h1>');
-    summaryWindow.document.write('<p>Period: ' + startFilter + ' to ' + endFilter + '</p><br><br>');
-    summaryWindow.document.write(reportHtml);
-    summaryWindow.document.write('<div class="rpt-footer">เอกสารสรุปยอดสะสม | ออกโดยระบบ CoffeeToday Manager v.2026 | วันที่: ' + new Date().toLocaleString("th-TH") + '</div></div>');
-    summaryWindow.document.write('<script>window.onload=function(){const target=document.getElementById("pdf-manifest");');
-    summaryWindow.document.write('html2pdf().set({margin:10, filename:"Sales_Summary.pdf", image:{type:"jpeg", quality:0.98},');
-    summaryWindow.document.write('html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:"mm", format:"a4", orientation:"portrait"}');
-    summaryWindow.document.write('}).from(target).save().then(function(){setTimeout(function(){window.close();},1200);});};<\/script></body></html>');
-    
-    summaryWindow.document.close();
-
-    setTimeout(function() {
-      btnSummary.innerHTML = '<i class="fas fa-file-invoice"></i> รายงานสาขา';
-      btnSummary.disabled = false;
-    }, 1500);
-  }
-
-  function printOrder(encodedOrderData) { 
-    
-    const targetObj = JSON.parse(decodeURIComponent(encodedOrderData));
-    
-    let tableRowsHtml = '';
-    const itemStringArray = targetObj.items.split('\n');
-    
-    itemStringArray.forEach(function(lineText) {
-      if(lineText.trim() !== "") {
-        const partsMatch = lineText.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
-        if(partsMatch) {
-          tableRowsHtml += '<tr>';
-          tableRowsHtml += '<td style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:15px;">' + partsMatch[1] + '</td>';
-          tableRowsHtml += '<td align="center" style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:15px; color:#888;">' + partsMatch[2] + '</td>';
-          tableRowsHtml += '<td align="center" style="padding:16px; border-bottom:1px solid #EEEEEE; font-size:18px; font-weight:bold; color: #000;">' + partsMatch[3] + '</td>';
-          tableRowsHtml += '</tr>';
-        } else {
-          tableRowsHtml += '<tr><td colspan="3" style="padding:16px; border-bottom:1px solid #EEEEEE; color:#AAAAAA; font-style:italic;">' + lineText + '</td></tr>';
-        }
-      }
-    });
-
-    let thaiPackedTime = formatPackedTime(targetObj.packedTime);
-    let bannerHtml = '';
-    
-    if ((targetObj.status === 'Packed' || targetObj.status === 'Success') && thaiPackedTime !== "-") {
-      bannerHtml = '<div style="background-color:#f0fdf4; border:2px dashed #10b981; padding:20px; border-radius:15px; text-align:center; margin-bottom:30px;">';
-      bannerHtml += '<span style="color:#047857; font-size:16px; font-weight:bold;">✓ ตรวจสอบความถูกต้องและแพ็กเสร็จสิ้น: ' + thaiPackedTime + '</span>';
-      bannerHtml += '</div>';
-    }
-
-    const printWindow = window.open('','','width=850,height=900'); 
-    
-    printWindow.document.write('<html><head><style>');
-    printWindow.document.write('body{font-family:"Tahoma", sans-serif; padding:50px; color:#333333; background: #FFF;}');
-    printWindow.document.write('.receipt-wrapper{border:3px solid #F0F0F0; padding:50px; border-radius:30px; max-width:650px; margin:0 auto;}'); 
-    printWindow.document.write('h1{color:#A91D3A; text-align:center; font-size:28px; margin-bottom:30px; font-weight:bold; letter-spacing:1px;}');
-    printWindow.document.write('.meta-grid { display: flex; justify-content: space-between; margin-bottom: 30px; background: #F9F9F9; padding: 25px; border-radius: 20px; }');
-    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
-    printWindow.document.write('th { text-align: left; padding: 15px; border-bottom: 2.5px solid #111; font-size: 15px; color: #111; }');
-    printWindow.document.write('</style></head><body>');
-    printWindow.document.write('<div class="receipt-wrapper">');
-    printWindow.document.write('<h1>COFFEETODAY ORDER</h1>');
-    printWindow.document.write(bannerHtml);
-    printWindow.document.write('<div class="meta-grid">');
-    printWindow.document.write('<div><div style="font-size:11px; color:#999; text-transform:uppercase;">Reference ID</div><div style="font-size:16px; font-weight:bold;">' + targetObj.id + '</div><br>');
-    printWindow.document.write('<div style="font-size:11px; color:#999; text-transform:uppercase;">Store Branch</div><div style="font-size:16px; font-weight:bold;">' + targetObj.branch + '</div></div>');
-    printWindow.document.write('<div style="text-align:right;"><div style="font-size:11px; color:#999; text-transform:uppercase;">Transaction Date</div><div style="font-size:16px; font-weight:bold;">' + targetObj.date + '</div><br>');
-    printWindow.document.write('<div style="font-size:11px; color:#999; text-transform:uppercase;">Contact Number</div><div style="font-size:16px; font-weight:bold;">' + (targetObj.phone || '-') + '</div></div>');
-    printWindow.document.write('</div>');
-    printWindow.document.write('<table><thead><tr><th>Product Manifesto</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead>');
-    printWindow.document.write('<tbody>' + tableRowsHtml + '</tbody></table>');
-    printWindow.document.write('<div style="text-align:center; margin-top:50px; border-top:1.5px dashed #DDDDDD; padding-top:30px; font-size:12px; color:#BBBBBB;">');
-    printWindow.document.write('<p>ขอบคุณที่ร่วมเป็นส่วนหนึ่งของการบริการคุณภาพจาก CoffeeToday</p>');
-    printWindow.document.write('<p>พิมพ์เอกสารเมื่อ: ' + new Date().toLocaleString("th-TH") + '</p>');
-    printWindow.document.write('</div></div>');
-    printWindow.document.write('<script>window.print();<\/script></body></html>'); 
-    
-    printWindow.document.close(); 
+    pdfWindow.document.close(); 
   }
   
   function renderCharts(analyticsData) {
