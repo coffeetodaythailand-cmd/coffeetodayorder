@@ -74,7 +74,6 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.04); transition: 0.4s ease; 
     }
 
-    /* ✅ เพิ่ม CSS Class สำหรับจัดการ Layout ให้ Responsive */
     .chart-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 35px; margin-bottom: 35px; }
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
 
@@ -188,14 +187,13 @@
     @keyframes fadeInOut { 0% { opacity: 0; bottom: 0; } 20% { opacity: 1; bottom: 20px; } 80% { opacity: 1; bottom: 20px; } 100% { opacity: 0; bottom: 0; } }
     @keyframes blinkPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-    /* ✅ จัดระเบียบหน้าจอมือถือ (Mobile Responsive Fix) */
     @media (max-width: 768px) {
       .container { padding: 0 10px; margin: 15px auto; }
       .card { padding: 20px; border-radius: 20px; margin-bottom: 20px; }
       .nav { padding: 15px 20px; flex-wrap: wrap; gap: 10px; justify-content: center; }
       .nav span { font-size: 16px; }
-      .chart-grid { grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; } /* ดันกราฟลงมาเรียงแนวตั้ง */
-      .section-header { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 15px; } /* ปัดปุ่มลงบรรทัดใหม่ */
+      .chart-grid { grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; } 
+      .section-header { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 15px; } 
       .section-header > div { width: 100%; display: flex; flex-wrap: wrap; gap: 10px; }
       .filter-panel { width: 100%; flex-wrap: wrap; justify-content: flex-start; }
       .search-row { padding: 10px 20px; }
@@ -376,7 +374,6 @@
 </div>
 
 <script>
-  // ✅ เพิ่มตัวแปร pendingApproveId สำหรับเก็บ ID ที่รอกดยืนยัน
   let bcObj, pcObj, scObj, allOrders = [], pgNum = 1, pgLim = 8, menuObj = {}, editTargetId = null, currentCat = null, pendingApproveId = "";
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
@@ -488,20 +485,14 @@
       });
   }
 
-  /**
-   * ✅ เปลี่ยนจาก confirm() ธรรมดา มาเป็นการเรียก Modal สวยๆ
-   */
   function approveOrder(id) {
     pendingApproveId = id;
     document.getElementById('confirmOrderId').innerText = id;
     document.getElementById('confirmModal').style.display = 'flex';
   }
 
-  /**
-   * ✅ ฟังก์ชันที่จะทำงานเมื่อกดปุ่ม "ยืนยันอนุมัติ" ใน Modal
-   */
   function executeApproveOrder() {
-    closeM('confirmModal'); // ปิดป๊อปอัป
+    closeM('confirmModal'); 
     if(!pendingApproveId) return;
     
     const token = localStorage.getItem(TOKEN_KEY);
@@ -534,17 +525,26 @@
       const isPacked = o.status === 'Packed';
       const isSuccess = o.status === 'Success';
       
+      let timeHtml = (isPacked || isSuccess) && o.packedTime && o.packedTime !== "-" 
+        ? `<div style="font-size:10px; color:#888; margin-top:5px; background:#f3f4f6; padding:3px 8px; border-radius:10px; display:inline-block;"><i class="fas fa-box"></i> แพ็คเมื่อ ${o.packedTime}</div>` 
+        : '';
+
       html += `
       <tr class="${isSuccess ? 'row-ready' : ''}">
-        <td><b style="color:var(--red); cursor:pointer; text-decoration:underline;" onclick="viewOrderDetail('${o.id}')">${o.id}</b></td>
+        <td>
+          <b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:15px;" onclick="viewOrderDetail('${o.id}')">${o.id}</b>
+          <div style="margin-top: 5px;">${timeHtml}</div>
+        </td>
         <td>${o.date}</td>
         <td><b>${o.branch}</b></td>
         <td>${o.customer}</td>
         <td style="font-weight:600; color:var(--blue);">${o.phone || '-'}</td>
         <td style="font-size:12px; color:#555;">${o.items.replace(/\n/g,'<br>')}</td>
         <td align="center">
-          <div style="display:flex; gap:10px; justify-content:center; align-items:center;">
-            <span style="font-size:11px; font-weight:600; color:${isSuccess?'var(--green)': (isPacked?'#3498db':'#AAA')}">${o.status}</span>
+          <div style="display:flex; gap:15px; justify-content:center; align-items:center;">
+            <div style="text-align:center; min-width: 60px;">
+              <span style="font-size:12px; font-weight:600; color:${isSuccess?'var(--green)': (isPacked?'#3498db':'#AAA')}">${o.status}</span>
+            </div>
             <button class="page-btn" style="width:30px; height:30px;" onclick="printOrder('${encodeURIComponent(JSON.stringify(o))}')">
               <i class="fas fa-print" style="font-size:12px;"></i>
             </button>
@@ -578,6 +578,11 @@
         }
       }
     });
+
+    let packedAlert = (o.status === 'Packed' || o.status === 'Success') && o.packedTime && o.packedTime !== "-" 
+      ? `<div style="grid-column: 1 / -1; background: #f0fdf4; border: 1px dashed #bbf7d0; padding: 10px; border-radius: 10px; text-align: center; margin-top: 5px;">
+           <span style="font-size: 11px; color: #166534; font-weight: 600;"><i class="fas fa-check-circle"></i> จัดเตรียมของเสร็จสิ้นเมื่อ: ${o.packedTime}</span>
+         </div>` : '';
     
     const bodyHtml = `
       <div class="receipt-info-grid">
@@ -585,6 +590,7 @@
         <div style="text-align:right;"><div class="receipt-label">Date</div><div class="receipt-value">${o.date}</div></div>
         <div><div class="receipt-label">Branch</div><div class="receipt-value">${o.branch}</div></div>
         <div style="text-align:right;"><div class="receipt-label">Phone</div><div class="receipt-value">${o.phone || '-'}</div></div>
+        ${packedAlert}
       </div>
       <table class="receipt-table">
         <thead>
@@ -863,11 +869,19 @@
       } 
     });
     
+    // ✅ แก้กราฟส้ม (Stock) ไม่ให้แท่งติดกัน
     scObj = new Chart(document.getElementById('sC'), {
       type: 'bar', 
       data: { 
         labels: c.sL ? c.sL.slice(0, 15) : [], 
-        datasets: [{ label: 'คงเหลือล่าสุด', data: c.sV ? c.sV.slice(0, 15) : [], backgroundColor: '#f39c12', borderRadius: 10, barThickness: 20 }] 
+        datasets: [{ 
+          label: 'คงเหลือล่าสุด', 
+          data: c.sV ? c.sV.slice(0, 15) : [], 
+          backgroundColor: '#f39c12', 
+          borderRadius: 8, 
+          // ✅ ลบคำสั่ง barThickness: 20 ออก และใช้ maxBarThickness แทน เพื่อให้แท่งไม่หนาเกินไปและเว้นช่องว่างสวยๆ
+          maxBarThickness: 30 
+        }] 
       },
       options: { 
         maintainAspectRatio: false, 
