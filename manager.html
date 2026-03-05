@@ -2176,8 +2176,8 @@
     
   }
 
-  // ---------------------------------------------------------
-  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF)
+// ---------------------------------------------------------
+  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF) - อัปเดตแก้ตัดคำ/หัวตาราง
   // ---------------------------------------------------------
   function downloadSummaryReport() {
     
@@ -2223,6 +2223,11 @@
     pdfWindow.document.write('h2 { text-align: center; color: #2D3133; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }');
     pdfWindow.document.write('.sub-title { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }');
     pdfWindow.document.write('table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }');
+    
+    // 💡 หัวใจสำคัญ: บังคับหัวตารางให้แสดงทุกหน้า และห้ามตัดบรรทัด tr ขาดครึ่ง
+    pdfWindow.document.write('thead { display: table-header-group; }');
+    pdfWindow.document.write('tr { page-break-inside: avoid; break-inside: avoid; }'); 
+    
     pdfWindow.document.write('th { text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; }');
     pdfWindow.document.write('.footer { text-align: center; font-size: 11px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 20px;}');
     pdfWindow.document.write('</style></head><body>');
@@ -2241,11 +2246,12 @@
     pdfWindow.document.write('window.onload = function() {');
     pdfWindow.document.write('  const element = document.getElementById("print-area");');
     pdfWindow.document.write('  html2pdf().set({');
-    pdfWindow.document.write('    margin: 10,');
+    pdfWindow.document.write('    margin: [15, 10, 15, 10],'); // เพิ่ม margin บนล่างให้ปลอดภัยขึ้น
     pdfWindow.document.write('    filename: "CoffeeToday_BranchReport_' + timeStamp + '.pdf",');
-    pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
+    pdfWindow.document.write('    image: { type: "jpeg", quality: 1 },');
     pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
-    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }'); 
+    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },'); 
+    pdfWindow.document.write('    pagebreak: { mode: ["css", "legacy"] }'); // 💡 หัวใจสำคัญ 2: เปิดโหมดป้องกันการตัดหน้าทับ CSS
     pdfWindow.document.write('  }).from(element).save().then(function() {');
     pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1500);');
     pdfWindow.document.write('  });');
