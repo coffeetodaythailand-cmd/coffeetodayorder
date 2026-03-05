@@ -2205,8 +2205,7 @@
       
       // สั่งขึ้นหน้าใหม่ถ้าไม่ใช่หน้าแรก (ให้ html2pdf รับรู้การตัดกระดาษที่จุดนี้)
       if (i > 0) {
-        tablesContent += '<div class="html2pdf__page-break"></div>';
-        tablesContent += '<div style="height: 20px;"></div>'; 
+        tablesContent += '<div class="html2pdf__page-break"></div>'; 
       }
       
       tablesContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">';
@@ -2250,7 +2249,7 @@
     pdfWindow.document.write('h2 { text-align: center; color: #2D3133; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }');
     pdfWindow.document.write('.sub-title { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }');
     pdfWindow.document.write('.footer { text-align: center; font-size: 11px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 20px;}');
-    pdfWindow.document.write('.html2pdf__page-break { page-break-before: always; }'); // คลาสบังคับขึ้นหน้าใหม่
+    pdfWindow.document.write('.html2pdf__page-break { page-break-before: always; height: 0px; margin: 0px; border: none; display: block; }');
     pdfWindow.document.write('</style></head><body>');
 
     pdfWindow.document.write('<div id="print-area" class="container">');
