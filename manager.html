@@ -462,20 +462,19 @@
     }
     
     .btn-sm {
-      padding: 6px 14px; /* ลด Padding บน-ล่าง ให้ปุ่มดูเตี้ยลง */
-      font-size: 11px; /* ลดขนาดฟอนต์ให้สมส่วน */
-      border-radius: 8px; /* ปรับความโค้งมนให้ดูเรียบร้อยขึ้น */
-      height: 32px; /* บังคับความสูงให้เท่ากับช่องกรอกวันที่ */
+      padding: 6px 14px;
+      font-size: 11px;
+      border-radius: 8px;
+      height: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* เพิ่มคลาสใหม่สำหรับตัวหนังสือในปุ่ม */
     .btn-icon-text {
         display: flex;
         align-items: center;
-        gap: 6px; /* ระยะห่างระหว่างไอคอนกับตัวหนังสือ */
+        gap: 6px;
     }
 
     /*
@@ -2176,8 +2175,8 @@
     
   }
 
-// ---------------------------------------------------------
-  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF) - อัปเดตแก้ตัดคำ/หัวตาราง
+  // ---------------------------------------------------------
+  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF)
   // ---------------------------------------------------------
   function downloadSummaryReport() {
     
@@ -2191,26 +2190,54 @@
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง PDF...';
     btn.disabled = true;
 
-    // เตรียมตารางข้อมูล
-    let rowsBuilder = '';
-    allOrders.forEach(function(item) {
-      rowsBuilder += '<tr>';
-      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#A91D3A; font-weight:bold;">' + item.id + '</td>';
-      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#666;">' + item.date + '</td>';
-      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:13px; font-weight:bold; color:#333;">' + item.branch + '</td>';
-      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px;">' + item.customer + '<br><span style="color:#3498db;">' + (item.phone || '-') + '</span></td>';
-      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:11px; color:#555; line-height:1.4;">' + (item.items || "").replace(/\n/g, '<br>') + '</td>';
-      
-      let statusColor = item.status === 'Success' ? '#22c55e' : (item.status === 'Packed' ? '#3498db' : '#999');
-      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; font-weight:bold; color:' + statusColor + ';">' + item.status + '</td>';
-      rowsBuilder += '</tr>';
-    });
-
     // ดึงวันที่ที่กรองมาแสดงที่หัวกระดาษ
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
     const printDate = new Date().toLocaleString("th-TH");
     const timeStamp = new Date().getTime();
+
+    // 💡 เทคนิคแก้ปัญหาหัวตารางหาย: แบ่งตารางเป็นหลายๆ หน้า (หน้าละ 8 แถว)
+    let tablesContent = '';
+    const rowsPerPage = 8; // กำหนด 8 แถวต่อ 1 หน้ากระดาษแนวนอน
+    
+    for (let i = 0; i < allOrders.length; i += rowsPerPage) {
+      let chunk = allOrders.slice(i, i + rowsPerPage);
+      
+      // สั่งขึ้นหน้าใหม่ถ้าไม่ใช่หน้าแรก (ให้ html2pdf รับรู้การตัดกระดาษที่จุดนี้)
+      if (i > 0) {
+        tablesContent += '<div class="html2pdf__page-break"></div>';
+        tablesContent += '<div style="height: 20px;"></div>'; 
+      }
+      
+      tablesContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">';
+      
+      // 💡 บังคับพิมพ์หัวตารางใหม่ทุกๆ ครั้งที่ขึ้นตารางหน้าใหม่
+      tablesContent += '<thead><tr>';
+      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:12%;">Order ID</th>';
+      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Date / Time</th>';
+      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Branch</th>';
+      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Customer / Phone</th>';
+      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A;">Items Detail</th>';
+      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:10%;">Status</th>';
+      tablesContent += '</tr></thead>';
+      
+      tablesContent += '<tbody>';
+      
+      chunk.forEach(function(item) {
+        tablesContent += '<tr>';
+        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#A91D3A; font-weight:bold;">' + item.id + '</td>';
+        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#666;">' + item.date + '</td>';
+        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:13px; font-weight:bold; color:#333;">' + item.branch + '</td>';
+        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px;">' + item.customer + '<br><span style="color:#3498db;">' + (item.phone || '-') + '</span></td>';
+        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:11px; color:#555; line-height:1.4;">' + (item.items || "").replace(/\n/g, '<br>') + '</td>';
+        
+        let statusColor = item.status === 'Success' ? '#22c55e' : (item.status === 'Packed' ? '#3498db' : '#999');
+        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; font-weight:bold; color:' + statusColor + ';">' + item.status + '</td>';
+        tablesContent += '</tr>';
+      });
+      
+      tablesContent += '</tbody></table>';
+    }
 
     // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF
     const pdfWindow = window.open('', '', 'width=1000,height=800');
@@ -2222,23 +2249,17 @@
     pdfWindow.document.write('.container { max-width: 100%; margin: 0 auto; }');
     pdfWindow.document.write('h2 { text-align: center; color: #2D3133; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }');
     pdfWindow.document.write('.sub-title { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }');
-    pdfWindow.document.write('table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }');
-    
-    // 💡 หัวใจสำคัญ: บังคับหัวตารางให้แสดงทุกหน้า และห้ามตัดบรรทัด tr ขาดครึ่ง
-    pdfWindow.document.write('thead { display: table-header-group; }');
-    pdfWindow.document.write('tr { page-break-inside: avoid; break-inside: avoid; }'); 
-    
-    pdfWindow.document.write('th { text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; }');
     pdfWindow.document.write('.footer { text-align: center; font-size: 11px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 20px;}');
+    pdfWindow.document.write('.html2pdf__page-break { page-break-before: always; }'); // คลาสบังคับขึ้นหน้าใหม่
     pdfWindow.document.write('</style></head><body>');
 
     pdfWindow.document.write('<div id="print-area" class="container">');
     pdfWindow.document.write('<h2>Branch Summary Report</h2>');
     pdfWindow.document.write('<div class="sub-title">ข้อมูลออเดอร์ตั้งแต่วันที่: <b style="color:#A91D3A;">' + sDate + '</b> ถึง <b style="color:#A91D3A;">' + eDate + '</b></div>');
-    pdfWindow.document.write('<table>');
-    pdfWindow.document.write('<thead><tr><th style="width:12%;">Order ID</th><th style="width:15%;">Date / Time</th><th style="width:15%;">Branch</th><th style="width:15%;">Customer / Phone</th><th>Items Detail</th><th style="width:10%;">Status</th></tr></thead>');
-    pdfWindow.document.write('<tbody>' + rowsBuilder + '</tbody>');
-    pdfWindow.document.write('</table>');
+    
+    // ใส่ Content ตารางที่แบ่งหน้าไว้แล้ว (รับประกันหัวตารางมีทุกหน้า!)
+    pdfWindow.document.write(tablesContent);
+    
     pdfWindow.document.write('<div class="footer"><p>CoffeeToday Management System | Printed on: ' + printDate + '</p></div>');
     pdfWindow.document.write('</div>');
 
@@ -2246,12 +2267,12 @@
     pdfWindow.document.write('window.onload = function() {');
     pdfWindow.document.write('  const element = document.getElementById("print-area");');
     pdfWindow.document.write('  html2pdf().set({');
-    pdfWindow.document.write('    margin: [15, 10, 15, 10],'); // เพิ่ม margin บนล่างให้ปลอดภัยขึ้น
+    pdfWindow.document.write('    margin: [10, 10, 15, 10],'); 
     pdfWindow.document.write('    filename: "CoffeeToday_BranchReport_' + timeStamp + '.pdf",');
-    pdfWindow.document.write('    image: { type: "jpeg", quality: 1 },');
+    pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
     pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
     pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },'); 
-    pdfWindow.document.write('    pagebreak: { mode: ["css", "legacy"] }'); // 💡 หัวใจสำคัญ 2: เปิดโหมดป้องกันการตัดหน้าทับ CSS
+    pdfWindow.document.write('    pagebreak: { mode: ["css", "legacy"] }'); 
     pdfWindow.document.write('  }).from(element).save().then(function() {');
     pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1500);');
     pdfWindow.document.write('  });');
