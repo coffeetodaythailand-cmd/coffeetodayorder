@@ -2175,11 +2175,10 @@
     
   }
 
-  // ---------------------------------------------------------
-  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF)
+// ---------------------------------------------------------
+  // 🚀 ระบบดาวน์โหลดรายงานสาขา (Fix Spacing & UI Complete Edition)
   // ---------------------------------------------------------
   function downloadSummaryReport() {
-    
     if (!allOrders || allOrders.length === 0) {
       return alert("ไม่มีข้อมูลออเดอร์ในระบบสำหรับสร้างรายงาน");
     }
@@ -2196,43 +2195,40 @@
     const printDate = new Date().toLocaleString("th-TH");
     const timeStamp = new Date().getTime();
 
-    // 💡 เทคนิคแก้ปัญหาหัวตารางหาย: แบ่งตารางเป็นหลายๆ หน้า (หน้าละ 8 แถว)
+    // 💡 ปรับเป็น 12 แถวเพื่อให้เต็มหน้ากระดาษแนวนอน (Landscape) และลบช่องว่างส่วนเกินออก
     let tablesContent = '';
-    const rowsPerPage = 8; // กำหนด 8 แถวต่อ 1 หน้ากระดาษแนวนอน
+    const rowsPerPage = 12; 
     
     for (let i = 0; i < allOrders.length; i += rowsPerPage) {
       let chunk = allOrders.slice(i, i + rowsPerPage);
       
-      // สั่งขึ้นหน้าใหม่ถ้าไม่ใช่หน้าแรก (ให้ html2pdf รับรู้การตัดกระดาษที่จุดนี้)
+      // สั่งขึ้นหน้าใหม่ (ลบ div height 20px ออกเพื่อไม่ให้ UI กระโดด)
       if (i > 0) {
         tablesContent += '<div class="html2pdf__page-break"></div>';
-        tablesContent += '<div style="height: 20px;"></div>'; 
       }
       
-      tablesContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">';
+      // บังคับความกว้างคอลัมน์ให้เท่ากันทุกหน้าด้วย table-layout: fixed
+      tablesContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 0; table-layout: fixed; border: 1px solid #EEEEEE;">';
       
-      // 💡 บังคับพิมพ์หัวตารางใหม่ทุกๆ ครั้งที่ขึ้นตารางหน้าใหม่
-      tablesContent += '<thead><tr>';
-      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:12%;">Order ID</th>';
-      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Date / Time</th>';
-      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Branch</th>';
-      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Customer / Phone</th>';
-      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A;">Items Detail</th>';
-      tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:10%;">Status</th>';
-      tablesContent += '</tr></thead>';
-      
-      tablesContent += '<tbody>';
+      // 💡 หัวตารางแบบ Nitro Clean
+      tablesContent += '<thead><tr style="background: #F8F9FA;">';
+      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:10%;">Order ID</th>';
+      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:15%;">Date / Time</th>';
+      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:15%;">Branch</th>';
+      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:18%;">Customer</th>';
+      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A;">Items Detail</th>';
+      tablesContent += '<th style="text-align: center; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:10%;">Status</th>';
+      tablesContent += '</tr></thead><tbody>';
       
       chunk.forEach(function(item) {
+        let statusColor = item.status === 'Success' ? '#16a34a' : (item.status === 'Packed' ? '#2563eb' : '#6b7280');
         tablesContent += '<tr>';
-        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#A91D3A; font-weight:bold;">' + item.id + '</td>';
-        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#666;">' + item.date + '</td>';
-        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:13px; font-weight:bold; color:#333;">' + item.branch + '</td>';
-        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px;">' + item.customer + '<br><span style="color:#3498db;">' + (item.phone || '-') + '</span></td>';
-        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:11px; color:#555; line-height:1.4;">' + (item.items || "").replace(/\n/g, '<br>') + '</td>';
-        
-        let statusColor = item.status === 'Success' ? '#22c55e' : (item.status === 'Packed' ? '#3498db' : '#999');
-        tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; font-weight:bold; color:' + statusColor + ';">' + item.status + '</td>';
+        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; color:#A91D3A; font-weight:bold;">' + item.id + '</td>';
+        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; color:#666;">' + item.date + '</td>';
+        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; font-weight:bold;">' + item.branch + '</td>';
+        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px;">' + item.customer + '<br><small style="color:#3498db;">' + (item.phone || '-') + '</small></td>';
+        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; color:#444; line-height:1.4;">' + (item.items || "").replace(/\n/g, '<br>') + '</td>';
+        tablesContent += '<td align="center" style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; font-weight:bold; color:' + statusColor + ';">' + item.status + '</td>';
         tablesContent += '</tr>';
       });
       
@@ -2240,24 +2236,23 @@
     }
 
     // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF
-    const pdfWindow = window.open('', '', 'width=1000,height=800');
+    const pdfWindow = window.open('', '', 'width=1100,height=850');
     
     pdfWindow.document.write('<!DOCTYPE html><html lang="th"><head><title>Branch_Report_PDF</title>');
     pdfWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
     pdfWindow.document.write('<style>');
-    pdfWindow.document.write('body { font-family: "Tahoma", sans-serif; padding: 40px; color: #333; background: #FFF; }');
-    pdfWindow.document.write('.container { max-width: 100%; margin: 0 auto; }');
+    pdfWindow.document.write('body { font-family: "Tahoma", sans-serif; padding: 35px; color: #333; background: #FFF; }');
+    pdfWindow.document.write('.container { width: 100%; margin: 0 auto; }');
     pdfWindow.document.write('h2 { text-align: center; color: #2D3133; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }');
     pdfWindow.document.write('.sub-title { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }');
-    pdfWindow.document.write('.footer { text-align: center; font-size: 11px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 20px;}');
-    pdfWindow.document.write('.html2pdf__page-break { page-break-before: always; }'); // คลาสบังคับขึ้นหน้าใหม่
+    pdfWindow.document.write('.footer { text-align: right; font-size: 10px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 15px; margin-top: 15px; }');
     pdfWindow.document.write('</style></head><body>');
 
     pdfWindow.document.write('<div id="print-area" class="container">');
     pdfWindow.document.write('<h2>Branch Summary Report</h2>');
     pdfWindow.document.write('<div class="sub-title">ข้อมูลออเดอร์ตั้งแต่วันที่: <b style="color:#A91D3A;">' + sDate + '</b> ถึง <b style="color:#A91D3A;">' + eDate + '</b></div>');
     
-    // ใส่ Content ตารางที่แบ่งหน้าไว้แล้ว (รับประกันหัวตารางมีทุกหน้า!)
+    // ใส่ Content ตารางที่จัดระเบียบเรียบร้อยแล้ว
     pdfWindow.document.write(tablesContent);
     
     pdfWindow.document.write('<div class="footer"><p>CoffeeToday Management System | Printed on: ' + printDate + '</p></div>');
@@ -2267,12 +2262,10 @@
     pdfWindow.document.write('window.onload = function() {');
     pdfWindow.document.write('  const element = document.getElementById("print-area");');
     pdfWindow.document.write('  html2pdf().set({');
-    pdfWindow.document.write('    margin: [10, 10, 15, 10],'); 
+    pdfWindow.document.write('    margin: [10, 10, 10, 10],'); 
     pdfWindow.document.write('    filename: "CoffeeToday_BranchReport_' + timeStamp + '.pdf",');
-    pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
     pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
-    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },'); 
-    pdfWindow.document.write('    pagebreak: { mode: ["css", "legacy"] }'); 
+    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }');
     pdfWindow.document.write('  }).from(element).save().then(function() {');
     pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1500);');
     pdfWindow.document.write('  });');
@@ -2285,57 +2278,8 @@
     setTimeout(function() {
       btn.innerHTML = originalText;
       btn.disabled = false;
-      showToast("✅ สร้างและดาวน์โหลด PDF สำเร็จ!");
+      showToast("✅ ปรับปรุงรายงานและดาวน์โหลดสำเร็จ!");
     }, 2000);
-  }
-  // ---------------------------------------------------------
-  // ระบบสั่งพิมพ์ออเดอร์ (Print Function) - วางก่อนปิด </script> ตัวสุดท้าย
-  // ---------------------------------------------------------
-  function printOrder(encodedData) {
-    const item = JSON.parse(decodeURIComponent(encodedData));
-    const printWindow = window.open('', '', 'width=800,height=900');
-    
-    printWindow.document.write('<html><head><title>Print Order ' + item.id + '</title>');
-    printWindow.document.write('<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">');
-    printWindow.document.write('<style>');
-    printWindow.document.write('body { font-family: "Sarabun", sans-serif; padding: 40px; color: #333; }');
-    printWindow.document.write('.header { text-align: center; border-bottom: 2px solid #A91D3A; margin-bottom: 20px; padding-bottom: 10px; }');
-    printWindow.document.write('.order-id { font-size: 28px; font-weight: bold; color: #A91D3A; margin: 10px 0; }');
-    printWindow.document.write('.info-section { display: flex; justify-content: space-between; margin-bottom: 30px; line-height: 1.8; }');
-    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
-    printWindow.document.write('th { background: #F8F9FA; text-align: left; padding: 12px; border-bottom: 2px solid #333; }');
-    printWindow.document.write('td { padding: 12px; border-bottom: 1px solid #EEE; font-size: 15px; }');
-    printWindow.document.write('.footer { text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px dashed #CCC; padding-top: 20px; }');
-    printWindow.document.write('</style></head><body>');
-
-    printWindow.document.write('<div class="header">');
-    printWindow.document.write('  <div style="font-size: 22px; font-weight: bold;">COFFEETODAY</div>');
-    printWindow.document.write('  <div class="order-id">' + item.id + '</div>');
-    printWindow.document.write('  <div>ใบสั่งงานสาขา / จัดเตรียมพัสดุ</div>');
-    printWindow.document.write('</div>');
-
-    printWindow.document.write('<div class="info-section">');
-    printWindow.document.write('  <div><b>สาขา:</b> ' + item.branch + '<br><b>ผู้สั่ง:</b> ' + item.customer + '</div>');
-    printWindow.document.write('  <div style="text-align: right;"><b>วันที่สั่ง:</b> ' + item.date + '<br><b>เบอร์โทร:</b> ' + (item.phone || '-') + '</div>');
-    printWindow.document.write('</div>');
-
-    printWindow.document.write('<table><thead><tr><th>รายการสินค้าที่สั่ง</th><th style="text-align:center; width: 100px;">เช็ค</th></tr></thead><tbody>');
-    const items = item.items.split('\n');
-    items.forEach(line => {
-      if(line.trim()) {
-        printWindow.document.write('<tr><td>' + line + '</td><td style="border-left: 1px solid #EEE; text-align:center;">[   ]</td></tr>');
-      }
-    });
-    printWindow.document.write('</tbody></table>');
-
-    printWindow.document.write('<div class="footer">');
-    printWindow.document.write('  <p>พิมพ์เมื่อ: ' + new Date().toLocaleString("th-TH") + '</p>');
-    printWindow.document.write('  <p><b>CoffeeToday Shop System - Nitro Core Engine</b></p>');
-    printWindow.document.write('</div>');
-
-    printWindow.document.write('<script>window.onload = function(){ window.print(); setTimeout(function(){ window.close(); }, 500); };<\/script>');
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
   }
 </script>
 </body>
