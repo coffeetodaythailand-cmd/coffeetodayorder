@@ -2164,7 +2164,64 @@
     } 
     
   }
+// ---------------------------------------------------------
+  // ระบบดาวน์โหลดรายงานสาขา (Export to CSV)
+  // ---------------------------------------------------------
+  function downloadSummaryReport() {
+    
+    if (!allOrders || allOrders.length === 0) {
+      return alert("ไม่มีข้อมูลออเดอร์ในระบบสำหรับสร้างรายงาน");
+    }
 
+    // เปลี่ยนสถานะปุ่มตอนกำลังโหลด
+    const btn = document.getElementById('summaryBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> เตรียมไฟล์...';
+    btn.disabled = true;
+
+    // ใส่ BOM (\uFEFF) เพื่อให้ Excel อ่านภาษาไทยได้ 100%
+    let csvContent = "\uFEFF"; 
+    
+    // สร้างหัวตาราง (Header)
+    csvContent += "Order ID,วัน/เวลา,ชื่อสาขา,ลูกค้า,เบอร์โทร,รายการสินค้า,สถานะการจัดส่ง\n";
+
+    // วนลูปนำข้อมูลจาก allOrders มาใส่ทีละบรรทัด
+    allOrders.forEach(function(order) {
+      let id = order.id || "-";
+      let date = order.date || "-";
+      let branch = order.branch || "-";
+      let customer = order.customer || "-";
+      let phone = order.phone || "-";
+      
+      // จัดการรายการสินค้า: เปลี่ยนขึ้นบรรทัดใหม่ให้เป็นเครื่องหมาย " | " และครอบด้วย Double Quote
+      let items = (order.items || "").replace(/\n/g, " | ").replace(/"/g, '""'); 
+      let status = order.status || "-";
+
+      csvContent += `"${id}","${date}","${branch}","${customer}","${phone}","${items}","${status}"\n`;
+    });
+
+    // สร้างไฟล์และสั่งให้เบราว์เซอร์ดาวน์โหลด
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    // ตั้งชื่อไฟล์พร้อมแนบเวลาปัจจุบัน
+    const timeStamp = new Date().getTime();
+    link.setAttribute("href", url);
+    link.setAttribute("download", "CoffeeToday_BranchReport_" + timeStamp + ".csv");
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // คืนค่าปุ่มกลับมาเหมือนเดิม
+    setTimeout(function() {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      showToast("✅ ดาวน์โหลดรายงานสำเร็จ!");
+    }, 800);
+  }
 </script>
 
 </body>
