@@ -419,7 +419,7 @@
 
     /*
       =========================================================================
-      BUTTONS & CONTROLS
+      BUTTONS & CONTROLS (Updated for Slim Look)
       =========================================================================
     */
     .btn { 
@@ -462,9 +462,20 @@
     }
     
     .btn-sm {
-      padding: 8px 18px;
-      font-size: 12px;
-      border-radius: 12px;
+      padding: 6px 14px; /* ลด Padding บน-ล่าง ให้ปุ่มดูเตี้ยลง */
+      font-size: 11px; /* ลดขนาดฟอนต์ให้สมส่วน */
+      border-radius: 8px; /* ปรับความโค้งมนให้ดูเรียบร้อยขึ้น */
+      height: 32px; /* บังคับความสูงให้เท่ากับช่องกรอกวันที่ */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* เพิ่มคลาสใหม่สำหรับตัวหนังสือในปุ่ม */
+    .btn-icon-text {
+        display: flex;
+        align-items: center;
+        gap: 6px; /* ระยะห่างระหว่างไอคอนกับตัวหนังสือ */
     }
 
     /*
@@ -775,11 +786,11 @@
             <input type="date" id="sDate" class="filter-input">
             <span style="color:#CCC;">-</span>
             <input type="date" id="eDate" class="filter-input">
-            <button class="btn btn-red btn-sm" onclick="applyDateFilter()">
-              <i class="fas fa-filter"></i> กรอง
+            <button class="btn-red btn-sm" onclick="applyDateFilter()" style="border: none; cursor: pointer; color: white; font-family: 'Prompt', sans-serif;">
+              <div class="btn-icon-text"><i class="fas fa-filter"></i> กรอง</div>
             </button>
-            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="background-color:var(--blue); color:white;">
-              <i class="fas fa-file-invoice"></i> รายงานสาขา
+            <button id="summaryBtn" class="btn-sm" onclick="downloadSummaryReport()" style="background-color:var(--blue); color:white; border: none; cursor: pointer; font-family: 'Prompt', sans-serif;">
+               <div class="btn-icon-text"><i class="fas fa-file-invoice"></i> รายงานสาขา</div>
             </button>
           </div>
         </div>
@@ -853,13 +864,13 @@
         <table id="oT">
           <thead>
             <tr>
-              <th style="width: 140px;">Order ID</th>
-              <th style="width: 160px;">วัน/เวลา</th>
-              <th>ชื่อสาขา</th>
-              <th>ลูกค้า</th>
-              <th>เบอร์โทร</th>
-              <th>รายการสินค้า</th>
-              <th align="center" style="width:160px;">สถานะ</th>
+              <th style="width: 120px;">Order ID</th>
+              <th style="width: 140px;">วัน/เวลา</th>
+              <th style="width: 120px;">ชื่อสาขา</th>
+              <th style="width: 140px;">ลูกค้า</th>
+              <th style="width: 110px;">เบอร์โทร</th>
+              <th style="min-width: 350px;">รายการสินค้า</th>
+              <th align="center" style="width:140px;">สถานะ</th>
             </tr>
           </thead>
           <tbody id="oB">
@@ -2164,7 +2175,8 @@
     } 
     
   }
-// ---------------------------------------------------------
+
+  // ---------------------------------------------------------
   // ระบบดาวน์โหลดรายงานสาขา (Export to PDF)
   // ---------------------------------------------------------
   function downloadSummaryReport() {
@@ -2200,7 +2212,7 @@
     const printDate = new Date().toLocaleString("th-TH");
     const timeStamp = new Date().getTime();
 
-    // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF (ใช้เทคนิคเดียวกับระบบใบเสร็จของคุณเบลล์)
+    // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF
     const pdfWindow = window.open('', '', 'width=1000,height=800');
     
     pdfWindow.document.write('<!DOCTYPE html><html lang="th"><head><title>Branch_Report_PDF</title>');
@@ -2233,7 +2245,7 @@
     pdfWindow.document.write('    filename: "CoffeeToday_BranchReport_' + timeStamp + '.pdf",');
     pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
     pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
-    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }'); // ใช้กระดาษ A4 แนวนอน (landscape)
+    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }'); 
     pdfWindow.document.write('  }).from(element).save().then(function() {');
     pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1500);');
     pdfWindow.document.write('  });');
