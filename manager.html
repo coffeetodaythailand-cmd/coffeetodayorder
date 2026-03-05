@@ -2156,7 +2156,7 @@
     } 
   }
 
-  // ---------------------------------------------------------
+// ---------------------------------------------------------
   // ส่วนท้ายของระบบ (ซ่อมแซมโดย Gemini Nitro Engine)
   // ---------------------------------------------------------
   function prev() { 
@@ -2166,25 +2166,23 @@
     } 
   }
 
-  // 📄 ระบบรายงาน PDF (ซ่อมให้กดซ้ำได้ + จัดหน้าสวยไม่มีช่องว่าง)
+  // 📄 ระบบรายงาน PDF - Fix: ปลดล็อกปุ่มให้กดซ้ำได้ + จัดหน้า 12 แถว
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
-
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง...';
-    btn.disabled = true; // ล็อกปุ่มชั่วคราวกันกดซ้ำซ้อน
+    btn.disabled = true; // ล็อกชั่วคราว
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
-    
+    const timeStamp = new Date().getTime();
     let tablesContent = '';
-    const rowsPerPage = 12; // 💡 ตั้ง 12 แถวเพื่อให้พอดีกับกระดาษแนวนอน
+    const rowsPerPage = 12; 
     
     for (let i = 0; i < allOrders.length; i += rowsPerPage) {
       let chunk = allOrders.slice(i, i + rowsPerPage);
       if (i > 0) tablesContent += '<div class="html2pdf__page-break"></div>';
-      
       tablesContent += '<table style="width:100%; border-collapse:collapse; table-layout:fixed; border:1px solid #EEE;">';
       tablesContent += '<thead style="background:#F8F9FA;"><tr><th style="width:12%; padding:10px; border-bottom:2px solid #A91D3A; font-size:11px;">ID</th><th style="width:15%; padding:10px; border-bottom:2px solid #A91D3A; font-size:11px;">Date</th><th style="width:15%; padding:10px; border-bottom:2px solid #A91D3A; font-size:11px;">Branch</th><th style="width:18%; padding:10px; border-bottom:2px solid #A91D3A; font-size:11px;">Customer</th><th style="padding:10px; border-bottom:2px solid #A91D3A; font-size:11px;">Items</th><th style="width:10%; padding:10px; border-bottom:2px solid #A91D3A; font-size:11px;">Status</th></tr></thead><tbody>';
       chunk.forEach(o => {
@@ -2194,31 +2192,42 @@
     }
 
     const win = window.open('', '', 'width=1100,height=850');
-    if (!win) {
-        btn.disabled = false; btn.innerHTML = originalText;
-        return alert("⚠️ กรุณาอนุญาต Pop-up เพื่อโหลดรายงาน");
-    }
-    
+    if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
     win.document.write(`<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head><body style="padding:30px; font-family:sans-serif;"><h2>Branch Summary Report</h2><p>ช่วงวันที่: ${sDate} - ${eDate}</p>${tablesContent}<script>window.onload=()=>{ html2pdf().set({margin:10, filename:'Report.pdf', jsPDF:{orientation:'landscape'}}).from(document.body).save().then(()=>{setTimeout(()=>window.close(),1500)}); }<\/script></body></html>`);
     win.document.close();
 
-    // ✅ ปลดล็อกปุ่มให้กลับมาสวยเหมือนเดิมและกดซ้ำได้ทันที
-    setTimeout(() => {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-    }, 3000);
+    // ✅ ปลดล็อกปุ่มให้กดซ้ำได้ทันที
+    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
   }
 
-  // 🖨️ ฟังก์ชันปริ้น - ซ่อมให้กดแล้วเด้งใบสั่งงานขึ้นมา
+  // 🖨️ ฟังก์ชันปริ้น - ปรับหน้าตาให้เหมือน PDF ตัวอย่าง (ไม่มีช่องเช็ค) [cite: 91, 102, 103, 104]
   function printOrder(encodedData) {
     try {
       const item = JSON.parse(decodeURIComponent(encodedData));
-      const win = window.open('', '', 'width=800,height=900');
-      if(!win) return alert("⚠️ กรุณาอนุญาต Pop-up เพื่อทำการปริ้น");
+      const win = window.open('', '', 'width=850,height=950');
+      if(!win) return alert("กรุณาอนุญาต Pop-up");
 
-      win.document.write(`<html><head><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet"></head><body style="font-family:'Sarabun', sans-serif; padding:50px;"><div style="text-align:center; border-bottom:3px solid #A91D3A; margin-bottom:30px;"><h1>COFFEETODAY</h1><h2 style="color:#A91D3A;">${item.id}</h2></div><div style="display:flex; justify-content:space-between; margin-bottom:40px;"><div><b>สาขา:</b> ${item.branch}<br><b>ผู้สั่ง:</b> ${item.customer}</div><div style="text-align:right;"><b>วันที่:</b> ${item.date}<br><b>เบอร์โทร:</b> ${item.phone}</div></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#F9FAFB;"><th style="text-align:left; padding:15px; border-bottom:2px solid #333;">รายการสินค้า</th><th style="text-align:center; width:80px; border-bottom:2px solid #333;">เช็ค</th></tr></thead><tbody>`);
-      item.items.split('\n').forEach(line => { if(line.trim()) win.document.write(`<tr><td style="padding:12px; border-bottom:1px solid #EEE;">${line}</td><td style="border-left:1px solid #EEE; text-align:center;">[ ]</td></tr>`); });
-      win.document.write(`</tbody></table><div style="text-align:center; margin-top:60px; font-size:12px; color:#999; border-top:1px dashed #CCC; padding-top:20px;"><p>© CoffeeToday Nitro Engine</p></div><script>window.onload=()=>{ window.print(); setTimeout(()=>window.close(),800); }<\/script></body></html>`);
+      let rowsHtml = '';
+      item.items.split('\n').forEach(line => {
+        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        if(match) rowsHtml += `<tr><td style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${match[1]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${match[2]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:#A91D3A;">${match[3]}</td></tr>`;
+      });
+
+      const packedTag = (item.status === 'Packed' || item.status === 'Success') ? `<div style="background:#f0fdf4; border:1px dashed #10b981; padding:15px; border-radius:12px; text-align:center; color:#065f46; font-weight:bold; margin-bottom:20px;">✓ ยืนยันการจัดเตรียมพัสดุเรียบร้อย</div>` : '';
+
+      win.document.write(`<html><head><style>body{font-family:sans-serif;padding:50px;color:#333;}.label{font-size:10px;color:#999;text-transform:uppercase;}.val{font-size:16px;font-weight:bold;margin-bottom:20px;}table{width:100%;border-collapse:collapse;}th{text-align:left;padding:12px;background:#F9FAFB;border-bottom:2px solid #333;font-size:13px;}</style></head><body>
+        <div style="text-align:center;margin-bottom:30px;"><h2 style="margin:0;color:#A91D3A;letter-spacing:2px;">COFFEETODAY</h2><div style="font-size:12px;color:#999;">ORDER CONFIRMATION RECEIPT</div></div>
+        ${packedTag}
+        <div style="display:flex;justify-content:space-between;background:#F9F9F9;padding:20px;border-radius:15px;margin-bottom:30px;">
+          <div><div class="label">REFERENCE ID</div><div class="val">${item.id}</div><div class="label">BRANCH STORE</div><div class="val">${item.branch}</div></div>
+          <div style="text-align:right;"><div class="label">ISSUE DATE</div><div class="val">${item.date}</div><div class="label">CONTACT PHONE</div><div class="val">${item.phone || '-'}</div></div>
+        </div>
+        <table><thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+        <div style="text-align:center;margin-top:50px;font-size:11px;color:#AAA;border-top:1px dashed #DDD;padding-top:20px;">
+          <p>เอกสารฉบับนี้ใช้สำหรับยืนยันการจัดเตรียมสินค้าของ CoffeeToday เท่านั้น</p>
+          <p>Generated at: ${new Date().toLocaleString("th-TH")}</p>
+        </div>
+        <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),800);}<\/script></body></html>`);
       win.document.close();
     } catch (e) { console.error(e); }
   }
