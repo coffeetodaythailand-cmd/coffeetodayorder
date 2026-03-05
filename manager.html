@@ -1569,115 +1569,75 @@
     modal.style.display = 'flex';
   }
 
+// 📄 1. แก้ไขปุ่มเขียว (downloadPDF) - ให้ปลดล็อกปุ่มและจัดหน้าตาตามไฟล์ตัวอย่าง
   function downloadPDF() {
-    
     const targetOrder = allOrders.find(function(order) { 
       return order.id === currentViewingOrderId; 
     });
     
-    if(!targetOrder) {
-      return;
-    }
+    if(!targetOrder) return;
 
     const btnDownload = document.getElementById('dlBtn');
+    const originalText = '<i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)';
     btnDownload.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> บีบอัดข้อมูล PDF...';
-    btnDownload.disabled = true;
+    btnDownload.disabled = true; // ล็อกปุ่มกันกดซ้อน
+
+    // ✅ ส่วนปลดล็อกปุ่ม: ให้ปุ่มกลับมาใช้งานได้หลังจาก 3 วินาที
+    setTimeout(function() {
+      btnDownload.innerHTML = originalText;
+      btnDownload.disabled = false;
+    }, 3000);
 
     let rowsBuilder = '';
-    const itemsArray = targetOrder.items.split('\n');
-    
-    itemsArray.forEach(function(rowLine) {
+    targetOrder.items.split('\n').forEach(function(rowLine) {
       if(rowLine.trim() !== "") {
         const parts = rowLine.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
         if(parts) {
+          // จัดตาราง 3 คอลัมน์ (Product, Last Stock, Qty) ตามตัวอย่าง
           rowsBuilder += '<tr>';
-          rowsBuilder += '<td style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#333;">' + parts[1] + '</td>';
+          rowsBuilder += '<td style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:14px;">' + parts[1] + '</td>';
           rowsBuilder += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:14px; color:#666;">' + parts[2] + '</td>';
           rowsBuilder += '<td align="center" style="padding:15px; border-bottom:1px solid #EEEEEE; font-size:16px; font-weight:bold; color:#A91D3A;">' + parts[3] + '</td>';
           rowsBuilder += '</tr>';
-        } else {
-          rowsBuilder += '<tr><td colspan="3" style="padding:15px; border-bottom:1px solid #EEEEEE; color:#999; font-style:italic;">' + rowLine + '</td></tr>';
         }
       }
     });
 
-    const ThaiTimeNow = formatPackedTime(targetOrder.packedTime);
-    let alertBanner = '';
-    
-    if ((targetOrder.status === 'Packed' || targetOrder.status === 'Success') && ThaiTimeNow !== "-") {
-      alertBanner += '<div style="background-color: #f0fdf4; border: 2px dashed #10b981; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 30px;">';
-      alertBanner += '<span style="font-size: 14px; color: #065f46; font-weight: bold;">✓ ยืนยันการจัดเตรียมพัสดุเสร็จสิ้นเมื่อ: ' + ThaiTimeNow + '</span>';
-      alertBanner += '</div>';
-    }
-
     const pdfWindow = window.open('', '', 'width=900,height=950');
+    if(!pdfWindow) return alert("⚠️ กรุณาอนุญาต Pop-up เพื่อโหลดไฟล์ครับ");
+
+    pdfWindow.document.write('<!DOCTYPE html><html lang="th"><head><style>body{font-family:sans-serif;padding:40px;color:#333;}.main-container{padding:60px;border:2px solid #EEE;border-radius:30px;max-width:700px;margin:0 auto;}.title-main{text-align:center;color:#A91D3A;font-size:32px;font-weight:bold;}.grid-data{display:flex;justify-content:space-between;background:#F9F9F9;padding:25px;border-radius:20px;margin-bottom:30px;}.grid-col-label{font-size:10px;color:#999;text-transform:uppercase;font-weight:bold;}table{width:100%;border-collapse:collapse;}th{text-align:left;padding:15px;border-bottom:2px solid #333;font-size:14px;}</style><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head><body>');
+    pdfWindow.document.write('<div id="p-area" class="main-container"><div class="title-main">COFFEETODAY</div><div style="text-align:center;color:#999;margin-bottom:40px;">ORDER CONFIRMATION RECEIPT</div>');
+    pdfWindow.document.write('<div class="grid-data"><div><div class="grid-col-label">REFERENCE ID</div><div style="font-weight:bold;">'+targetOrder.id+'</div><div style="height:15px;"></div><div class="grid-col-label">BRANCH STORE</div><div style="font-weight:bold;">'+targetOrder.branch+'</div></div><div style="text-align:right;"><div class="grid-col-label">ISSUE DATE</div><div style="font-weight:bold;">'+targetOrder.date+'</div><div style="height:15px;"></div><div class="grid-col-label">CONTACT PHONE</div><div style="font-weight:bold;">'+(targetOrder.phone || '-')+'</div></div></div>');
+    pdfWindow.document.write('<table><thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead><tbody>'+rowsBuilder+'</tbody></table>');
+    pdfWindow.document.write('<div style="text-align:center;margin-top:50px;font-size:11px;color:#AAA;border-top:1px dashed #DDD;padding-top:20px;"><p>เอกสารฉบับนี้ใช้สำหรับยืนยันการจัดเตรียมสินค้าของ CoffeeToday เท่านั้น</p></div></div>');
+    pdfWindow.document.write('<script>window.onload=()=>{html2pdf().set({margin:10,filename:"Receipt.pdf",html2canvas:{scale:2},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}}).from(document.getElementById("p-area")).save().then(()=>{setTimeout(()=>window.close(),1500)});};<\/script></body></html>');
+    pdfWindow.document.close();
+  }
+
+  // 🖨️ 2. แก้ไขปุ่มปริ้นขวาสุด (printOrder) - ให้กดแล้วเด้งใบสั่งงานแบบไม่มีช่องเช็ค
+  function printOrder(encodedData) {
+    const item = JSON.parse(decodeURIComponent(encodedData));
+    const win = window.open('', '', 'width=800,height=900');
+    if(!win) return alert("⚠️ กรุณาอนุญาต Pop-up เพื่อทำการปริ้นครับ");
     
-    pdfWindow.document.write('<!DOCTYPE html>');
-    pdfWindow.document.write('<html lang="th">');
-    pdfWindow.document.write('<head>');
-    pdfWindow.document.write('<title>Official_Receipt_' + targetOrder.id + '</title>');
-    pdfWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
-    pdfWindow.document.write('<style>');
-    pdfWindow.document.write('body { font-family: "Tahoma", sans-serif; padding: 40px; color: #333333; line-height: 1.6; }');
-    pdfWindow.document.write('.main-container { padding: 60px; border: 2px solid #EEEEEE; border-radius: 30px; max-width: 700px; margin: 0 auto; background: #FFFFFF; }');
-    pdfWindow.document.write('.title-main { text-align: center; color: #A91D3A; font-size: 32px; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px; }');
-    pdfWindow.document.write('.title-sub { text-align: center; color: #AAAAAA; font-size: 14px; margin-bottom: 40px; text-transform: uppercase; }');
-    pdfWindow.document.write('.grid-data { display: flex; justify-content: space-between; margin-bottom: 35px; background: #F9F9F9; padding: 25px; border-radius: 20px; }');
-    pdfWindow.document.write('.grid-col-label { font-size: 11px; color: #999999; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }');
-    pdfWindow.document.write('.grid-col-value { font-size: 16px; font-weight: bold; color: #2D3133; }');
-    pdfWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 40px; }');
-    pdfWindow.document.write('th { text-align: left; padding: 15px; border-bottom: 2px solid #333333; font-size: 15px; color: #333333; }');
-    pdfWindow.document.write('.footer-note { text-align: center; margin-top: 40px; border-top: 1px dashed #DDDDDD; padding-top: 30px; font-size: 13px; color: #BBBBBB; }');
-    pdfWindow.document.write('</style>');
-    pdfWindow.document.write('</head>');
-    pdfWindow.document.write('<body>');
-    pdfWindow.document.write('<div id="print-area" class="main-container">');
-    pdfWindow.document.write('<div class="title-main">COFFEETODAY</div>');
-    pdfWindow.document.write('<div class="title-sub">Order Confirmation Receipt</div>');
-    pdfWindow.document.write(alertBanner);
-    pdfWindow.document.write('<div class="grid-data">');
-    pdfWindow.document.write('<div>');
-    pdfWindow.document.write('<div class="grid-col-label">Reference ID</div>');
-    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.id + '</div>');
-    pdfWindow.document.write('<div style="height:20px;"></div>');
-    pdfWindow.document.write('<div class="grid-col-label">Branch Store</div>');
-    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.branch + '</div>');
-    pdfWindow.document.write('</div>');
-    pdfWindow.document.write('<div style="text-align:right;">');
-    pdfWindow.document.write('<div class="grid-col-label">Issue Date</div>');
-    pdfWindow.document.write('<div class="grid-col-value">' + targetOrder.date + '</div>');
-    pdfWindow.document.write('<div style="height:20px;"></div>');
-    pdfWindow.document.write('<div class="grid-col-label">Contact Phone</div>');
-    pdfWindow.document.write('<div class="grid-col-value">' + (targetOrder.phone || '-') + '</div>');
-    pdfWindow.document.write('</div>');
-    pdfWindow.document.write('</div>');
-    pdfWindow.document.write('<table>');
-    pdfWindow.document.write('<thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead>');
-    pdfWindow.document.write('<tbody>' + rowsBuilder + '</tbody>');
-    pdfWindow.document.write('</table>');
-    pdfWindow.document.write('<div class="footer-note">');
-    pdfWindow.document.write('<p>เอกสารฉบับนี้ใช้สำหรับยืนยันการจัดเตรียมสินค้าของ CoffeeToday เท่านั้น</p>');
-    pdfWindow.document.write('<p>Generated at: ' + new Date().toLocaleString("th-TH") + '</p>');
-    pdfWindow.document.write('</div>');
-    pdfWindow.document.write('</div>');
-    pdfWindow.document.write('<script>');
-    pdfWindow.document.write('window.onload = function() {');
-    pdfWindow.document.write('  const element = document.getElementById("print-area");');
-    pdfWindow.document.write('  html2pdf().set({');
-    pdfWindow.document.write('    margin: 10,');
-    pdfWindow.document.write('    filename: "CT_Receipt_' + targetOrder.id + '.pdf",');
-    pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
-    pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
-    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }');
-    pdfWindow.document.write('  }).from(element).save().then(function() {');
-    pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1200);');
-    pdfWindow.document.write('  });');
-    pdfWindow.document.write('};');
-    pdfWindow.document.write('<\/script>');
-    pdfWindow.document.write('</body>');
-    pdfWindow.document.write('</html>');
-    
-    pdfWindow.document.close(); 
+    let rowsHtml = '';
+    item.items.split('\n').forEach(line => {
+      const parts = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+      if(parts) {
+        rowsHtml += `<tr><td style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${parts[1]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${parts[2]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:#A91D3A;">${parts[3]}</td></tr>`;
+      }
+    });
+
+    win.document.write(`<html><head><style>body{font-family:sans-serif;padding:50px;color:#333;}.label{font-size:10px;color:#999;text-transform:uppercase;}.val{font-size:16px;font-weight:bold;margin-bottom:20px;}table{width:100%;border-collapse:collapse;}th{text-align:left;padding:12px;background:#F9FAFB;border-bottom:2px solid #333;font-size:13px;}</style></head><body>
+      <div style="text-align:center;margin-bottom:30px;"><h2 style="margin:0;color:#A91D3A;letter-spacing:2px;">COFFEETODAY</h2><div style="font-size:12px;color:#999;">ORDER CONFIRMATION RECEIPT</div></div>
+      <div style="display:flex;justify-content:space-between;background:#F9F9F9;padding:25px;border-radius:20px;margin-bottom:30px;">
+        <div><div class="label">REFERENCE ID</div><div class="val">${item.id}</div><div class="label">BRANCH STORE</div><div class="val">${item.branch}</div></div>
+        <div style="text-align:right;"><div class="label">ISSUE DATE</div><div class="val">${item.date}</div><div class="label">CONTACT PHONE</div><div class="val">${item.phone || '-'}</div></div>
+      </div>
+      <table><thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+      <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),800);}<\/script></body></html>`);
+    win.document.close();
   }
   
   function renderCharts(analyticsData) {
