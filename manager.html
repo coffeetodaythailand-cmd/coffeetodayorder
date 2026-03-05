@@ -2165,7 +2165,7 @@
     
   }
 // ---------------------------------------------------------
-  // ระบบดาวน์โหลดรายงานสาขา (Export to CSV)
+  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF)
   // ---------------------------------------------------------
   function downloadSummaryReport() {
     
@@ -2176,53 +2176,79 @@
     // เปลี่ยนสถานะปุ่มตอนกำลังโหลด
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> เตรียมไฟล์...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง PDF...';
     btn.disabled = true;
 
-    // ใส่ BOM (\uFEFF) เพื่อให้ Excel อ่านภาษาไทยได้ 100%
-    let csvContent = "\uFEFF"; 
-    
-    // สร้างหัวตาราง (Header)
-    csvContent += "Order ID,วัน/เวลา,ชื่อสาขา,ลูกค้า,เบอร์โทร,รายการสินค้า,สถานะการจัดส่ง\n";
-
-    // วนลูปนำข้อมูลจาก allOrders มาใส่ทีละบรรทัด
-    allOrders.forEach(function(order) {
-      let id = order.id || "-";
-      let date = order.date || "-";
-      let branch = order.branch || "-";
-      let customer = order.customer || "-";
-      let phone = order.phone || "-";
+    // เตรียมตารางข้อมูล
+    let rowsBuilder = '';
+    allOrders.forEach(function(item) {
+      rowsBuilder += '<tr>';
+      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#A91D3A; font-weight:bold;">' + item.id + '</td>';
+      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#666;">' + item.date + '</td>';
+      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:13px; font-weight:bold; color:#333;">' + item.branch + '</td>';
+      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px;">' + item.customer + '<br><span style="color:#3498db;">' + (item.phone || '-') + '</span></td>';
+      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:11px; color:#555; line-height:1.4;">' + (item.items || "").replace(/\n/g, '<br>') + '</td>';
       
-      // จัดการรายการสินค้า: เปลี่ยนขึ้นบรรทัดใหม่ให้เป็นเครื่องหมาย " | " และครอบด้วย Double Quote
-      let items = (order.items || "").replace(/\n/g, " | ").replace(/"/g, '""'); 
-      let status = order.status || "-";
-
-      csvContent += `"${id}","${date}","${branch}","${customer}","${phone}","${items}","${status}"\n`;
+      let statusColor = item.status === 'Success' ? '#22c55e' : (item.status === 'Packed' ? '#3498db' : '#999');
+      rowsBuilder += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; font-weight:bold; color:' + statusColor + ';">' + item.status + '</td>';
+      rowsBuilder += '</tr>';
     });
 
-    // สร้างไฟล์และสั่งให้เบราว์เซอร์ดาวน์โหลด
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    // ตั้งชื่อไฟล์พร้อมแนบเวลาปัจจุบัน
+    // ดึงวันที่ที่กรองมาแสดงที่หัวกระดาษ
+    const sDate = document.getElementById('sDate').value || "เริ่มต้น";
+    const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
+    const printDate = new Date().toLocaleString("th-TH");
     const timeStamp = new Date().getTime();
-    link.setAttribute("href", url);
-    link.setAttribute("download", "CoffeeToday_BranchReport_" + timeStamp + ".csv");
-    link.style.visibility = 'hidden';
+
+    // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF (ใช้เทคนิคเดียวกับระบบใบเสร็จของคุณเบลล์)
+    const pdfWindow = window.open('', '', 'width=1000,height=800');
     
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    pdfWindow.document.write('<!DOCTYPE html><html lang="th"><head><title>Branch_Report_PDF</title>');
+    pdfWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+    pdfWindow.document.write('<style>');
+    pdfWindow.document.write('body { font-family: "Tahoma", sans-serif; padding: 40px; color: #333; background: #FFF; }');
+    pdfWindow.document.write('.container { max-width: 100%; margin: 0 auto; }');
+    pdfWindow.document.write('h2 { text-align: center; color: #2D3133; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }');
+    pdfWindow.document.write('.sub-title { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }');
+    pdfWindow.document.write('table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }');
+    pdfWindow.document.write('th { text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; }');
+    pdfWindow.document.write('.footer { text-align: center; font-size: 11px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 20px;}');
+    pdfWindow.document.write('</style></head><body>');
+
+    pdfWindow.document.write('<div id="print-area" class="container">');
+    pdfWindow.document.write('<h2>Branch Summary Report</h2>');
+    pdfWindow.document.write('<div class="sub-title">ข้อมูลออเดอร์ตั้งแต่วันที่: <b style="color:#A91D3A;">' + sDate + '</b> ถึง <b style="color:#A91D3A;">' + eDate + '</b></div>');
+    pdfWindow.document.write('<table>');
+    pdfWindow.document.write('<thead><tr><th style="width:12%;">Order ID</th><th style="width:15%;">Date / Time</th><th style="width:15%;">Branch</th><th style="width:15%;">Customer / Phone</th><th>Items Detail</th><th style="width:10%;">Status</th></tr></thead>');
+    pdfWindow.document.write('<tbody>' + rowsBuilder + '</tbody>');
+    pdfWindow.document.write('</table>');
+    pdfWindow.document.write('<div class="footer"><p>CoffeeToday Management System | Printed on: ' + printDate + '</p></div>');
+    pdfWindow.document.write('</div>');
+
+    pdfWindow.document.write('<script>');
+    pdfWindow.document.write('window.onload = function() {');
+    pdfWindow.document.write('  const element = document.getElementById("print-area");');
+    pdfWindow.document.write('  html2pdf().set({');
+    pdfWindow.document.write('    margin: 10,');
+    pdfWindow.document.write('    filename: "CoffeeToday_BranchReport_' + timeStamp + '.pdf",');
+    pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
+    pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
+    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }'); // ใช้กระดาษ A4 แนวนอน (landscape)
+    pdfWindow.document.write('  }).from(element).save().then(function() {');
+    pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1500);');
+    pdfWindow.document.write('  });');
+    pdfWindow.document.write('};');
+    pdfWindow.document.write('<\/script>');
+    pdfWindow.document.write('</body></html>');
+    pdfWindow.document.close();
 
     // คืนค่าปุ่มกลับมาเหมือนเดิม
     setTimeout(function() {
       btn.innerHTML = originalText;
       btn.disabled = false;
-      showToast("✅ ดาวน์โหลดรายงานสำเร็จ!");
-    }, 800);
+      showToast("✅ สร้างและดาวน์โหลด PDF สำเร็จ!");
+    }, 2000);
   }
 </script>
-
 </body>
 </html>
