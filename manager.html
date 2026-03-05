@@ -462,7 +462,7 @@
     }
     
     .btn-sm {
-      padding: 6px 14px; /* Slim Design  */
+      padding: 6px 14px;
       font-size: 11px;
       border-radius: 8px;
       height: 32px;
@@ -1019,7 +1019,6 @@
   
   let pendingApproveId = "";
   let currentDeepSearchQuery = ""; 
-  let currentViewingOrderId = "";
 
   // ตัวแปรสำหรับระบบ Drag & Drop
   let dragCatIndex = null;
@@ -2177,7 +2176,7 @@
   }
 
   // ---------------------------------------------------------
-  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF) [cite: 12, 13, 14, 15, 16]
+  // ระบบดาวน์โหลดรายงานสาขา (Export to PDF)
   // ---------------------------------------------------------
   function downloadSummaryReport() {
     
@@ -2197,22 +2196,23 @@
     const printDate = new Date().toLocaleString("th-TH");
     const timeStamp = new Date().getTime();
 
-    // 💡 แก้ปัญหาหัวตารางหายและช่องว่างเว้นห่าง: แบ่งตารางเป็นหลายๆ หน้า (หน้าละ 8 แถว)
+    // 💡 เทคนิคแก้ปัญหาหัวตารางหาย: แบ่งตารางเป็นหลายๆ หน้า (หน้าละ 8 แถว)
     let tablesContent = '';
-    const rowsPerPage = 8; // กำหนด 8 แถวต่อ 1 หน้ากระดาษแนวนอน [cite: 12, 15]
+    const rowsPerPage = 8; // กำหนด 8 แถวต่อ 1 หน้ากระดาษแนวนอน
     
     for (let i = 0; i < allOrders.length; i += rowsPerPage) {
       let chunk = allOrders.slice(i, i + rowsPerPage);
       
-      // 💡 จุดสำคัญ: สั่งตัดขึ้นหน้าใหม่แบบแนบชิด (height: 0) [cite: 12, 16]
+      // สั่งขึ้นหน้าใหม่ถ้าไม่ใช่หน้าแรก (ให้ html2pdf รับรู้การตัดกระดาษที่จุดนี้)
       if (i > 0) {
-        tablesContent += '<div class="html2pdf__page-break" style="height: 0px; margin: 0px; page-break-before: always; border:none; display:block;"></div>';
+        tablesContent += '<div class="html2pdf__page-break"></div>';
+        tablesContent += '<div style="height: 20px;"></div>'; 
       }
       
       tablesContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">';
       
-      // 💡 บังคับพิมพ์หัวตารางใหม่ทุกครั้งที่ขึ้นตารางหน้าใหม่ เพื่อให้หน้า 2-3 มีหัวตาราง 
-      tablesContent += '<thead><tr style="display: table-header-group;">';
+      // 💡 บังคับพิมพ์หัวตารางใหม่ทุกๆ ครั้งที่ขึ้นตารางหน้าใหม่
+      tablesContent += '<thead><tr>';
       tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:12%;">Order ID</th>';
       tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Date / Time</th>';
       tablesContent += '<th style="text-align: left; padding: 15px 10px; background: #F8F9FA; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #A91D3A; width:15%;">Branch</th>';
@@ -2224,13 +2224,14 @@
       tablesContent += '<tbody>';
       
       chunk.forEach(function(item) {
-        let statusColor = item.status === 'Success' ? '#22c55e' : (item.status === 'Packed' ? '#3498db' : '#999');
-        tablesContent += '<tr style="page-break-inside: avoid; break-inside: avoid;">';
+        tablesContent += '<tr>';
         tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#A91D3A; font-weight:bold;">' + item.id + '</td>';
         tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; color:#666;">' + item.date + '</td>';
         tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:13px; font-weight:bold; color:#333;">' + item.branch + '</td>';
         tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px;">' + item.customer + '<br><span style="color:#3498db;">' + (item.phone || '-') + '</span></td>';
         tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:11px; color:#555; line-height:1.4;">' + (item.items || "").replace(/\n/g, '<br>') + '</td>';
+        
+        let statusColor = item.status === 'Success' ? '#22c55e' : (item.status === 'Packed' ? '#3498db' : '#999');
         tablesContent += '<td style="padding:12px 10px; border-bottom:1px solid #EEE; font-size:12px; font-weight:bold; color:' + statusColor + ';">' + item.status + '</td>';
         tablesContent += '</tr>';
       });
@@ -2238,7 +2239,7 @@
       tablesContent += '</tbody></table>';
     }
 
-    // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF (ตามเทคนิคเดียวกับใบเสร็จ)
+    // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF
     const pdfWindow = window.open('', '', 'width=1000,height=800');
     
     pdfWindow.document.write('<!DOCTYPE html><html lang="th"><head><title>Branch_Report_PDF</title>');
@@ -2249,13 +2250,14 @@
     pdfWindow.document.write('h2 { text-align: center; color: #2D3133; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }');
     pdfWindow.document.write('.sub-title { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }');
     pdfWindow.document.write('.footer { text-align: center; font-size: 11px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 20px;}');
+    pdfWindow.document.write('.html2pdf__page-break { page-break-before: always; }'); // คลาสบังคับขึ้นหน้าใหม่
     pdfWindow.document.write('</style></head><body>');
 
     pdfWindow.document.write('<div id="print-area" class="container">');
     pdfWindow.document.write('<h2>Branch Summary Report</h2>');
-    pdfWindow.document.write('<div class="sub-title">ข้อมูลออเดอร์จากวันที่: <b style="color:#A91D3A;">' + sDate + '</b> ถึง <b style="color:#A91D3A;">' + eDate + '</b></div>');
+    pdfWindow.document.write('<div class="sub-title">ข้อมูลออเดอร์ตั้งแต่วันที่: <b style="color:#A91D3A;">' + sDate + '</b> ถึง <b style="color:#A91D3A;">' + eDate + '</b></div>');
     
-    // ใส่ Content ตารางที่แบ่งหน้าไว้แล้ว (รับประกันหัวตารางมีทุกหน้าและหน้า 2 ไม่เว้นห่าง) 
+    // ใส่ Content ตารางที่แบ่งหน้าไว้แล้ว (รับประกันหัวตารางมีทุกหน้า!)
     pdfWindow.document.write(tablesContent);
     
     pdfWindow.document.write('<div class="footer"><p>CoffeeToday Management System | Printed on: ' + printDate + '</p></div>');
@@ -2267,7 +2269,7 @@
     pdfWindow.document.write('  html2pdf().set({');
     pdfWindow.document.write('    margin: [10, 10, 15, 10],'); 
     pdfWindow.document.write('    filename: "CoffeeToday_BranchReport_' + timeStamp + '.pdf",');
-    pdfWindow.document.write('    image: { type: "jpeg", quality: 1 },');
+    pdfWindow.document.write('    image: { type: "jpeg", quality: 0.98 },');
     pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
     pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },'); 
     pdfWindow.document.write('    pagebreak: { mode: ["css", "legacy"] }'); 
@@ -2287,6 +2289,5 @@
     }, 2000);
   }
 </script>
-
 </body>
 </html>
