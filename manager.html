@@ -419,7 +419,7 @@
 
     /*
       =========================================================================
-      BUTTONS & CONTROLS (Updated for Slim Look)
+      BUTTONS & CONTROLS
       =========================================================================
     */
     .btn { 
@@ -462,19 +462,9 @@
     }
     
     .btn-sm {
-      padding: 6px 14px;
-      font-size: 11px;
-      border-radius: 8px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-icon-text {
-        display: flex;
-        align-items: center;
-        gap: 6px;
+      padding: 8px 18px;
+      font-size: 12px;
+      border-radius: 12px;
     }
 
     /*
@@ -785,11 +775,11 @@
             <input type="date" id="sDate" class="filter-input">
             <span style="color:#CCC;">-</span>
             <input type="date" id="eDate" class="filter-input">
-            <button class="btn-red btn-sm" onclick="applyDateFilter()" style="border: none; cursor: pointer; color: white; font-family: 'Prompt', sans-serif;">
-              <div class="btn-icon-text"><i class="fas fa-filter"></i> กรอง</div>
+            <button class="btn btn-red btn-sm" onclick="applyDateFilter()">
+              <i class="fas fa-filter"></i> กรอง
             </button>
-            <button id="summaryBtn" class="btn-sm" onclick="downloadSummaryReport()" style="background-color:var(--blue); color:white; border: none; cursor: pointer; font-family: 'Prompt', sans-serif;">
-               <div class="btn-icon-text"><i class="fas fa-file-invoice"></i> รายงานสาขา</div>
+            <button id="summaryBtn" class="btn btn-sm" onclick="downloadSummaryReport()" style="background-color:var(--blue); color:white;">
+              <i class="fas fa-file-invoice"></i> รายงานสาขา
             </button>
           </div>
         </div>
@@ -863,13 +853,13 @@
         <table id="oT">
           <thead>
             <tr>
-              <th style="width: 120px;">Order ID</th>
-              <th style="width: 140px;">วัน/เวลา</th>
-              <th style="width: 120px;">ชื่อสาขา</th>
-              <th style="width: 140px;">ลูกค้า</th>
-              <th style="width: 110px;">เบอร์โทร</th>
-              <th style="min-width: 350px;">รายการสินค้า</th>
-              <th align="center" style="width:140px;">สถานะ</th>
+              <th style="width: 140px;">Order ID</th>
+              <th style="width: 160px;">วัน/เวลา</th>
+              <th>ชื่อสาขา</th>
+              <th>ลูกค้า</th>
+              <th>เบอร์โทร</th>
+              <th>รายการสินค้า</th>
+              <th align="center" style="width:160px;">สถานะ</th>
             </tr>
           </thead>
           <tbody id="oB">
@@ -2175,112 +2165,7 @@
     
   }
 
-// ---------------------------------------------------------
-  // 🚀 ระบบดาวน์โหลดรายงานสาขา (Fix Spacing & UI Complete Edition)
-  // ---------------------------------------------------------
-  function downloadSummaryReport() {
-    if (!allOrders || allOrders.length === 0) {
-      return alert("ไม่มีข้อมูลออเดอร์ในระบบสำหรับสร้างรายงาน");
-    }
-
-    // เปลี่ยนสถานะปุ่มตอนกำลังโหลด
-    const btn = document.getElementById('summaryBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง PDF...';
-    btn.disabled = true;
-
-    // ดึงวันที่ที่กรองมาแสดงที่หัวกระดาษ
-    const sDate = document.getElementById('sDate').value || "เริ่มต้น";
-    const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
-    const printDate = new Date().toLocaleString("th-TH");
-    const timeStamp = new Date().getTime();
-
-    // 💡 ปรับเป็น 12 แถวเพื่อให้เต็มหน้ากระดาษแนวนอน (Landscape) และลบช่องว่างส่วนเกินออก
-    let tablesContent = '';
-    const rowsPerPage = 12; 
-    
-    for (let i = 0; i < allOrders.length; i += rowsPerPage) {
-      let chunk = allOrders.slice(i, i + rowsPerPage);
-      
-      // สั่งขึ้นหน้าใหม่ (ลบ div height 20px ออกเพื่อไม่ให้ UI กระโดด)
-      if (i > 0) {
-        tablesContent += '<div class="html2pdf__page-break"></div>';
-      }
-      
-      // บังคับความกว้างคอลัมน์ให้เท่ากันทุกหน้าด้วย table-layout: fixed
-      tablesContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 0; table-layout: fixed; border: 1px solid #EEEEEE;">';
-      
-      // 💡 หัวตารางแบบ Nitro Clean
-      tablesContent += '<thead><tr style="background: #F8F9FA;">';
-      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:10%;">Order ID</th>';
-      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:15%;">Date / Time</th>';
-      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:15%;">Branch</th>';
-      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:18%;">Customer</th>';
-      tablesContent += '<th style="text-align: left; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A;">Items Detail</th>';
-      tablesContent += '<th style="text-align: center; padding: 12px 8px; color: #333; font-size: 11px; border-bottom: 2px solid #A91D3A; width:10%;">Status</th>';
-      tablesContent += '</tr></thead><tbody>';
-      
-      chunk.forEach(function(item) {
-        let statusColor = item.status === 'Success' ? '#16a34a' : (item.status === 'Packed' ? '#2563eb' : '#6b7280');
-        tablesContent += '<tr>';
-        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; color:#A91D3A; font-weight:bold;">' + item.id + '</td>';
-        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; color:#666;">' + item.date + '</td>';
-        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; font-weight:bold;">' + item.branch + '</td>';
-        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px;">' + item.customer + '<br><small style="color:#3498db;">' + (item.phone || '-') + '</small></td>';
-        tablesContent += '<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; color:#444; line-height:1.4;">' + (item.items || "").replace(/\n/g, '<br>') + '</td>';
-        tablesContent += '<td align="center" style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; font-weight:bold; color:' + statusColor + ';">' + item.status + '</td>';
-        tablesContent += '</tr>';
-      });
-      
-      tablesContent += '</tbody></table>';
-    }
-
-    // สร้างหน้าต่าง Popup เพื่อเรนเดอร์ PDF
-    const pdfWindow = window.open('', '', 'width=1100,height=850');
-    
-    pdfWindow.document.write('<!DOCTYPE html><html lang="th"><head><title>Branch_Report_PDF</title>');
-    pdfWindow.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
-    pdfWindow.document.write('<style>');
-    pdfWindow.document.write('body { font-family: "Tahoma", sans-serif; padding: 35px; color: #333; background: #FFF; }');
-    pdfWindow.document.write('.container { width: 100%; margin: 0 auto; }');
-    pdfWindow.document.write('h2 { text-align: center; color: #2D3133; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }');
-    pdfWindow.document.write('.sub-title { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }');
-    pdfWindow.document.write('.footer { text-align: right; font-size: 10px; color: #AAA; border-top: 1px dashed #EEE; padding-top: 15px; margin-top: 15px; }');
-    pdfWindow.document.write('</style></head><body>');
-
-    pdfWindow.document.write('<div id="print-area" class="container">');
-    pdfWindow.document.write('<h2>Branch Summary Report</h2>');
-    pdfWindow.document.write('<div class="sub-title">ข้อมูลออเดอร์ตั้งแต่วันที่: <b style="color:#A91D3A;">' + sDate + '</b> ถึง <b style="color:#A91D3A;">' + eDate + '</b></div>');
-    
-    // ใส่ Content ตารางที่จัดระเบียบเรียบร้อยแล้ว
-    pdfWindow.document.write(tablesContent);
-    
-    pdfWindow.document.write('<div class="footer"><p>CoffeeToday Management System | Printed on: ' + printDate + '</p></div>');
-    pdfWindow.document.write('</div>');
-
-    pdfWindow.document.write('<script>');
-    pdfWindow.document.write('window.onload = function() {');
-    pdfWindow.document.write('  const element = document.getElementById("print-area");');
-    pdfWindow.document.write('  html2pdf().set({');
-    pdfWindow.document.write('    margin: [10, 10, 10, 10],'); 
-    pdfWindow.document.write('    filename: "CoffeeToday_BranchReport_' + timeStamp + '.pdf",');
-    pdfWindow.document.write('    html2canvas: { scale: 2, useCORS: true },');
-    pdfWindow.document.write('    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }');
-    pdfWindow.document.write('  }).from(element).save().then(function() {');
-    pdfWindow.document.write('    setTimeout(function() { window.close(); }, 1500);');
-    pdfWindow.document.write('  });');
-    pdfWindow.document.write('};');
-    pdfWindow.document.write('<\/script>');
-    pdfWindow.document.write('</body></html>');
-    pdfWindow.document.close();
-
-    // คืนค่าปุ่มกลับมาเหมือนเดิม
-    setTimeout(function() {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      showToast("✅ ปรับปรุงรายงานและดาวน์โหลดสำเร็จ!");
-    }, 2000);
-  }
 </script>
+
 </body>
 </html>
