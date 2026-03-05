@@ -2288,6 +2288,55 @@
       showToast("✅ สร้างและดาวน์โหลด PDF สำเร็จ!");
     }, 2000);
   }
+  // ---------------------------------------------------------
+  // ระบบสั่งพิมพ์ออเดอร์ (Print Function) - วางก่อนปิด </script> ตัวสุดท้าย
+  // ---------------------------------------------------------
+  function printOrder(encodedData) {
+    const item = JSON.parse(decodeURIComponent(encodedData));
+    const printWindow = window.open('', '', 'width=800,height=900');
+    
+    printWindow.document.write('<html><head><title>Print Order ' + item.id + '</title>');
+    printWindow.document.write('<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">');
+    printWindow.document.write('<style>');
+    printWindow.document.write('body { font-family: "Sarabun", sans-serif; padding: 40px; color: #333; }');
+    printWindow.document.write('.header { text-align: center; border-bottom: 2px solid #A91D3A; margin-bottom: 20px; padding-bottom: 10px; }');
+    printWindow.document.write('.order-id { font-size: 28px; font-weight: bold; color: #A91D3A; margin: 10px 0; }');
+    printWindow.document.write('.info-section { display: flex; justify-content: space-between; margin-bottom: 30px; line-height: 1.8; }');
+    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+    printWindow.document.write('th { background: #F8F9FA; text-align: left; padding: 12px; border-bottom: 2px solid #333; }');
+    printWindow.document.write('td { padding: 12px; border-bottom: 1px solid #EEE; font-size: 15px; }');
+    printWindow.document.write('.footer { text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px dashed #CCC; padding-top: 20px; }');
+    printWindow.document.write('</style></head><body>');
+
+    printWindow.document.write('<div class="header">');
+    printWindow.document.write('  <div style="font-size: 22px; font-weight: bold;">COFFEETODAY</div>');
+    printWindow.document.write('  <div class="order-id">' + item.id + '</div>');
+    printWindow.document.write('  <div>ใบสั่งงานสาขา / จัดเตรียมพัสดุ</div>');
+    printWindow.document.write('</div>');
+
+    printWindow.document.write('<div class="info-section">');
+    printWindow.document.write('  <div><b>สาขา:</b> ' + item.branch + '<br><b>ผู้สั่ง:</b> ' + item.customer + '</div>');
+    printWindow.document.write('  <div style="text-align: right;"><b>วันที่สั่ง:</b> ' + item.date + '<br><b>เบอร์โทร:</b> ' + (item.phone || '-') + '</div>');
+    printWindow.document.write('</div>');
+
+    printWindow.document.write('<table><thead><tr><th>รายการสินค้าที่สั่ง</th><th style="text-align:center; width: 100px;">เช็ค</th></tr></thead><tbody>');
+    const items = item.items.split('\n');
+    items.forEach(line => {
+      if(line.trim()) {
+        printWindow.document.write('<tr><td>' + line + '</td><td style="border-left: 1px solid #EEE; text-align:center;">[   ]</td></tr>');
+      }
+    });
+    printWindow.document.write('</tbody></table>');
+
+    printWindow.document.write('<div class="footer">');
+    printWindow.document.write('  <p>พิมพ์เมื่อ: ' + new Date().toLocaleString("th-TH") + '</p>');
+    printWindow.document.write('  <p><b>CoffeeToday Shop System - Nitro Core Engine</b></p>');
+    printWindow.document.write('</div>');
+
+    printWindow.document.write('<script>window.onload = function(){ window.print(); setTimeout(function(){ window.close(); }, 500); };<\/script>');
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+  }
 </script>
 </body>
 </html>
