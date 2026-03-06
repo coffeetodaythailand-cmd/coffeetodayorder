@@ -595,13 +595,31 @@
     document.getElementById('rL').innerHTML = h + "</ul>"; document.getElementById('rM').style.display = 'flex';
   }
 
-  // 🚀 ระบบ NITRO SYNC: รันเลข ORD-XXXX ผ่าน Firebase ทันที
+// 🚀 ระบบ NITRO SYNC + GUARD (เพิ่มระบบเช็คแบนและ Device ID)
   async function confirmSubmit() {
     const cBtn = document.getElementById('cBtn');
-    cBtn.innerText = "กำลังส่ง..."; cBtn.disabled = true;
+    cBtn.innerText = "กำลังตรวจสอบความปลอดภัย..."; cBtn.disabled = true;
 
     try {
-      // ⚡ 1. รันเลข ORD-XXXX จาก Firebase (ทำผ่าน Transaction เพื่อความแม่นยำ)
+      // 🕵️‍♂️ 1. สร้างหรือดึงรหัสประจำเครื่อง (Device ID)
+      let deviceId = localStorage.getItem('coffee_today_device_id');
+      if (!deviceId) {
+        deviceId = 'DEV-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+        localStorage.setItem('coffee_today_device_id', deviceId);
+      }
+
+      // 🛡️ 2. ด่านตรวจ Blacklist: เช็คว่าเครื่องนี้โดนแบนมั้ย
+      const banDoc = await db.collection("blacklist").doc(deviceId).get();
+      if (banDoc.exists) {
+        alert("⚠️ ขออภัย! อุปกรณ์ของคุณถูกระงับการสั่งซื้อชั่วคราวเนื่องจากตรวจพบความผิดปกติ \nกรุณาติดต่อแอดมินเพื่อตรวจสอบ");
+        cBtn.innerText = "ถูกระงับการเข้าถึง";
+        cBtn.disabled = true;
+        return; 
+      }
+
+      cBtn.innerText = "กำลังส่ง...";
+
+      // ⚡ 3. รันเลข ORD-XXXX จาก Firebase (ทำผ่าน Transaction)
       const counterRef = db.collection("metadata").doc("counters");
       const realOrderId = await db.runTransaction(async (transaction) => {
         const doc = await transaction.get(counterRef);
@@ -611,20 +629,26 @@
         return "ORD-" + ("0000" + nextId).slice(-4);
       });
 
-      // 🚀 2. บันทึกลง Firebase ด้วยเลขจริง (Nitro 0.5 วินาที)
+      // 🚀 4. บันทึกลง Firebase พร้อมฝังรหัส Device ID
       await db.collection("orders").doc(realOrderId).set({
-        orderId: realOrderId, name: pD.name, phone: pD.phone, email: pD.email,
-        branch: pD.branch, details: pD.details, status: "Pending",
+        orderId: realOrderId, 
+        name: pD.name, 
+        phone: pD.phone, 
+        email: pD.email,
+        branch: pD.branch, 
+        details: pD.details, 
+        status: "Pending",
+        deviceId: deviceId, // <--- ฝังรหัสเครื่องเพื่อส่งไปที่หน้า Guard
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // ✅ 3. จบงานทันที ลูกค้าเห็นเลข ORD ตรงกับอีเมล!
+      // ✅ 5. จบงานทันที
       document.getElementById('rM').style.display = 'none'; 
       document.getElementById('showOrderId').innerText = realOrderId; 
       document.getElementById('successModal').style.display = 'flex'; 
       cBtn.innerText = "ยืนยันสั่ง"; cBtn.disabled = false;
 
-      // 🕵️‍♂️ 4. สำรองข้อมูลลง Sheet (ทำเบื้องหลัง ไม่ให้ลูกค้ารอ)
+      // 🕵️‍♂️ 6. สำรองข้อมูลลง Sheet (ทำเบื้องหลัง)
       fetch(GAS_URL, {
         method: "POST", mode: "no-cors",
         body: JSON.stringify({ action: "submitOrderBackupOnly", formData: pD, orderId: realOrderId })
@@ -638,3 +662,4 @@
 </script>
 </body>
 </html>
+
