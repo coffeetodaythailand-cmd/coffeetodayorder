@@ -790,7 +790,7 @@
       
       <div class="card" id="doughnutCard">
         <h4 class="section-title" style="margin-bottom: 30px;">
-          <i class="fas fa-pie-chart"></i> สัดส่วนสาขา
+          <i class="fas fa-pie-chart"></i> สัดส่วนการสั่งสินค้าแต่ละสาขา
         </h4>
         <div style="height:280px; position: relative;">
           <canvas id="pC_Chart"></canvas>
@@ -919,12 +919,12 @@
       <div style="margin-top: 40px; text-align: center; border-top: 1px dashed #cccccc; padding-top: 20px; font-size: 11px; color: #999999;">
         <p style="margin: 5px 0;">เอกสารตรวจสอบการจัดเตรียมพัสดุ</p>
         <p style="margin: 5px 0;">วันที่พิมพ์เอกสาร: <span id="printDate"></span></p>
-        <p style="margin: 5px 0; font-weight: bold; color: #666;">© CoffeeToday Shop System 2026</p>
+        <p style="margin: 5px 0; font-weight: bold; color: #666;">© CoffeeToday Shop System </p>
       </div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 30px;">
       <button id="dlBtn" class="btn" style="background-color:var(--green); color:white; padding:18px;" onclick="downloadPDF()">
-        <i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF (A4)
+        <i class="fas fa-file-pdf"></i> ดาวน์โหลดเป็นไฟล์ PDF
       </button>
       <button class="btn btn-red" style="padding:15px;" onclick="closeM('receiptModal')">
         <i class="fas fa-times"></i> ปิดหน้าต่างนี้
@@ -1747,24 +1747,20 @@
    * 🚀 NEW FEATURE: Drag & Drop Configuration
    * =========================================================================
    */
-  function renderMenuAccordion(menuData) {
-    
-    if(!menuData || !menuData.categories) {
-      return;
-    }
+    function renderMenuAccordion(menuData) {
+    if(!menuData || !menuData.categories) return;
     
     menuObj = menuData; 
     let chipsHtmlContent = ''; 
-    let itemsHtmlContent = ''; 
+    let itemsHtmlContent = '';
     let selectOptionsHtml = '';
     
     if(!currentCat && menuData.categories.length > 0) {
       currentCat = menuData.categories[0];
     }
     
-    // สร้างปุ่มหมวดหมู่แบบลากวางได้ (Draggable Chips)
+    // 1. สร้างปุ่มหมวดหมู่ (เพิ่มเลขลำดับ idx + 1)
     menuData.categories.forEach(function(categoryName, idx) {
-      
       const itemCount = menuData.grouped[categoryName] ? menuData.grouped[categoryName].length : 0;
       const isSelected = (categoryName === currentCat ? 'active' : '');
       
@@ -1778,17 +1774,15 @@
       chipsHtmlContent += 'ondrop="dropCat(event, ' + idx + ')" ';
       chipsHtmlContent += 'style="cursor: grab;"';
       chipsHtmlContent += '>';
-      chipsHtmlContent += '<i class="fas fa-grip-vertical" style="margin-right: 6px; color: #CCC;"></i>';
-      chipsHtmlContent += categoryName + ' (' + itemCount + ')';
+      chipsHtmlContent += '<i class="fas fa-grip-vertical" style="margin-right: 8px; color: #CCC;"></i>';
+      // ✅ ใส่ตัวเลขลำดับ 1. 2. 3. หน้าชื่อหมวดหมู่
+      chipsHtmlContent += '<b style="margin-right:5px; opacity:0.6;">' + (idx + 1) + '.</b> ' + categoryName + ' (' + itemCount + ')';
       chipsHtmlContent += '</div>';
-      
     });
     
-    // สร้างรายการสินค้าแบบลากวางได้ (Draggable Items)
+    // 2. สร้างรายการสินค้า (เพิ่มเลขลำดับ idx + 1)
     if(currentCat && menuData.grouped[currentCat]) {
-      
       menuData.grouped[currentCat].forEach(function(product, idx) { 
-        
         const isProductActive = (product.status === 'Active' ? 'checked' : '');
         
         itemsHtmlContent += '<div class="cat-item" ';
@@ -1801,7 +1795,8 @@
         itemsHtmlContent += '<div style="display:flex; align-items:center; gap: 15px;">';
         itemsHtmlContent += '<i class="fas fa-grip-lines" style="color: #DDD; font-size: 20px;"></i>';
         itemsHtmlContent += '<div>';
-        itemsHtmlContent += '<span style="font-weight:600; color:#333; font-size:16px;">' + product.name + '</span>';
+        // ✅ ใส่ตัวเลขลำดับ 1. 2. 3. หน้าชื่อสินค้า
+        itemsHtmlContent += '<span style="font-weight:600; color:#333; font-size:16px;"><span style="color:var(--red); margin-right:8px;">' + (idx + 1) + '.</span>' + product.name + '</span>';
         itemsHtmlContent += '<div style="font-size:11px; color:#AAA; margin-top:5px;">ID Ref: ' + product.rowId + '</div>';
         itemsHtmlContent += '</div>';
         itemsHtmlContent += '</div>';
@@ -1813,11 +1808,8 @@
         itemsHtmlContent += '</label>';
         itemsHtmlContent += '<i class="fas fa-edit" style="color:#CCCCCC; cursor:pointer; font-size:18px; transition:0.3s;" onmouseover="this.style.color=\'var(--red)\'" onmouseout="this.style.color=\'#CCCCCC\'" onclick="openProdModal(' + product.rowId + ', \'' + product.name + '\', \'' + currentCat + '\')"></i>';
         itemsHtmlContent += '</div>';
-        
         itemsHtmlContent += '</div>'; 
-        
       });
-      
     }
     
     document.getElementById('catChips').innerHTML = chipsHtmlContent; 
