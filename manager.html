@@ -2309,10 +2309,9 @@
       .then(res => res.json())
       .then(res => {
         if (res.status === 'success') {
-          if (res.status === 'success') {
-          // ✅ เปลี่ยนมาใช้ Toast สีเขียวสวยๆ ด้านล่างแทนการใช้ Alert ของเบราว์เซอร์
+          // ✅ ใช้ Toast แทน Alert เพื่อความหล่อเท่ (หายลาวแน่นอน!)
           showToast('✅ ปิดงานสำเร็จ! เคลียร์กราฟเรียบร้อย'); 
-          setTimeout(() => location.reload(), 1500); // รอให้แถบเขียวโชว์ 1.5 วิ แล้วค่อยรีโหลดหน้าเว็บ
+          setTimeout(() => location.reload(), 1500); 
         } else {
           alert('❌ สิทธิ์ไม่พอ หรือเกิดข้อผิดพลาด');
           btn.innerHTML = 'ยืนยันปิดงานเลย!';
@@ -2324,7 +2323,7 @@
         btn.innerHTML = 'ยืนยันปิดงานเลย!';
         btn.disabled = false;
       });
-  } // จบฟังก์ชันแค่ตรงนี้พอครับ!
+  }
 </script>
 </body>
 </html>
