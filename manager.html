@@ -2126,19 +2126,19 @@
     } 
   }
 
-  // 📄 ระบบรายงาน (Nitro Auto-PDF V6 - ร่างสมบูรณ์) ยัดแน่นเต็มแผ่น, หัวตารางครบ, ปิดหน้าต่างอัตโนมัติ
+  // 📄 ระบบรายงาน (Nitro Auto-PDF V5 - ร่างสมบูรณ์) จัดหน้าเป๊ะ, โหลดออโต้, ปิดเอง, ไม่มั่ว!
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดลำดับข้อมูล...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง PDF...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // 💡 1. กระจายรายการสินค้าออกเป็นแถวเดี่ยว (Flatten) เพื่อความแน่นและสวยงาม
+    // 💡 1. นำข้อมูลมา "ซอยแถว" (1 สินค้า = 1 แถว เพื่อให้เรียงได้แน่นและสวยที่สุด)
     let flatRows = [];
     allOrders.forEach(o => {
       let itemArray = o.items ? o.items.split('\n').filter(line => line.trim() !== '') : [];
@@ -2152,27 +2152,37 @@
       });
     });
 
-    // 💡 2. ตั้งค่าความหนาแน่น (26 แถวต่อหน้า คือค่าที่พอดีที่สุดสำหรับ A4 แนวนอน)
-    const ROWS_PER_PAGE = 26; 
+    // 💡 2. หั่นหน้ากระดาษ (ล็อคไว้ที่ 30 แถว/หน้า เพื่อไม่ให้ล้นกรอบ A4 แนวนอน)
+    const ROWS_PER_PAGE = 30;
     let pagesHtml = '';
 
     for (let i = 0; i < flatRows.length; i += ROWS_PER_PAGE) {
       if (i > 0) pagesHtml += '<div class="html2pdf__page-break"></div>';
 
-      pagesHtml += '<div class="pdf-container">'; 
+      // สร้างกรอบล็อคขนาด A4
+      pagesHtml += '<div class="a4-page">';
       
+      // หัวรายงาน
       if (i === 0) {
          pagesHtml += `<div class="header-title">COFFEETODAY - Branch Summary Report</div>`;
          pagesHtml += `<div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>`;
       } else {
-         pagesHtml += `<div style="height: 10px;"></div>`;
+         pagesHtml += `<div style="height: 20px;"></div>`;
       }
 
       pagesHtml += '<table>';
-      pagesHtml += '<thead><tr><th style="width:10%;">ID</th><th style="width:12%;">Date</th><th style="width:15%;">Branch</th><th style="width:15%;">Customer</th><th style="width:38%;">Items</th><th style="width:10%; text-align:center;">Status</th></tr></thead><tbody>';
+      pagesHtml += '<thead><tr>';
+      pagesHtml += '<th style="width:10%;">ID</th>';
+      pagesHtml += '<th style="width:12%;">Date</th>';
+      pagesHtml += '<th style="width:15%;">Branch</th>';
+      pagesHtml += '<th style="width:15%;">Customer</th>';
+      pagesHtml += '<th style="width:38%;">Items</th>';
+      pagesHtml += '<th style="width:10%; text-align:center;">Status</th>';
+      pagesHtml += '</tr></thead><tbody>';
 
       let chunk = flatRows.slice(i, i + ROWS_PER_PAGE);
       chunk.forEach((r, chunkIndex) => {
+        // 💡 3. ฟีเจอร์พิเศษ: ถ้าเป็นรายการแรกของออเดอร์ หรือ เป็นบรรทัดแรกของหน้ากระดาษใหม่ ให้โชว์ชื่อสาขาและเลขบิลกันงง
         let showData = r.isFirstOfOrder || chunkIndex === 0;
         let trClass = showData ? 'order-start' : 'order-cont';
         
@@ -2187,6 +2197,7 @@
       pagesHtml += '</tbody></table></div>';
     }
 
+    // 💡 4. โค้ด HTML ปลายทาง (ล็อค CSS ขนาด A4)
     let html = `
     <!DOCTYPE html>
     <html lang="th">
@@ -2194,21 +2205,28 @@
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
-        body { font-family: 'Sarabun', sans-serif; color: #333; margin: 0; padding: 0; background: #FFF; }
-        .pdf-container { width: 297mm; padding: 12mm 15mm; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Sarabun', sans-serif; color: #333; margin: 0; padding: 0; background: #e5e7eb; }
+        
+        /* 💡 ล็อคขนาดกระดาษ A4 แนวนอน ป้องกันการตัดหน้ามั่ว */
+        .a4-page { width: 297mm; min-height: 195mm; padding: 15mm; background: #FFF; margin: 0 auto; }
+        
         .header-title { font-family: 'Prompt', sans-serif; color: #A91D3A; text-align: center; font-size: 24px; margin-bottom: 5px; }
         .date-range { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { background-color: #F8F9FA !important; padding: 10px 8px; border-bottom: 2px solid #A91D3A; border-top: 1px solid #EEE; text-align: left; font-size: 12px; }
-        td { padding: 7px 8px; vertical-align: top; }
-        .order-start td { border-top: 1px solid #CCC; padding-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background-color: #F8F9FA !important; padding: 10px 8px; border-bottom: 2px solid #A91D3A; border-top: 1px solid #EEE; text-align: left; font-size: 13px; color: #333; }
+        td { padding: 6px 8px; vertical-align: top; }
+        
+        .order-start td { border-top: 1px solid #BBB; padding-top: 10px; }
         .order-cont td { padding-top: 4px; }
         .order-cont .td-items { border-top: 1px dashed #EEE; }
+
         .td-id { color: #A91D3A; font-weight: bold; }
-        .td-date { color: #666; font-size: 10px; }
+        .td-date { color: #666; font-size: 11px; }
         .td-branch { font-weight: bold; }
         .td-status { font-weight: bold; text-align: center; }
-        .html2pdf__page-break { page-break-before: always; height: 0; }
+        
+        .html2pdf__page-break { height: 0; page-break-before: always; margin: 0; border: 0; background: transparent; }
       </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
     </head>
@@ -2216,14 +2234,19 @@
       <div id="pdf-wrapper">${pagesHtml}</div>
       <script>
         window.onload = () => {
-          html2pdf().set({
-            margin: 0, 
-            filename: 'Branch_Summary_Report.pdf',
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-          }).from(document.getElementById('pdf-wrapper')).save().then(() => {
-            setTimeout(() => { window.close(); }, 1200);
+          const element = document.getElementById('pdf-wrapper');
+          const opt = {
+            margin:       0, 
+            filename:     'Branch_Summary_Report.pdf',
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak:    { mode: 'css' }
+          };
+          
+          // สั่งโหลด PDF อัตโนมัติ แล้วปิดหน้าต่างนี้ทิ้งทันที
+          html2pdf().set(opt).from(element).save().then(() => {
+            setTimeout(() => { window.close(); }, 1000);
           });
         };
       <\/script>
@@ -2231,8 +2254,9 @@
     </html>
     `;
 
-    const win = window.open('', '', 'width=1200,height=800');
+    const win = window.open('', '', 'width=1200,height=850');
     if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
+    
     win.document.write(html);
     win.document.close();
 
