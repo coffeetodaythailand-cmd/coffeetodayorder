@@ -401,7 +401,10 @@
       appId: "1:949270145151:web:ae6cbc6c5c5d54a502b74a"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    // 🛡️ ป้องกันเบราว์เซอร์ลูกค้าโหลด Firebase ซ้ำซ้อนจนเว็บขาว
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
   </script>
 </head>
@@ -589,7 +592,9 @@
 
     if (!elB.value.trim()) { elB.focus(); elB.scrollIntoView({ behavior: 'smooth', block: 'center' }); return showError("กรุณากรอกชื่อสาขา"); }
 
-    const name = elN.value.trim(), phone = elP.value.trim(), branch = elB.value.trim(), email = elE.value.trim();
+    // 🛡️ คลีนข้อมูล ป้องกันแฮกเกอร์ฝังโค้ด (XSS)
+    const cleanTxt = (txt) => txt.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c] || c));
+    const name = cleanTxt(elN.value.trim()), phone = cleanTxt(elP.value.trim()), branch = cleanTxt(elB.value.trim()), email = cleanTxt(elE.value.trim());
 
     // 2. ตรวจสอบรายการเมนูหลัก (ล็อคสต็อก)
     const qis = document.querySelectorAll('.qi'), sis = document.querySelectorAll('.si');
@@ -602,7 +607,10 @@
           return showError(`กรุณาใส่สต็อกของ: ${qis[i].dataset.n}`);
         }
         hasItem = true; 
-        d += `${qis[i].dataset.n} (เหลือ:${sis[i].value.trim()}, สั่ง:${qVal})\n`; 
+        // 🛡️ ล้างลูกน้ำและวงเล็บทิ้ง ป้องกันตีกับ Regex หลังบ้าน
+        let rawStock = sis[i].value.trim() || "-";
+        const stockVal = rawStock.replace(/[,()]/g, '').replace(/สั่ง:/g, '');
+        d += `${qis[i].dataset.n} (เหลือ:${stockVal}, สั่ง:${qVal})\n`; 
       }
     }
 
@@ -617,7 +625,11 @@
           return showError(`กรุณาใส่สต็อกของ: ${n}`);
         }
         hasItem = true; 
-        d += `${n} (เหลือ:${css[i].value.trim()}, สั่ง:${qVal})\n`;
+        // 🛡️ ล้างวงเล็บและลูกน้ำออกจากชื่อเมนูและสต็อก ป้องกันตีกับ Regex
+        let safeName = n.replace(/[,()]/g, '');
+        let rawStock = css[i].value.trim() || "-";
+        const stockVal = rawStock.replace(/[,()]/g, '').replace(/สั่ง:/g, '');
+        d += `${safeName} (เหลือ:${stockVal}, สั่ง:${qVal})\n`;
       }
     }
 
