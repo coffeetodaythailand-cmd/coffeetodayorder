@@ -1245,8 +1245,7 @@
                pV: topSorted.map(function(i) { return i[1]; }),
                bL: finalBLabels,
                bV: finalBVals,
-               sL: stockSorted.map(function(i) { return i[0]; }),
-               sV: stockSorted.map(function(i) { return i[1]; })
+               sStacked: d.analytics.charts.sStacked // 👈 สั่งให้มันหยิบข้อมูลกราฟแยกสี (Nitro Stacked) จากหลังบ้านมาใช้งานด้วย!
              };
           }
           
