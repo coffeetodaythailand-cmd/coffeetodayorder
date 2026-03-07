@@ -2126,127 +2126,103 @@
     } 
   }
 
-  // 📄 ระบบรายงาน (Nitro Auto-PDF V5 - ร่างสมบูรณ์) จัดหน้าเป๊ะ, โหลดออโต้, ปิดเอง, ไม่มั่ว!
+  // 📄 ระบบรายงาน (V6 Smart Auto-Fill) คำนวณพื้นที่ออโต้ ถมกระดาษแน่น หัวตารางมาครบ ปิดหน้าต่างเอง!
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง PDF...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดพื้นที่หน้ากระดาษ...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // 💡 1. นำข้อมูลมา "ซอยแถว" (1 สินค้า = 1 แถว เพื่อให้เรียงได้แน่นและสวยที่สุด)
-    let flatRows = [];
-    allOrders.forEach(o => {
-      let itemArray = o.items ? o.items.split('\n').filter(line => line.trim() !== '') : [];
-      if (itemArray.length === 0) itemArray = ['-'];
-      
-      itemArray.forEach((itemLine, index) => {
-        flatRows.push({
-          id: o.id, date: o.date, branch: o.branch, customer: o.customer, status: o.status,
-          item: itemLine, isFirstOfOrder: (index === 0)
-        });
-      });
-    });
-
-    // 💡 2. หั่นหน้ากระดาษ (ล็อคไว้ที่ 30 แถว/หน้า เพื่อไม่ให้ล้นกรอบ A4 แนวนอน)
-    const ROWS_PER_PAGE = 30;
+    // 🚀 ตั้งค่าความจุพื้นที่ต่อ 1 หน้า (A4 แนวนอนใส่ได้ประมาณ 38-40 หน่วยพื้นที่)
+    const MAX_PAGE_CAPACITY = 38; 
+    let currentLinesUsed = 0;
     let pagesHtml = '';
 
-    for (let i = 0; i < flatRows.length; i += ROWS_PER_PAGE) {
-      if (i > 0) pagesHtml += '<div class="html2pdf__page-break"></div>';
-
-      // สร้างกรอบล็อคขนาด A4
-      pagesHtml += '<div class="a4-page">';
-      
-      // หัวรายงาน
-      if (i === 0) {
-         pagesHtml += `<div class="header-title">COFFEETODAY - Branch Summary Report</div>`;
-         pagesHtml += `<div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>`;
-      } else {
-         pagesHtml += `<div style="height: 20px;"></div>`;
-      }
-
-      pagesHtml += '<table>';
-      pagesHtml += '<thead><tr>';
-      pagesHtml += '<th style="width:10%;">ID</th>';
-      pagesHtml += '<th style="width:12%;">Date</th>';
-      pagesHtml += '<th style="width:15%;">Branch</th>';
-      pagesHtml += '<th style="width:15%;">Customer</th>';
-      pagesHtml += '<th style="width:38%;">Items</th>';
-      pagesHtml += '<th style="width:10%; text-align:center;">Status</th>';
+    // ฟังก์ชันสร้างหัวตารางใหม่
+    function startNewTable(isFirst) {
+      if (!isFirst) pagesHtml += '</tbody></table><div class="html2pdf__page-break"></div>';
+      pagesHtml += '<table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; font-family: Sarabun, sans-serif;">';
+      pagesHtml += '<thead style="background: #F8F9FA;"><tr>';
+      pagesHtml += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>';
+      pagesHtml += '<th style="width:12%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>';
+      pagesHtml += '<th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>';
+      pagesHtml += '<th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Customer</th>';
+      pagesHtml += '<th style="width:38%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>';
+      pagesHtml += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>';
       pagesHtml += '</tr></thead><tbody>';
-
-      let chunk = flatRows.slice(i, i + ROWS_PER_PAGE);
-      chunk.forEach((r, chunkIndex) => {
-        // 💡 3. ฟีเจอร์พิเศษ: ถ้าเป็นรายการแรกของออเดอร์ หรือ เป็นบรรทัดแรกของหน้ากระดาษใหม่ ให้โชว์ชื่อสาขาและเลขบิลกันงง
-        let showData = r.isFirstOfOrder || chunkIndex === 0;
-        let trClass = showData ? 'order-start' : 'order-cont';
-        
-        let idCol = showData ? `<td class="td-id">${r.id}</td>` : '<td></td>';
-        let dateCol = showData ? `<td class="td-date">${r.date}</td>` : '<td></td>';
-        let branchCol = showData ? `<td class="td-branch">${r.branch}</td>` : '<td></td>';
-        let custCol = showData ? `<td>${r.customer}</td>` : '<td></td>';
-        let statusCol = showData ? `<td class="td-status">${r.status}</td>` : '<td></td>';
-
-        pagesHtml += `<tr class="${trClass}">` + idCol + dateCol + branchCol + custCol + `<td class="td-items">${r.item}</td>` + statusCol + `</tr>`;
-      });
-      pagesHtml += '</tbody></table></div>';
+      currentLinesUsed = 0;
     }
 
-    // 💡 4. โค้ด HTML ปลายทาง (ล็อค CSS ขนาด A4)
+    startNewTable(true);
+
+    allOrders.forEach((o) => {
+      let itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
+      // 🧠 คำนวณน้ำหนักพื้นที่: 1 ออเดอร์ = (Header 1.5 หน่วย) + (สินค้ากี่บรรทัดก็นับตามนั้น)
+      let orderWeight = 1.5 + itemLines.length;
+
+      // ถ้าพื้นที่ปัจจุบันบวกออเดอร์ใหม่แล้วล้นหน้า ให้ขึ้นหน้าใหม่และสร้างหัวตาราง
+      if (currentLinesUsed + orderWeight > MAX_PAGE_CAPACITY) {
+        startNewTable(false);
+      }
+
+      // วาดออเดอร์
+      itemLines.forEach((line, idx) => {
+        let isFirst = (idx === 0);
+        let trStyle = isFirst ? 'border-top: 1px solid #BBB;' : '';
+        let itemBorder = isFirst ? 'none' : '1px dashed #EEE';
+        
+        pagesHtml += `<tr style="${trStyle}">`;
+        pagesHtml += `<td style="padding:6px 8px; color:#A91D3A; font-weight:bold; vertical-align:top;">${isFirst ? o.id : ''}</td>`;
+        pagesHtml += `<td style="padding:6px 8px; color:#666; font-size:11px; vertical-align:top;">${isFirst ? o.date : ''}</td>`;
+        pagesHtml += `<td style="padding:6px 8px; font-weight:bold; vertical-align:top;">${isFirst ? o.branch : ''}</td>`;
+        pagesHtml += `<td style="padding:6px 8px; vertical-align:top;">${isFirst ? o.customer : ''}</td>`;
+        pagesHtml += `<td style="padding:6px 8px; border-top:${itemBorder}; vertical-align:top;">${line}</td>`;
+        pagesHtml += `<td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top;">${isFirst ? o.status : ''}</td>`;
+        pagesHtml += `</tr>`;
+      });
+
+      currentLinesUsed += orderWeight;
+    });
+
+    pagesHtml += '</tbody></table>';
+
     let html = `
     <!DOCTYPE html>
-    <html lang="th">
+    <html>
     <head>
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
-        * { box-sizing: border-box; }
-        body { font-family: 'Sarabun', sans-serif; color: #333; margin: 0; padding: 0; background: #e5e7eb; }
-        
-        /* 💡 ล็อคขนาดกระดาษ A4 แนวนอน ป้องกันการตัดหน้ามั่ว */
-        .a4-page { width: 297mm; min-height: 195mm; padding: 15mm; background: #FFF; margin: 0 auto; }
-        
+        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 15mm; }
         .header-title { font-family: 'Prompt', sans-serif; color: #A91D3A; text-align: center; font-size: 24px; margin-bottom: 5px; }
         .date-range { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { background-color: #F8F9FA !important; padding: 10px 8px; border-bottom: 2px solid #A91D3A; border-top: 1px solid #EEE; text-align: left; font-size: 13px; color: #333; }
-        td { padding: 6px 8px; vertical-align: top; }
-        
-        .order-start td { border-top: 1px solid #BBB; padding-top: 10px; }
-        .order-cont td { padding-top: 4px; }
-        .order-cont .td-items { border-top: 1px dashed #EEE; }
-
-        .td-id { color: #A91D3A; font-weight: bold; }
-        .td-date { color: #666; font-size: 11px; }
-        .td-branch { font-weight: bold; }
-        .td-status { font-weight: bold; text-align: center; }
-        
-        .html2pdf__page-break { height: 0; page-break-before: always; margin: 0; border: 0; background: transparent; }
+        .html2pdf__page-break { page-break-before: always; }
       </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
     </head>
     <body>
-      <div id="pdf-wrapper">${pagesHtml}</div>
+      <div id="pdf-area">
+        <div class="header-title">COFFEETODAY - Branch Summary Report</div>
+        <div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>
+        ${pagesHtml}
+      </div>
       <script>
         window.onload = () => {
-          const element = document.getElementById('pdf-wrapper');
+          const element = document.getElementById('pdf-area');
           const opt = {
-            margin:       0, 
+            margin:       10, 
             filename:     'Branch_Summary_Report.pdf',
             image:        { type: 'jpeg', quality: 1 },
             html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-            pagebreak:    { mode: 'css' }
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
           };
-          
-          // สั่งโหลด PDF อัตโนมัติ แล้วปิดหน้าต่างนี้ทิ้งทันที
           html2pdf().set(opt).from(element).save().then(() => {
-            setTimeout(() => { window.close(); }, 1000);
+            setTimeout(() => { window.close(); }, 1200);
           });
         };
       <\/script>
@@ -2256,7 +2232,6 @@
 
     const win = window.open('', '', 'width=1200,height=850');
     if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
-    
     win.document.write(html);
     win.document.close();
 
