@@ -1680,90 +1680,39 @@
   
   function renderCharts(analyticsData) {
     
-    if(bcObj !== null) { 
-      bcObj.destroy(); 
-    }
-    
-    if(pcObj !== null) { 
-      pcObj.destroy(); 
-    }
-    
-    if(scObj !== null) { 
-      scObj.destroy(); 
-    }
+    if(bcObj !== null) { bcObj.destroy(); }
+    if(pcObj !== null) { pcObj.destroy(); }
+    if(scObj !== null) { scObj.destroy(); }
     
     const ctxBar = document.getElementById('bC').getContext('2d');
     const ctxPie = document.getElementById('pC_Chart').getContext('2d');
     const ctxStock = document.getElementById('sC').getContext('2d');
-    
+
+    // วาดกราฟขายดี 10 อันดับ
     bcObj = new Chart(ctxBar, { 
       type: 'bar', 
       data: { 
         labels: analyticsData.pL, 
-        datasets: [{ 
-          label: 'ปริมาณการสั่งซื้อ', 
-          data: analyticsData.pV, 
-          backgroundColor: 'rgba(169, 29, 58, 0.9)', 
-          borderWidth: 0,
-          borderRadius: 12,
-          barPercentage: 0.55,
-          categoryPercentage: 0.85
-        }] 
+        datasets: [{ label: 'ปริมาณการสั่งซื้อ', data: analyticsData.pV, backgroundColor: 'rgba(169, 29, 58, 0.9)', borderWidth: 0, borderRadius: 12, barPercentage: 0.55, categoryPercentage: 0.85 }] 
       }, 
-      options: { 
-        maintainAspectRatio: false, 
-        indexAxis: 'y', 
-        plugins: { 
-          legend: { display: false }
-        }, 
-        scales: { 
-          x: { 
-            grid: { display: false },
-            title: { display: true, text: 'ปริมาณสั่ง (ชิ้น/แก้ว)', font: { family: 'Prompt', size: 10 } } 
-          },
-          y: {
-            grid: { display: false },
-            ticks: { font: { family: 'Sarabun', size: 11 } }
-          }
-        } 
-      } 
+      options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, title: { display: true, text: 'ปริมาณสั่ง (ชิ้น/แก้ว)', font: { family: 'Prompt', size: 10 } } }, y: { grid: { display: false }, ticks: { font: { family: 'Sarabun', size: 11 } } } } } 
     });
-    
+
+    // วาดกราฟวงกลม
     pcObj = new Chart(ctxPie, { 
       type: 'doughnut', 
       data: { 
         labels: analyticsData.bL, 
-        datasets: [{ 
-          data: analyticsData.bV, 
-          backgroundColor: ['#2D3133', '#A91D3A', '#3498db', '#95a5a6', '#f1c40f', '#e67e22', '#16a085'],
-          hoverOffset: 15,
-          borderWidth: 4,
-          borderColor: '#FFFFFF'
-        }] 
+        datasets: [{ data: analyticsData.bV, backgroundColor: ['#2D3133', '#A91D3A', '#3498db', '#95a5a6', '#f1c40f', '#e67e22', '#16a085'], hoverOffset: 15, borderWidth: 4, borderColor: '#FFFFFF' }] 
       }, 
-      options: { 
-        maintainAspectRatio: false, 
-        cutout: '82%',
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Sarabun', size: 10 } } }
-        }
-      } 
+      options: { maintainAspectRatio: false, cutout: '82%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Sarabun', size: 10 } } } } } 
     });
     
-    // 🚀 1. ตั้งค่าความสูงกราฟให้ขยายตามจำนวนสาขา (เพื่อให้แท่งหนาสม่ำเสมอ)
-    const branchCount = analyticsData.sStacked.labels.length;
+    // 🚀 วาดกราฟวิเคราะห์สต็อก (NITRO STACKED - แท่งใหญ่ & จิ้มคลีน)
+    // คำนวณความสูงให้แท่งใหญ่เสมอ
+    const branchesList = analyticsData.sStacked.labels || [];
     const chartDiv = document.getElementById('sC').parentElement;
-    chartDiv.style.height = Math.max(300, branchCount * 70) + "px"; 
-
-    // 🚀 1. ปรับความสูงพื้นที่กราฟอัตโนมัติ (แท่งจะหนาสม่ำเสมอ ไม่โดนบีบ)
-    const branchCount = analyticsData.sStacked.labels.length;
-    const chartContainer = document.getElementById('sC').parentElement;
-    chartContainer.style.height = Math.max(300, branchCount * 65) + "px"; // 1 สาขาเอาไปเลย 65px
-
-    // 🚀 1. ขยายพื้นที่กราฟตามจำนวนสาขา (แท่งจะหนา ไม่โดนบีบ)
-    const branchCount = analyticsData.sStacked.labels.length;
-    const chartDiv = document.getElementById('sC').parentElement;
-    chartDiv.style.height = Math.max(300, branchCount * 65) + "px"; 
+    chartDiv.style.height = Math.max(300, branchesList.length * 65) + "px"; 
 
     scObj = new Chart(ctxStock, {
       type: 'bar',
@@ -1771,26 +1720,21 @@
       options: {
         maintainAspectRatio: false,
         indexAxis: 'y', 
-        barThickness: 40, // 👈 แท่งใหญ่หนาสะใจ
+        barThickness: 40, // แท่งหนาสะใจ
         plugins: {
           legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Prompt' } } },
           tooltip: {
             enabled: true,
-            mode: 'nearest', // 👈 จิ้มสีไหน โชว์แค่ชิ้นนั้น (เหมือนวงกลมเป๊ะ!)
+            mode: 'nearest', // จิ้มก้อนไหน โชว์ก้อนนั้น
             intersect: true, 
             backgroundColor: 'rgba(0,0,0,0.9)',
             padding: 15,
             callbacks: {
               label: function(context) {
-                // ✅ กรองออก: ถ้าเหลือ 0 ไม่ต้องโชว์ให้รกตาบอส
-                if (context.raw <= 0) return null; 
-                
-                let label = ' ' + context.dataset.label + ': ' + context.raw + ' ชิ้น';
-                // ✅ เพิ่มคำเตือนของใกล้หมด (ถ้าเหลือ <= 5)
-                if (context.raw <= 5) {
-                  label += ' (⚠️ ใกล้หมดแล้ว!!)';
-                }
-                return label;
+                if (context.raw <= 0) return null; // ซ่อนรายการที่เป็น 0
+                let labelText = ' ' + context.dataset.label + ': ' + context.raw + ' ชิ้น';
+                if (context.raw <= 5) labelText += ' (⚠️ ใกล้หมด!!)'; // แจ้งเตือน
+                return labelText;
               }
             }
           }
