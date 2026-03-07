@@ -1760,41 +1760,35 @@
     const chartContainer = document.getElementById('sC').parentElement;
     chartContainer.style.height = Math.max(300, branchCount * 65) + "px"; // 1 สาขาเอาไปเลย 65px
 
+    // 🚀 1. ขยายพื้นที่กราฟตามจำนวนสาขา (แท่งจะหนา ไม่โดนบีบ)
+    const branchCount = analyticsData.sStacked.labels.length;
+    const chartDiv = document.getElementById('sC').parentElement;
+    chartDiv.style.height = Math.max(300, branchCount * 65) + "px"; 
+
     scObj = new Chart(ctxStock, {
       type: 'bar',
       data: analyticsData.sStacked,
       options: {
         maintainAspectRatio: false,
         indexAxis: 'y', 
-        barThickness: 40, // 👈 แท่งใหญ่หนาสะใจตามสั่ง
+        barThickness: 40, // 👈 แท่งใหญ่หนาสะใจ
         plugins: {
-          legend: { 
-            display: true, 
-            position: 'bottom',
-            labels: { 
-              boxWidth: 8, 
-              font: { size: 10, family: 'Prompt' },
-              // ✅ กรองแถบสีด้านล่าง: โชว์เฉพาะสินค้าที่มียอดเหลือจริงๆ
-              filter: (item, chart) => chart.data.datasets[item.datasetIndex].data.some(v => v > 0)
-            }
-          },
+          legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Prompt' } } },
           tooltip: {
             enabled: true,
-            mode: 'nearest', // 👈 จิ้มก้อนสีไหน โชว์แค่ก้อนสีนั้น (เหมือนวงกลม)
+            mode: 'nearest', // 👈 จิ้มสีไหน โชว์แค่ชิ้นนั้น (เหมือนวงกลมเป๊ะ!)
             intersect: true, 
             backgroundColor: 'rgba(0,0,0,0.9)',
             padding: 15,
-            titleFont: { size: 14, family: 'Prompt' },
-            bodyFont: { size: 13 },
             callbacks: {
               label: function(context) {
-                // ✅ แก้จุดมั่ว: ถ้าสินค้าเหลือ 0 จะไม่โชว์ในกล่องข้อมูลเด็ดขาด
+                // ✅ กรองออก: ถ้าเหลือ 0 ไม่ต้องโชว์ให้รกตาบอส
                 if (context.raw <= 0) return null; 
                 
                 let label = ' ' + context.dataset.label + ': ' + context.raw + ' ชิ้น';
-                // ✅ เพิ่มข้อความเตือนของใกล้หมด (ถ้าเหลือ < 5)
+                // ✅ เพิ่มคำเตือนของใกล้หมด (ถ้าเหลือ <= 5)
                 if (context.raw <= 5) {
-                  label += ' (⚠️ ใกล้หมด!)';
+                  label += ' (⚠️ ใกล้หมดแล้ว!!)';
                 }
                 return label;
               }
@@ -1802,7 +1796,7 @@
           }
         },
         scales: {
-          x: { stacked: true, grid: { color: '#F0F0F0' }, title: { display: true, text: 'รวมสินค้าคงเหลือ (ชิ้น)', font: { size: 10 } } },
+          x: { stacked: true, grid: { color: '#F0F0F0' }, title: { display: true, text: 'สินค้าคงเหลือ (ชิ้น)', font: { size: 10 } } },
           y: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Prompt', size: 12, weight: 'bold' } } }
         }
       }
