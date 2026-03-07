@@ -568,7 +568,26 @@
     input:checked + .slider:before { 
       transform: translateX(22px); 
     }
+/* สไตล์ป้ายสถานะในหน้าจัดการ */
+    .status-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .status-active { background: #dcfce7; color: #15803d; }
+    .status-soldout { background: #fef3c7; color: #b45309; }
+    .status-inactive { background: #fee2e2; color: #b91c1c; }
 
+    .status-select {
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-family: 'Prompt';
+      font-size: 12px;
+      outline: none;
+    }
     /*
       =========================================================================
       SKELETON LOADING EFFECTS
@@ -1808,7 +1827,11 @@
     // 2. สินค้า (ขยายช่องเลขและเพิ่มปุ่มลบถาวร)
     if(currentCat && menuData.grouped[currentCat]) {
       menuData.grouped[currentCat].forEach((p, idx) => {
-        const isActive = (p.status === 'Active' ? 'checked' : '');
+        // 🚀 เปลี่ยนจากการติ๊กถูก เป็นตัวเลือก 3 สถานะ
+        const s = p.status || 'Active';
+        let statusClass = (s === 'Active' ? 'status-active' : (s === 'SoldOut' ? 'status-soldout' : 'status-inactive'));
+        let statusText = (s === 'Active' ? 'ปกติ' : (s === 'SoldOut' ? 'ของหมด' : 'ซ่อนอยู่'));
+
         itemsHtml += `
           <div class="cat-item" draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})" style="display:flex; justify-content:space-between; padding:18px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:grab;">
             <div style="display:flex; align-items:center; gap:18px;">
@@ -1817,13 +1840,19 @@
                 style="width:55px; height:35px; border:2px solid var(--red); border-radius:10px; text-align:center; font-weight:bold; font-size:16px; color:var(--red); background:white;">
               <div>
                 <span style="font-weight:600; color:#333; font-size:17px;">${p.name}</span>
-                <div style="font-size:10px; color:#AAA; margin-top:3px;">ID: ${p.rowId}</div>
+                <div style="margin-top:5px;">
+                  <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
               </div>
             </div>
-            <div style="display:flex; gap:25px; align-items:center;">
-              <label class="switch"><input type="checkbox" ${isActive} onchange="toggleItem('${p.rowId}', '${p.name}', '${currentCat}', this)"><span class="slider"></span></label>
+            <div style="display:flex; gap:15px; align-items:center;">
+              <select class="status-select" onchange="toggleItem('${p.rowId}', '${p.name}', '${currentCat}', this.value)">
+                <option value="Active" ${s === 'Active' ? 'selected' : ''}>ปกติ</option>
+                <option value="SoldOut" ${s === 'SoldOut' ? 'selected' : ''}>ของหมด</option>
+                <option value="Inactive" ${s === 'Inactive' ? 'selected' : ''}>ซ่อนไว้</option>
+              </select>
               <i class="fas fa-edit" style="color:#CCC; cursor:pointer; font-size:20px;" onclick="openProdModal(${p.rowId}, '${p.name}', '${currentCat}')"></i>
-              <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:20px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#EEE'" onclick="prepareDelete('prod', ${idx}, '${p.name}')"></i>
+              <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:20px;" onclick="prepareDelete('prod', ${idx}, '${p.name}')"></i>
             </div>
           </div>`;
       });
@@ -1968,27 +1997,23 @@
     renderMenuAccordion(menuObj); 
   }
 
-  function toggleItem(rowId, productName, category, checkboxElement) { 
-    
+  function toggleItem(rowId, productName, category, newStatus) { 
     const adminToken = localStorage.getItem(TOKEN_KEY);
-    const updatedStatus = (checkboxElement.checked ? 'Active' : 'Inactive');
     
+    // ส่งสถานะใหม่ (Active/SoldOut/Inactive) ไปที่เซิร์ฟเวอร์
     const updateUrl = GAS_URL + 
                       '?action=updateProduct' + 
                       '&id=' + rowId + 
                       '&name=' + encodeURIComponent(productName) + 
                       '&cat=' + encodeURIComponent(category) + 
-                      '&status=' + updatedStatus + 
+                      '&status=' + newStatus + 
                       '&token=' + adminToken;
-    
+
     fetch(updateUrl)
-      .then(function(res) { 
-        return res.json(); 
-      })
-      .then(function(newMenuData) { 
+      .then(res => res.json())
+      .then(newMenuData => { 
         renderMenuAccordion(newMenuData); 
-        const statusMsg = (checkboxElement.checked ? "✅ เปิดรับออเดอร์เมนูนี้แล้ว!" : "🌑 ปิดรับออเดอร์เมนูนี้ชั่วคราว");
-        showToast(statusMsg); 
+        showToast("✅ อัปเดตสถานะเป็น: " + newStatus); 
       });
   }
 
