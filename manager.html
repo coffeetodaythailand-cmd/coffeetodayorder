@@ -2126,29 +2126,30 @@
     } 
   }
 
- // 📄 ระบบรายงาน (V11 Landscape Pro) - แนวนอน, หัวตารางครบทุกหน้า, เลขหน้าตรงเป๊ะ, โหลดแล้วปิดเอง
+ // 📄 ระบบรายงาน (V12 Final Landscape) - ถมพื้นที่แน่น, หัวตารางครบทุกหน้า, เลขหน้าตรงกลาง, โหลดแล้วปิดเอง
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังรันเลขหน้า...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมข้อมูล...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น", eDate = document.getElementById('eDate').value || "ปัจจุบัน";
     let pagesHtml = '', currentWeight = 0, isFirstPage = true, pageNum = 1;
     
-    // 🚀 ความจุสำหรับแนวนอน (A4 แนวนอนใส่ได้ประมาณ 32-34 หน่วยพื้นที่)
-    const PAGE_LIMIT = 32; 
+    // 🚀 เพิ่มความจุหน้ากระดาษเพื่อให้ถมพื้นที่ได้แน่นขึ้น (ประมาณ 40 หน่วยสำหรับแนวนอน)
+    const PAGE_LIMIT = 40; 
 
     function startNewPageTable() {
       if (!isFirstPage) {
-        // ✅ ใส่เลขหน้าแผ่นปัจจุบันที่มุมขวาล่าง ก่อนจะปิดตารางและขึ้นหน้าใหม่
-        pagesHtml += `</tbody></table><div style="text-align:right; font-size:10px; color:#999; margin-top:5px; font-family:Sarabun;">หน้าที่ ${pageNum}</div></div><div class="page-break"></div>`;
+        // ✅ ปรับเลขหน้าให้อยู่ตรงกลางล่าง และเผื่อระยะห่างให้สวยงาม
+        pagesHtml += `</tbody></table><div style="text-align:center; font-size:11px; color:#888; margin-top:25px; font-family:Sarabun;">หน้าที่ ${pageNum}</div></div><div class="page-break"></div>`;
         pageNum++;
       }
       
-      pagesHtml += `<div class="report-container">
-        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:5px; font-family:Sarabun, sans-serif;">
+      // ✅ เพิ่ม Padding-top เพื่อไม่ให้หัวตารางชิดขอบกระดาษเกินไปตอนปรินต์
+      pagesHtml += `<div class="report-container" style="padding-top:15px;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:10px; font-family:Sarabun, sans-serif;">
         <thead style="background:#F8F9FA;"><tr>
           <th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>
           <th style="width:12%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>
@@ -2166,8 +2167,8 @@
 
     allOrders.forEach(o => {
       const itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
-      // 🧠 ชั่งน้ำหนักออเดอร์: 1.5 (ส่วนหัว) + จำนวนรายการสินค้า
-      const oWeight = 1.5 + itemLines.length;
+      // 🧠 ชั่งน้ำหนัก: ปรับให้เบาลง (1.2) เพื่อให้ระบบยัดออเดอร์ถัดไปขยับขึ้นมาต่อกันได้แน่นขึ้น
+      const oWeight = 1.2 + itemLines.length;
 
       if (currentWeight + oWeight > PAGE_LIMIT && currentWeight > 0) {
         startNewPageTable();
@@ -2181,22 +2182,22 @@
           <td style="padding:6px 8px; font-weight:bold; vertical-align:top;">${isFirst ? o.branch : ''}</td>
           <td style="padding:6px 8px; vertical-align:top;">${isFirst ? o.customer : ''}</td>
           <td style="padding:6px 8px; border-top:${isFirst ? 'none' : '1px dashed #EEE'}; vertical-align:top; line-height:1.4;">${line}</td>
-          <td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top;">${isFirst ? o.status : ''}</td>
+          <td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top; font-size:10px;">${isFirst ? o.status : ''}</td>
         </tr>`;
       });
       currentWeight += oWeight;
     });
 
-    // ปิดตารางสุดท้าย พร้อมเลขหน้าแผ่นสุดท้าย
-    pagesHtml += `</tbody></table><div style="text-align:right; font-size:10px; color:#999; margin-top:5px; font-family:Sarabun;">หน้าที่ ${pageNum}</div></div>`;
+    // ปิดตารางแผ่นสุดท้าย พร้อมเลขหน้าตรงกลาง
+    pagesHtml += `</tbody></table><div style="text-align:center; font-size:11px; color:#888; margin-top:25px; font-family:Sarabun;">หน้าที่ ${pageNum}</div></div>`;
     
-    // ✅ กำจัดเศษตัวตัดหน้าถ้ามีเหลือท้ายไฟล์
+    // ลบตัวตัดหน้าส่วนเกิน
     pagesHtml = pagesHtml.replace(/<div class="page-break"><\/div>\s*$/, '');
 
     const html = `<html><head><meta charset="UTF-8"><style>
       @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
       body { font-family:'Sarabun', sans-serif; color:#333; margin:0; padding:0; }
-      #pdf-content { padding:10mm; }
+      #pdf-content { padding: 10mm 15mm; }
       .header-title { font-family:'Prompt', sans-serif; color:#A91D3A; text-align:center; font-size:24px; margin-bottom:5px; }
       .date-range { text-align:center; color:#666; font-size:14px; margin-bottom:20px; }
       .page-break { page-break-before:always; height:0; margin:0; padding:0; }
