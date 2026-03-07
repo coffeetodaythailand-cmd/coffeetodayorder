@@ -2126,94 +2126,93 @@
     } 
   }
 
- // 📄 ระบบรายงาน (V12 Final Landscape) - ถมพื้นที่แน่น, หัวตารางครบทุกหน้า, เลขหน้าตรงกลาง, โหลดแล้วปิดเอง
+ // 📄 ระบบรายงาน (V13 Master Landscape) - ล็อคหน้าเป๊ะ, หัวตารางครบทุกหน้า, เลขหน้าตรงแผ่น, ชิดขอบล่าง
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมข้อมูล...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดหน้ากระดาษ...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น", eDate = document.getElementById('eDate').value || "ปัจจุบัน";
-    let pagesHtml = '', currentWeight = 0, isFirstPage = true, pageNum = 1;
     
-    // 🚀 เพิ่มความจุหน้ากระดาษเพื่อให้ถมพื้นที่ได้แน่นขึ้น (ประมาณ 40 หน่วยสำหรับแนวนอน)
-    const PAGE_LIMIT = 40; 
+    // 🚀 ตั้งค่าการคำนวณพื้นที่ (สำหรับแนวนอน A4)
+    const PAGE_HEIGHT_LIMIT = 32; // จำนวนหน่วยพื้นที่ต่อ 1 หน้า
+    let pagesHtml = '', currentWeight = 0, pageNum = 1, orderBuffer = [];
 
-    function startNewPageTable() {
-      if (!isFirstPage) {
-        // ✅ ปรับเลขหน้าให้อยู่ตรงกลางล่าง และเผื่อระยะห่างให้สวยงาม
-        pagesHtml += `</tbody></table><div style="text-align:center; font-size:11px; color:#888; margin-top:25px; font-family:Sarabun;">หน้าที่ ${pageNum}</div></div><div class="page-break"></div>`;
-        pageNum++;
-      }
-      
-      // ✅ เพิ่ม Padding-top เพื่อไม่ให้หัวตารางชิดขอบกระดาษเกินไปตอนปรินต์
-      pagesHtml += `<div class="report-container" style="padding-top:15px;">
-        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:10px; font-family:Sarabun, sans-serif;">
-        <thead style="background:#F8F9FA;"><tr>
-          <th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>
-          <th style="width:12%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>
-          <th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>
-          <th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Customer</th>
-          <th style="width:38%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>
-          <th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>
-        </tr></thead><tbody>`;
-      
-      currentWeight = 0;
-      isFirstPage = false;
+    // ฟังก์ชันสร้างโครงสร้างหน้ากระดาษ 1 แผ่น
+    function buildPhysicalPage(ordersInPage, isLast) {
+      let tableRows = '';
+      ordersInPage.forEach(o => {
+        const itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
+        itemLines.forEach((line, idx) => {
+          const isFirst = (idx === 0);
+          tableRows += `<tr style="page-break-inside:avoid; ${isFirst ? 'border-top: 1px solid #CCC;' : ''}">
+            <td style="padding:6px 8px; color:#A91D3A; font-weight:bold; vertical-align:top; width:10%;">${isFirst ? o.id : ''}</td>
+            <td style="padding:6px 8px; color:#666; font-size:10px; vertical-align:top; width:12%;">${isFirst ? o.date : ''}</td>
+            <td style="padding:6px 8px; font-weight:bold; vertical-align:top; width:15%;">${isFirst ? o.branch : ''}</td>
+            <td style="padding:6px 8px; vertical-align:top; width:15%;">${isFirst ? o.customer : ''}</td>
+            <td style="padding:6px 8px; border-top:${isFirst ? 'none' : '1px dashed #EEE'}; vertical-align:top; line-height:1.4; width:38%;">${line}</td>
+            <td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top; font-size:10px; width:10%;">${isFirst ? o.status : ''}</td>
+          </tr>`;
+        });
+      });
+
+      // สร้างแผ่นกระดาษที่มีความสูงคงที่ (Fixed Height Container)
+      pagesHtml += `
+        <div class="physical-page" style="position:relative; height:185mm; padding-top:15mm; page-break-after:always;">
+          ${pageNum === 1 ? `<div style="text-align:center; margin-bottom:15px;"><h2 style="margin:0; color:#A91D3A; font-family:Prompt;">COFFEETODAY - Branch Summary Report</h2><p style="font-size:13px; color:#666; margin:5px 0;">ช่วงวันที่: ${sDate} - ${eDate}</p></div>` : ''}
+          <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:Sarabun, sans-serif;">
+            <thead style="background:#F8F9FA;">
+              <tr>
+                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Customer</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+          <div style="position:absolute; bottom:5mm; left:0; width:100%; text-align:center; font-size:11px; color:#999; font-family:Sarabun;">หน้าที่ ${pageNum}</div>
+        </div>`;
+      pageNum++;
     }
 
-    startNewPageTable();
-
-    allOrders.forEach(o => {
+    // กระบวนการแบ่งออเดอร์ลงหน้ากระดาษ
+    allOrders.forEach((o, index) => {
       const itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
-      // 🧠 ชั่งน้ำหนัก: ปรับให้เบาลง (1.2) เพื่อให้ระบบยัดออเดอร์ถัดไปขยับขึ้นมาต่อกันได้แน่นขึ้น
-      const oWeight = 1.2 + itemLines.length;
+      const oWeight = 1.5 + itemLines.length;
 
-      if (currentWeight + oWeight > PAGE_LIMIT && currentWeight > 0) {
-        startNewPageTable();
+      if (currentWeight + oWeight > PAGE_HEIGHT_LIMIT && orderBuffer.length > 0) {
+        buildPhysicalPage(orderBuffer, false);
+        orderBuffer = [];
+        currentWeight = 0;
       }
-
-      itemLines.forEach((line, idx) => {
-        const isFirst = (idx === 0);
-        pagesHtml += `<tr style="page-break-inside:avoid; ${isFirst ? 'border-top: 1px solid #CCC;' : ''}">
-          <td style="padding:6px 8px; color:#A91D3A; font-weight:bold; vertical-align:top;">${isFirst ? o.id : ''}</td>
-          <td style="padding:6px 8px; color:#666; font-size:10px; vertical-align:top;">${isFirst ? o.date : ''}</td>
-          <td style="padding:6px 8px; font-weight:bold; vertical-align:top;">${isFirst ? o.branch : ''}</td>
-          <td style="padding:6px 8px; vertical-align:top;">${isFirst ? o.customer : ''}</td>
-          <td style="padding:6px 8px; border-top:${isFirst ? 'none' : '1px dashed #EEE'}; vertical-align:top; line-height:1.4;">${line}</td>
-          <td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top; font-size:10px;">${isFirst ? o.status : ''}</td>
-        </tr>`;
-      });
+      orderBuffer.push(o);
       currentWeight += oWeight;
-    });
 
-    // ปิดตารางแผ่นสุดท้าย พร้อมเลขหน้าตรงกลาง
-    pagesHtml += `</tbody></table><div style="text-align:center; font-size:11px; color:#888; margin-top:25px; font-family:Sarabun;">หน้าที่ ${pageNum}</div></div>`;
-    
-    // ลบตัวตัดหน้าส่วนเกิน
-    pagesHtml = pagesHtml.replace(/<div class="page-break"><\/div>\s*$/, '');
+      if (index === allOrders.length - 1) {
+        buildPhysicalPage(orderBuffer, true);
+      }
+    });
 
     const html = `<html><head><meta charset="UTF-8"><style>
       @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
-      body { font-family:'Sarabun', sans-serif; color:#333; margin:0; padding:0; }
-      #pdf-content { padding: 10mm 15mm; }
-      .header-title { font-family:'Prompt', sans-serif; color:#A91D3A; text-align:center; font-size:24px; margin-bottom:5px; }
-      .date-range { text-align:center; color:#666; font-size:14px; margin-bottom:20px; }
-      .page-break { page-break-before:always; height:0; margin:0; padding:0; }
+      body { margin:0; padding:0; background:#FFF; }
+      .physical-page { box-sizing: border-box; }
+      table { table-layout: fixed; width: 100%; }
+      th, td { word-wrap: break-word; }
     </style><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head>
-    <body><div id="pdf-content">
-      <div class="header-title">COFFEETODAY - Branch Summary Report</div>
-      <div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>
-      ${pagesHtml}
-    </div><script>window.onload=()=>{
+    <body><div id="pdf-content">${pagesHtml}</div><script>window.onload=()=>{
       html2pdf().set({ 
         margin:0, 
         filename:'Branch_Summary_Report.pdf', 
         html2canvas:{scale:2, useCORS:true}, 
         jsPDF:{unit:'mm', format:'a4', orientation:'landscape'}, 
         pagebreak:{mode:'css'} 
-      }).from(document.getElementById('pdf-content')).save().then(()=>setTimeout(()=>window.close(), 1000));
+      }).from(document.getElementById('pdf-content')).save().then(()=>setTimeout(()=>window.close(), 1200));
     };<\/script></body></html>`;
 
     const win = window.open('', '', 'width=1200,height=850');
