@@ -2126,96 +2126,59 @@
     } 
   }
 
-  // 📄 ระบบรายงาน PDF - Fix: ปลดล็อกปุ่มให้กดซ้ำได้ + จัดหน้า 12 แถว
-  // 📄 ระบบรายงาน PDF (Nitro V2) - จัดหน้าอัตโนมัติ, ข้อความไม่เบียด, ไม่มีหน้าต่างเด้งกวนใจ
+  // 📄 ระบบรายงาน PDF (Nitro V3 - ตัวจบ) เลิกหั่นตาราง, ให้ระบบคำนวณหน้ากระดาษและหัวตารางเอง
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง PDF...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
-
-    // ✅ 1. โครงสร้างตารางหลัก (ใช้ตารางเดียวให้ระบบตัดหน้าเอง)
-    let htmlString = `
-    <div style="padding: 20px; font-family: sans-serif; color: #333; background: #FFF;">
-      <h2 style="color: #A91D3A; margin-bottom: 5px;">Branch Summary Report</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 20px;">ช่วงวันที่: ${sDate} - ${eDate}</p>
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;">
-        <thead style="display: table-header-group; background: #F8F9FA;">
-          <tr>
-            <th style="padding: 12px; border-bottom: 2px solid #A91D3A; text-align: left; width: 12%;">ID</th>
-            <th style="padding: 12px; border-bottom: 2px solid #A91D3A; text-align: left; width: 14%;">Date</th>
-            <th style="padding: 12px; border-bottom: 2px solid #A91D3A; text-align: left; width: 14%;">Branch</th>
-            <th style="padding: 12px; border-bottom: 2px solid #A91D3A; text-align: left; width: 15%;">Customer</th>
-            <th style="padding: 12px; border-bottom: 2px solid #A91D3A; text-align: left; width: 35%;">Items</th>
-            <th style="padding: 12px; border-bottom: 2px solid #A91D3A; text-align: center; width: 10%;">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
+    let tablesContent = '';
+    
+    // ✅ 1. สร้างตารางเดียวแบบยาวๆ ไม่ต้องหั่นทีละ 7 บรรทัดแล้ว
+    tablesContent += '<table style="width:100%; border-collapse:collapse; border:1px solid #EEE; margin-bottom:20px; font-family:sans-serif;">';
+    
+    // ✅ 2. ใช้ display: table-header-group เพื่อบังคับให้หัวตารางตามไปแสดงผลทุกครั้งที่ขึ้นหน้าใหม่
+    tablesContent += '<thead style="display:table-header-group; background:#F8F9FA;"><tr>';
+    tablesContent += '<th style="width:10%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">ID</th>';
+    tablesContent += '<th style="width:12%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Date</th>';
+    tablesContent += '<th style="width:15%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Branch</th>';
+    tablesContent += '<th style="width:15%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Customer</th>';
+    tablesContent += '<th style="width:38%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Items</th>';
+    tablesContent += '<th style="width:10%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:center;">Status</th>';
+    tablesContent += '</tr></thead><tbody>';
 
     allOrders.forEach(o => {
-      // ✅ 2. จัดระเบียบรายการสินค้า (แยกบรรทัด มีเส้นคั่นบางๆ ให้อ่านง่าย)
-      let itemsFormatted = "";
-      if (o.items) {
-         let itemList = o.items.split('\n');
-         itemList.forEach(item => {
-            if(item.trim() !== "") {
-               itemsFormatted += `<div style="margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #EEE; line-height: 1.5;">${item}</div>`;
-            }
-         });
-      } else {
-         itemsFormatted = "-";
-      }
-
-      // ✅ 3. ใส่ page-break-inside: avoid เพื่อไม่ให้แถวโดนตัดครึ่งตอนขึ้นหน้าใหม่
-      htmlString += `
-          <tr style="page-break-inside: avoid;">
-            <td style="padding: 12px 8px; border-bottom: 1px solid #F0F0F0; color: #A91D3A; font-weight: bold; vertical-align: top; word-wrap: break-word;">${o.id}</td>
-            <td style="padding: 12px 8px; border-bottom: 1px solid #F0F0F0; color: #666; vertical-align: top; word-wrap: break-word;">${o.date}</td>
-            <td style="padding: 12px 8px; border-bottom: 1px solid #F0F0F0; font-weight: bold; vertical-align: top; word-wrap: break-word;">${o.branch}</td>
-            <td style="padding: 12px 8px; border-bottom: 1px solid #F0F0F0; vertical-align: top; word-wrap: break-word;">${o.customer}</td>
-            <td style="padding: 12px 8px; border-bottom: 1px solid #F0F0F0; vertical-align: top; word-wrap: break-word;">${itemsFormatted}</td>
-            <td style="padding: 12px 8px; border-bottom: 1px solid #F0F0F0; font-weight: bold; text-align: center; vertical-align: top; word-wrap: break-word;">${o.status}</td>
-          </tr>
-      `;
+      // ปัดบรรทัดรายการสินค้า
+      let itemsFormatted = o.items ? o.items.replace(/\n/g, '<br><br>') : '-';
+      
+      // ✅ 3. ใส่ page-break-inside: avoid เพื่อป้องกันไม่ให้ 1 ออเดอร์ถูกตัดขาดครึ่งกลางกระดาษ
+      tablesContent += '<tr style="page-break-inside: avoid;">';
+      tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; color:#A91D3A; font-weight:bold; vertical-align:top;">${o.id}</td>`;
+      tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; color:#666; vertical-align:top;">${o.date}</td>`;
+      tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; font-weight:bold; vertical-align:top;">${o.branch}</td>`;
+      tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; vertical-align:top;">${o.customer}</td>`;
+      tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; vertical-align:top; line-height:1.4;">${itemsFormatted}</td>`;
+      tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; font-weight:bold; text-align:center; vertical-align:top;">${o.status}</td>`;
+      tablesContent += '</tr>';
     });
+    
+    tablesContent += '</tbody></table>';
 
-    htmlString += `
-        </tbody>
-      </table>
-    </div>
-    `;
+    // กลับมาใช้ Pop-up ตัวเดิมที่ชัวร์กว่า
+    const win = window.open('', '', 'width=1100,height=850');
+    if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
+    
+    // ✅ เพิ่ม pagebreak mode: 'css' เข้าไปในตั้งค่าเพื่อให้ระบบรองรับคำสั่งหลบการตัดคำ
+    win.document.write(`<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head><body style="padding:20px; font-family:sans-serif;"><h2>Branch Summary Report</h2><p>ช่วงวันที่: ${sDate} - ${eDate}</p>${tablesContent}<script>window.onload=()=>{ html2pdf().set({margin: 10, filename: 'Report.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2 }, pagebreak: { mode: ['css', 'legacy'] }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }}).from(document.body).save().then(()=>{setTimeout(()=>window.close(), 1500)}); }<\/script></body></html>`);
+    win.document.close();
 
-    // ✅ 4. สร้างกระดาษจำลองขนาด A4 แนวนอนแบบล่องหน (ป้องกันตารางบีบตัวตามขนาดจอคอม)
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.top = '0';
-    tempDiv.style.width = '297mm'; // ความกว้าง A4 แนวนอนเป๊ะๆ
-    tempDiv.innerHTML = htmlString;
-    document.body.appendChild(tempDiv);
-
-    // ✅ 5. ตั้งค่าตัดหน้าอัตโนมัติ
-    const opt = {
-      margin:       10,
-      filename:     'Branch_Summary_Report.pdf',
-      image:        { type: 'jpeg', quality: 1 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-      pagebreak:    { mode: ['css', 'legacy'] }
-    };
-
-    // โหลดแล้วโหลดลงเครื่องทันที (ไม่มีเด้ง Pop-up)
-    html2pdf().set(opt).from(tempDiv).save().then(() => {
-      document.body.removeChild(tempDiv);
-      btn.innerHTML = originalText; 
-      btn.disabled = false;
-    });
+    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
+  }
 
     // ✅ ปลดล็อกปุ่มให้กดซ้ำได้ทันที
     setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
