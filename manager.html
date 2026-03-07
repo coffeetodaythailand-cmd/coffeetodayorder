@@ -2176,10 +2176,7 @@
     // ✅ เพิ่ม pagebreak mode: 'css' เข้าไปในตั้งค่าเพื่อให้ระบบรองรับคำสั่งหลบการตัดคำ
     win.document.write(`<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head><body style="padding:20px; font-family:sans-serif;"><h2>Branch Summary Report</h2><p>ช่วงวันที่: ${sDate} - ${eDate}</p>${tablesContent}<script>window.onload=()=>{ html2pdf().set({margin: 10, filename: 'Report.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2 }, pagebreak: { mode: ['css', 'legacy'] }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }}).from(document.body).save().then(()=>{setTimeout(()=>window.close(), 1500)}); }<\/script></body></html>`);
     win.document.close();
-
-    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
-  }
-
+    
     // ✅ ปลดล็อกปุ่มให้กดซ้ำได้ทันที
     setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
   }
