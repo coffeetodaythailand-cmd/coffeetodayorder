@@ -988,6 +988,17 @@
   </div>
 </div>
 
+<div id="delConfirmModal" class="overlay">
+  <div class="modal-card" style="text-align: center; max-width: 420px; border-top: 15px solid #333;">
+    <div style="margin-bottom: 20px;"><i class="fas fa-trash-alt" style="font-size: 65px; color: var(--red);"></i></div>
+    <h3 style="margin:0; font-family:'Prompt'; font-size: 22px;">ยืนยันการลบข้อมูล?</h3>
+    <p id="delMsg" style="color: #666; margin: 15px 0 35px; font-size: 15px; line-height: 1.5;"></p>
+    <div style="display: flex; gap: 15px;">
+      <button class="btn" style="flex: 1; background-color: #F5F5F5;" onclick="closeM('delConfirmModal')">ยกเลิก</button>
+      <button id="confirmDelBtn" class="btn btn-red" style="flex: 1;">ยืนยันลบ</button>
+    </div>
+  </div>
+</div>
 <script>
   /**
    * ==========================================================================
@@ -1747,50 +1758,81 @@
    * 🚀 NEW FEATURE: Drag & Drop Configuration
    * =========================================================================
    */
-    function renderMenuAccordion(menuData) {
+    // 🚀 ระบบ V17: ช่องเลขใหญ่ขึ้น, ลบหายทันที, Modal สวยงาม
+  let delTarget = null; // เก็บเป้าหมายที่จะลบ
+
+  function renderMenuAccordion(menuData) {
     if(!menuData || !menuData.categories) return;
     menuObj = menuData; 
     let chipsHtml = '', itemsHtml = '', selectHtml = '';
     if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
 
-    // 1. ส่วนจัดการหมวดหมู่ (Category Chips)
+    // 1. หมวดหมู่ (ขยายช่องเลขให้ใหญ่ขึ้น)
     menuData.categories.forEach((cat, idx) => {
       const isSelected = (cat === currentCat ? 'active' : '');
       selectHtml += `<option value="${cat}">${cat}</option>`;
       chipsHtml += `
-        <div class="chip ${isSelected}" draggable="true" ondragstart="dragStartCat(event, ${idx})" ondragover="dragOverCat(event)" ondrop="dropCat(event, ${idx})" style="cursor:grab; display:flex; align-items:center; gap:8px;">
+        <div class="chip ${isSelected}" draggable="true" ondragstart="dragStartCat(event, ${idx})" ondragover="dragOverCat(event)" ondrop="dropCat(event, ${idx})" style="cursor:grab; display:flex; align-items:center; gap:10px; padding: 10px 18px;">
           <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
-          <input type="number" value="${idx + 1}" onchange="moveCatManual(${idx}, this.value - 1)" style="width:35px; border:none; background:rgba(0,0,0,0.05); border-radius:4px; text-align:center; font-size:12px; font-weight:bold; color:inherit;">
-          <span onclick="selectCat('${cat}')">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
-          <i class="fas fa-trash-alt" style="margin-left:8px; font-size:12px; opacity:0.5; cursor:pointer;" onclick="deleteCat('${cat}')"></i>
+          <input type="number" value="${idx + 1}" onchange="moveCatManual(${idx}, this.value - 1)" 
+            style="width:50px; height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-size:14px; font-weight:bold; background: white; color:var(--red);">
+          <span onclick="selectCat('${cat}')" style="margin-left:5px;">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
+          <i class="fas fa-trash-alt" style="margin-left:10px; font-size:14px; color:#ffb3b3; cursor:pointer;" onclick="prepareDelete('cat', '${cat}')" onmouseover="this.style.color='white'"></i>
         </div>`;
     });
 
-    // 2. ส่วนจัดการรายการสินค้า (Menu Items)
+    // 2. สินค้า (ขยายช่องเลขและเพิ่มปุ่มลบถาวร)
     if(currentCat && menuData.grouped[currentCat]) {
       menuData.grouped[currentCat].forEach((p, idx) => {
         const isActive = (p.status === 'Active' ? 'checked' : '');
         itemsHtml += `
-          <div class="cat-item" draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})" style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:grab;">
-            <div style="display:flex; align-items:center; gap:15px;">
+          <div class="cat-item" draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})" style="display:flex; justify-content:space-between; padding:18px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:grab;">
+            <div style="display:flex; align-items:center; gap:18px;">
               <i class="fas fa-grip-lines" style="color:#DDD;"></i>
-              <input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" style="width:40px; padding:5px; border:1px solid #EEE; border-radius:8px; text-align:center; font-weight:bold; color:var(--red);">
+              <input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" 
+                style="width:55px; height:35px; border:2px solid var(--red); border-radius:10px; text-align:center; font-weight:bold; font-size:16px; color:var(--red); background:white;">
               <div>
-                <span style="font-weight:600; color:#333; font-size:16px;">${p.name}</span>
-                <div style="font-size:10px; color:#AAA; margin-top:2px;">ID: ${p.rowId}</div>
+                <span style="font-weight:600; color:#333; font-size:17px;">${p.name}</span>
+                <div style="font-size:10px; color:#AAA; margin-top:3px;">ID: ${p.rowId}</div>
               </div>
             </div>
             <div style="display:flex; gap:25px; align-items:center;">
               <label class="switch"><input type="checkbox" ${isActive} onchange="toggleItem('${p.rowId}', '${p.name}', '${currentCat}', this)"><span class="slider"></span></label>
-              <i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${p.rowId}, '${p.name}', '${currentCat}')"></i>
-              <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#EEE'" onclick="deleteProd('${p.rowId}', '${p.name}')"></i>
+              <i class="fas fa-edit" style="color:#CCC; cursor:pointer; font-size:20px;" onclick="openProdModal(${p.rowId}, '${p.name}', '${currentCat}')"></i>
+              <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:20px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#EEE'" onclick="prepareDelete('prod', ${idx}, '${p.name}')"></i>
             </div>
           </div>`;
       });
     }
     document.getElementById('catChips').innerHTML = chipsHtml; 
-    document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:40px; color:#CCC;">ไม่มีสินค้าในหมวดนี้</div>';
+    document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:40px; color:#CCC;">หมวดนี้ยังไม่มีสินค้า...</div>';
     document.getElementById('pCatSelect').innerHTML = selectHtml;
+  }
+
+  // 🗑️ ระบบลบแบบใหม่ (ลบในเครื่องทันที)
+  function prepareDelete(type, target, name) {
+    delTarget = { type, target, name };
+    document.getElementById('delMsg').innerText = `คุณแน่ใจใช่ไหมว่าจะลบ "${name}"? (รายการจะหายจากหน้าจอทันที และจะถูกลบถาวรเมื่อกดบันทึกลำดับ)`;
+    document.getElementById('confirmDelBtn').onclick = executeDelete;
+    document.getElementById('delConfirmModal').style.display = 'flex';
+  }
+
+  function executeDelete() {
+    if (delTarget.type === 'cat') {
+      // ลบหมวดหมู่
+      const idx = menuObj.categories.indexOf(delTarget.target);
+      if (idx > -1) {
+        menuObj.categories.splice(idx, 1);
+        delete menuObj.grouped[delTarget.target];
+        if (currentCat === delTarget.target) currentCat = menuObj.categories[0];
+      }
+    } else {
+      // ลบสินค้าในหมวด
+      menuObj.grouped[currentCat].splice(delTarget.target, 1);
+    }
+    closeM('delConfirmModal');
+    renderMenuAccordion(menuObj);
+    showToast("🗑️ ลบออกจากหน้าจอแล้ว (อย่าลืมกดบันทึกลำดับ)");
   }
 
   function moveCatManual(from, to) {
@@ -1806,18 +1848,6 @@
     const item = items.splice(from, 1)[0];
     items.splice(to, 0, item);
     renderMenuAccordion(menuObj);
-  }
-
-  function deleteCat(name) {
-    if (!confirm(`ลบหมวดหมู่ "${name}"?`)) return;
-    fetch(`${GAS_URL}?action=deleteCategory&catName=${encodeURIComponent(name)}&token=${localStorage.getItem(TOKEN_KEY)}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("🗑️ ลบหมวดหมู่สำเร็จ"); });
-  }
-
-  function deleteProd(id, name) {
-    if (!confirm(`ลบสินค้า "${name}"?`)) return;
-    fetch(`${GAS_URL}?action=deleteProduct&id=${id}&token=${localStorage.getItem(TOKEN_KEY)}`)
-      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("🗑️ ลบสินค้าสำเร็จ"); });
   }
 
   function dragStartCat(e, i) { dragCatIndex = i; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); }
