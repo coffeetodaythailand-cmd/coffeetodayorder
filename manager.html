@@ -2294,21 +2294,32 @@
     document.getElementById('managerConfirmModal').style.display = 'flex';
   }
 
+  // 🚀 ฟังก์ชันทำงานจริง (เวอร์ชันแก้บั๊กหมุนค้าง)
   function executeManagerClose() {
     const btn = document.getElementById('managerExecBtn');
+    const token = localStorage.getItem(TOKEN_KEY); // 🔑 ดึงกุญแจออกมา
+    
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสั่งปิดงาน...';
     btn.disabled = true;
 
-    google.script.run.withSuccessHandler(function(isSuccess) {
-      if (isSuccess) {
-        showToast('✅ ปิดงานสำเร็จ! เคลียร์กราฟเรียบร้อย');
-        setTimeout(() => location.reload(), 1500); 
-      } else {
-        alert('❌ เกิดข้อผิดพลาด ไม่สามารถส่งคำสั่งได้');
+    // ส่งครบ 3 อย่าง: ID, สถานะ, และ Token
+    google.script.run
+      .withSuccessHandler(function(isSuccess) {
+        if (isSuccess) {
+          showToast('✅ ปิดงานสำเร็จ! เคลียร์กราฟเรียบร้อย');
+          setTimeout(() => location.reload(), 1000); 
+        } else {
+          alert('❌ สิทธิ์ไม่พอ หรือเกิดข้อผิดพลาดที่ระบบ');
+          btn.innerHTML = 'ยืนยันปิดงานเลย!';
+          btn.disabled = false;
+        }
+      })
+      .withFailureHandler(function(err) { // 🛡️ กันค้างถ้าเน็ตหลุดหรือระบบพัง
+        alert('❌ ระบบขัดข้อง: ' + err.message);
         btn.innerHTML = 'ยืนยันปิดงานเลย!';
         btn.disabled = false;
-      }
-    }).setOrderStatus(currentManagerOrderId, 'Success');
+      })
+      .setOrderStatus(currentManagerOrderId, 'Success', token); 
   }
 </script>
 </body>
