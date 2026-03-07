@@ -2126,25 +2126,24 @@
     } 
   }
 
-  // 📄 ระบบรายงาน (V6 Smart Auto-Fill) คำนวณพื้นที่ออโต้ ถมกระดาษแน่น หัวตารางมาครบ ปิดหน้าต่างเอง!
+ // 📄 ระบบรายงาน (V6 Smart Auto-Fill) ถมกระดาษแน่น หัวตารางมาครบ โหลดออโต้ และปิดหน้าต่างเอง!
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดพื้นที่หน้ากระดาษ...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียม PDF...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // 🚀 ตั้งค่าความจุพื้นที่ต่อ 1 หน้า (A4 แนวนอนใส่ได้ประมาณ 38-40 หน่วยพื้นที่)
+    // 🚀 คำนวณความจุ: A4 แนวนอนใส่ได้ประมาณ 38-40 หน่วย (1 สินค้า = 1 หน่วย, หัวบิล = 1.5 หน่วย)
     const MAX_PAGE_CAPACITY = 38; 
-    let currentLinesUsed = 0;
+    let currentUsed = 0;
     let pagesHtml = '';
 
-    // ฟังก์ชันสร้างหัวตารางใหม่
-    function startNewTable(isFirst) {
+    function startTable(isFirst) {
       if (!isFirst) pagesHtml += '</tbody></table><div class="html2pdf__page-break"></div>';
       pagesHtml += '<table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; font-family: Sarabun, sans-serif;">';
       pagesHtml += '<thead style="background: #F8F9FA;"><tr>';
@@ -2155,22 +2154,20 @@
       pagesHtml += '<th style="width:38%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>';
       pagesHtml += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>';
       pagesHtml += '</tr></thead><tbody>';
-      currentLinesUsed = 0;
+      currentUsed = 0;
     }
 
-    startNewTable(true);
+    startTable(true);
 
     allOrders.forEach((o) => {
       let itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
-      // 🧠 คำนวณน้ำหนักพื้นที่: 1 ออเดอร์ = (Header 1.5 หน่วย) + (สินค้ากี่บรรทัดก็นับตามนั้น)
       let orderWeight = 1.5 + itemLines.length;
 
-      // ถ้าพื้นที่ปัจจุบันบวกออเดอร์ใหม่แล้วล้นหน้า ให้ขึ้นหน้าใหม่และสร้างหัวตาราง
-      if (currentLinesUsed + orderWeight > MAX_PAGE_CAPACITY) {
-        startNewTable(false);
+      // ถ้าบิลนี้ใส่แล้วล้นหน้า ให้ขึ้นหน้าใหม่พร้อมหัวตาราง
+      if (currentUsed + orderWeight > MAX_PAGE_CAPACITY) {
+        startTable(false);
       }
 
-      // วาดออเดอร์
       itemLines.forEach((line, idx) => {
         let isFirst = (idx === 0);
         let trStyle = isFirst ? 'border-top: 1px solid #BBB;' : '';
@@ -2185,8 +2182,7 @@
         pagesHtml += `<td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top;">${isFirst ? o.status : ''}</td>`;
         pagesHtml += `</tr>`;
       });
-
-      currentLinesUsed += orderWeight;
+      currentUsed += orderWeight;
     });
 
     pagesHtml += '</tbody></table>';
@@ -2198,10 +2194,9 @@
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
-        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 15mm; }
+        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 10mm; }
         .header-title { font-family: 'Prompt', sans-serif; color: #A91D3A; text-align: center; font-size: 24px; margin-bottom: 5px; }
         .date-range { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
-        .html2pdf__page-break { page-break-before: always; }
       </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
     </head>
@@ -2213,16 +2208,16 @@
       </div>
       <script>
         window.onload = () => {
-          const element = document.getElementById('pdf-area');
           const opt = {
-            margin:       10, 
-            filename:     'Branch_Summary_Report.pdf',
-            image:        { type: 'jpeg', quality: 1 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            margin: 10, 
+            filename: 'Branch_Summary_Report.pdf',
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
           };
-          html2pdf().set(opt).from(element).save().then(() => {
-            setTimeout(() => { window.close(); }, 1200);
+          // ✅ โหลดไฟล์แล้วปิดหน้าต่างทันที
+          html2pdf().set(opt).from(document.getElementById('pdf-area')).save().then(() => {
+            setTimeout(() => { window.close(); }, 1000);
           });
         };
       <\/script>
