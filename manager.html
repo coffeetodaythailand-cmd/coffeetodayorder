@@ -1121,16 +1121,24 @@
   }
 
   function initApp(token) { 
-    
-    loadDashboardData(false, token); 
+    loadDashboardData(false, token);
     loadApproveList(token); 
     
     setInterval(function() {
-      
+      // 🛡️ เช็คว่ามีหน้าต่างเด้ง (Modal) เปิดค้างไว้ หรือกำลังลากเมนูอยู่หรือไม่
+      const isBusy = ['receiptModal', 'confirmModal', 'cM', 'pM', 'delConfirmModal'].some(function(id) {
+        const el = document.getElementById(id);
+        return el && el.style.display === 'flex';
+      });
+
+      if (isBusy || dragCatIndex !== null || dragItemIndex !== null) {
+        console.log("System Sync Skipped: User is working.");
+        return; // ข้ามการดึงข้อมูลรอบนี้ไปก่อน เพื่อไม่ให้รบกวนบอส
+      }
+
       loadDashboardData(false, token, currentDeepSearchQuery);
       loadApproveList(token);
-      
-    }, 180000); 
+    }, 180000);
   }
 
   /**
@@ -1202,25 +1210,22 @@
                    let iStr = ord.items || "";
                    iStr.split('\n').forEach(function(lineStr) {
                       
-                      if (lineStr.indexOf('สั่ง:') !== -1) {
+                      // 🛡️ ระบบสกัดคำสุดฉลาด (V17 Smart Regex) ไม่กลัววงเล็บซ้อนหรือเว้นวรรคผิด
+                      let itemMatch = lineStr.match(/(.+?)\s*\(\s*เหลือ:\s*(.*?)\s*,\s*สั่ง:\s*(.*?)\s*\)/);
+                      if (itemMatch) {
+                         let nameOnlyStr = itemMatch[1].trim();
+                         let stockStr = itemMatch[2];
+                         let qtyStr = itemMatch[3];
                          
-                         let nameOnlyStr = lineStr.split(' (')[0].trim();
-                         let qtyReg = lineStr.match(/สั่ง:([\d.]+)/);
-                         let qtyVal = qtyReg ? parseFloat(qtyReg[1]) : 0;
+                         let qtyVal = parseFloat(qtyStr.match(/[\d.]+/)?.[0] || 0);
                          productSum[nameOnlyStr] = (productSum[nameOnlyStr] || 0) + qtyVal;
                          
-                         // 💡 แงะสต็อกล่าสุดพร้อมแปะชื่อสาขา
-                         let stockReg = lineStr.match(/เหลือ:([^,)]+)/);
-                         if (stockReg) {
-                            let stockStr = stockReg[1].trim();
-                            let stockNumReg = stockStr.match(/[\d.]+/);
-                            // กรองเอาเฉพาะที่มีตัวเลข (ไม่เอาขีด)
-                            if (stockNumReg) {
-                               let numVal = parseFloat(stockNumReg[0]);
-                               let branchKeyStr = "[" + bNameStr + "] " + nameOnlyStr;
-                               if(stockSum[branchKeyStr] === undefined) {
-                                  stockSum[branchKeyStr] = numVal;
-                               }
+                         let stockNumReg = stockStr.match(/[\d.]+/);
+                         if (stockNumReg) {
+                            let numVal = parseFloat(stockNumReg[0]);
+                            let branchKeyStr = "[" + bNameStr + "] " + nameOnlyStr;
+                            if(stockSum[branchKeyStr] === undefined) {
+                               stockSum[branchKeyStr] = numVal;
                             }
                          }
                       }
@@ -1552,7 +1557,7 @@
     
     itemListArray.forEach(function(itemLine) {
       if(itemLine.trim() !== "") {
-        const regexMatch = itemLine.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        const regexMatch = itemLine.match(/(.+?)\s*\(\s*เหลือ:\s*(.*?)\s*,\s*สั่ง:\s*(.*?)\s*\)/);
         if(regexMatch) {
           rowsList += '<tr>';
           rowsList += '<td style="padding:15px 10px; border-bottom:1px solid #f9f9f9; color:#444;">' + regexMatch[1] + '</td>';
@@ -1624,7 +1629,7 @@
     let rowsBuilder = '';
     targetOrder.items.split('\n').forEach(function(rowLine) {
       if(rowLine.trim() !== "") {
-        const parts = rowLine.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        const parts = rowLine.match(/(.+?)\s*\(\s*เหลือ:\s*(.*?)\s*,\s*สั่ง:\s*(.*?)\s*\)/);
         if(parts) {
           // จัดตาราง 3 คอลัมน์ (Product, Last Stock, Qty) ตามตัวอย่าง
           rowsBuilder += '<tr>';
@@ -1644,7 +1649,7 @@
     pdfWindow.document.write('<div class="grid-data"><div><div class="grid-col-label">REFERENCE ID</div><div style="font-weight:bold;">'+targetOrder.id+'</div><div style="height:15px;"></div><div class="grid-col-label">BRANCH STORE</div><div style="font-weight:bold;">'+targetOrder.branch+'</div></div><div style="text-align:right;"><div class="grid-col-label">ISSUE DATE</div><div style="font-weight:bold;">'+targetOrder.date+'</div><div style="height:15px;"></div><div class="grid-col-label">CONTACT PHONE</div><div style="font-weight:bold;">'+(targetOrder.phone || '-')+'</div></div></div>');
     pdfWindow.document.write('<table><thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead><tbody>'+rowsBuilder+'</tbody></table>');
     pdfWindow.document.write('<div style="text-align:center;margin-top:50px;font-size:11px;color:#AAA;border-top:1px dashed #DDD;padding-top:20px;"><p>เอกสารฉบับนี้ใช้สำหรับยืนยันการจัดเตรียมสินค้าของ CoffeeToday เท่านั้น</p></div></div>');
-    pdfWindow.document.write('<script>window.onload=()=>{html2pdf().set({margin:10,filename:"Receipt.pdf",html2canvas:{scale:2},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}}).from(document.getElementById("p-area")).save().then(()=>{setTimeout(()=>window.close(),1500)});};<\/script></body></html>');
+    pdfWindow.document.write('<script>window.onload=()=>{html2pdf().set({margin:10,filename:"Receipt.pdf",html2canvas:{scale:1.5},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}}).from(document.getElementById("p-area")).save().then(()=>{setTimeout(()=>window.close(),1500)});};<\/script></body></html>');
     pdfWindow.document.close();
   }
 
@@ -1656,7 +1661,7 @@
     
     let rowsHtml = '';
     item.items.split('\n').forEach(line => {
-      const parts = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+      const parts = line.match(/(.+?)\s*\(\s*เหลือ:\s*(.*?)\s*,\s*สั่ง:\s*(.*?)\s*\)/);
       if(parts) {
         rowsHtml += `<tr><td style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${parts[1]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${parts[2]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:#A91D3A;">${parts[3]}</td></tr>`;
       }
@@ -1669,7 +1674,7 @@
         <div style="text-align:right;"><div class="label">ISSUE DATE</div><div class="val">${item.date}</div><div class="label">CONTACT PHONE</div><div class="val">${item.phone || '-'}</div></div>
       </div>
       <table><thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead><tbody>${rowsHtml}</tbody></table>
-      <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),800);}<\/script></body></html>`);
+      <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script></body></html>`);
     win.document.close();
   }
   
@@ -2230,7 +2235,7 @@
       html2pdf().set({ 
         margin:0, 
         filename:'Branch_Summary_Report.pdf', 
-        html2canvas:{scale:2, useCORS:true}, 
+        html2canvas:{scale:1.5, useCORS:true}, 
         jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}, 
         pagebreak:{mode:'css'} 
       }).from(document.getElementById('pdf-content')).save().then(()=>setTimeout(()=>window.close(), 1200));
@@ -2253,7 +2258,7 @@
 
       let rowsHtml = '';
       item.items.split('\n').forEach(line => {
-        const match = line.match(/(.+) \(เหลือ:(.+), สั่ง:(.+)\)/);
+        const match = line.match(/(.+?)\s*\(\s*เหลือ:\s*(.*?)\s*,\s*สั่ง:\s*(.*?)\s*\)/);
         if(match) rowsHtml += `<tr><td style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${match[1]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${match[2]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:#A91D3A;">${match[3]}</td></tr>`;
       });
 
@@ -2271,7 +2276,7 @@
           <p>เอกสารฉบับนี้ใช้สำหรับยืนยันการจัดเตรียมสินค้าของ CoffeeToday เท่านั้น</p>
           <p>Generated at: ${new Date().toLocaleString("th-TH")}</p>
         </div>
-        <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),800);}<\/script></body></html>`);
+        <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script></body></html>`);
       win.document.close();
     } catch (e) { console.error(e); }
   }
