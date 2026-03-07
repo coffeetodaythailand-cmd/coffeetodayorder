@@ -400,7 +400,6 @@
       messagingSenderId: "949270145151",
       appId: "1:949270145151:web:ae6cbc6c5c5d54a502b74a"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
   </script>
@@ -529,7 +528,7 @@
       const s = document.createElement('div'); s.id = `s-${i}`; s.className = `table-section ${i===0?'active':''}`;
       let h = `<table width="100%"><thead><tr><th>สินค้า</th><th width="100">คงเหลือ</th><th width="75">สั่ง</th></tr></thead><tbody>`;
       initData.products[c].forEach(p => { 
-        h += `<tr><td style="padding-right:10px;">${p.name}</td><td><input type="text" class="qty-in si" data-tab="${i}" placeholder="..."></td><td><input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0"></td></tr>`; 
+        h += `<tr><td style="padding-right:10px;">${p.name}</td><td><input type="text" class="qty-in si" data-tab="${i}" placeholder="..."></td><td><input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0"></td></tr>`;
       });
       s.innerHTML = h + `</tbody></table>`; l.appendChild(s);
     });
@@ -539,7 +538,7 @@
       document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); 
       document.getElementById('sec-others').classList.add('active'); 
     };
-    t.appendChild(oB); addRow(); 
+    t.appendChild(oB); addRow();
   }
 
   function addRow() {
@@ -565,35 +564,73 @@
 
   function showError(m) {
     const t = document.getElementById('errT'); document.getElementById('errM').innerText = m;
-    t.classList.add('show'); setTimeout(() => { t.classList.remove('show'); }, 4000);
+    t.classList.add('show');
+    setTimeout(() => { t.classList.remove('show'); }, 4000);
   }
 
   function reviewOrder() {
     let d = "", h = "", hasItem = false;
-    const name = document.getElementById('cN').value.trim(), phone = document.getElementById('cP').value.trim(), branch = document.getElementById('cB').value.trim();
-    if(!name || !phone || !branch) return showError("ข้อมูลส่วนตัวไม่ครบ");
+    
+    // ดึง Element ออกมาเพื่อใช้คำสั่งเลื่อนหน้าจอ
+    const elN = document.getElementById('cN'), 
+          elP = document.getElementById('cP'), 
+          elE = document.getElementById('cE'), 
+          elB = document.getElementById('cB');
+
+    // 🛡️ เช็คทีละช่อง ถ้าว่างให้เด้งไปหาช่องนั้นทันที (Nitro Focus System)
+    if (!elN.value.trim()) {
+      elN.focus();
+      elN.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกชื่อผู้สั่ง");
+    }
+    if (!elP.value.trim()) {
+      elP.focus();
+      elP.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกเบอร์โทรศัพท์");
+    }
+    if (!elE.value.trim()) {
+      elE.focus();
+      elE.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกอีเมลติดต่อ");
+    }
+    if (!elB.value.trim()) {
+      elB.focus();
+      elB.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกชื่อสาขา");
+    }
+
+    const name = elN.value.trim(), phone = elP.value.trim(), branch = elB.value.trim(), email = elE.value.trim();
+
     const qis = document.querySelectorAll('.qi'), sis = document.querySelectorAll('.si');
     qis.forEach((qi, i) => {
       let qVal = parseFloat(qi.value) || 0;
       if(qVal > 0) {
-        hasItem = true; d += `${qi.dataset.n} (เหลือ:${sis[i].value || "-"}, สั่ง:${qVal})\n`; 
+        // ✅ ปลดล็อกแล้ว: ไม่เช็คสต็อกก่อนส่ง (Unchecked Stock Mode)
+        hasItem = true; 
+        const stockVal = sis[i].value.trim() || "-";
+        d += `${qi.dataset.n} (เหลือ:${stockVal}, สั่ง:${qVal})\n`; 
       }
     });
+
     const cns = document.querySelectorAll('.cn'), css = document.querySelectorAll('.cs'), cqs = document.querySelectorAll('.cq');
     cqs.forEach((cq, i) => {
       let qVal = parseFloat(cq.value) || 0; let n = cns[i].value.trim();
       if(n && qVal > 0) {
-        hasItem = true; d += `${n} (เหลือ:${css[i].value}, สั่ง:${qVal})\n`;
+        // ✅ ปลดล็อกรายการพิเศษเช่นกัน
+        hasItem = true; 
+        const stockVal = css[i].value.trim() || "-";
+        d += `${n} (เหลือ:${stockVal}, สั่ง:${qVal})\n`;
       }
     });
+
     if(!hasItem) return showError("เลือกสินค้าก่อน");
     h += `<div style="margin-bottom:10px;"><b>ผู้สั่ง:</b> ${name}<br><b>สาขา:</b> ${branch}</div><ul>`;
     d.split('\n').filter(Boolean).forEach(line => h += `<li>${line}</li>`);
-    pD = { name, phone, email: document.getElementById('cE').value, branch, details: d };
+    pD = { name, phone, email, branch, details: d };
     document.getElementById('rL').innerHTML = h + "</ul>"; document.getElementById('rM').style.display = 'flex';
   }
 
-// 🚀 ระบบ NITRO SYNC + GUARD (เพิ่มระบบเช็คแบนและ Device ID)
+  // 🚀 ระบบ NITRO SYNC + GUARD (เพิ่มระบบเช็คแบนและ Device ID)
   async function confirmSubmit() {
     const cBtn = document.getElementById('cBtn');
     cBtn.innerText = "กำลังตรวจสอบความปลอดภัย..."; cBtn.disabled = true;
@@ -616,7 +653,6 @@
       }
 
       cBtn.innerText = "กำลังส่ง...";
-
       // ⚡ 3. รันเลข ORD-XXXX จาก Firebase (ทำผ่าน Transaction)
       const counterRef = db.collection("metadata").doc("counters");
       const realOrderId = await db.runTransaction(async (transaction) => {
@@ -636,14 +672,14 @@
         branch: pD.branch, 
         details: pD.details, 
         status: "Pending",
-        deviceId: deviceId, // <--- ฝังรหัสเครื่องเพื่อส่งไปที่หน้า Guard
+        deviceId: deviceId, 
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
       // ✅ 5. จบงานทันที
       document.getElementById('rM').style.display = 'none'; 
       document.getElementById('showOrderId').innerText = realOrderId; 
-      document.getElementById('successModal').style.display = 'flex'; 
+      document.getElementById('successModal').style.display = 'flex';
       cBtn.innerText = "ยืนยันสั่ง"; cBtn.disabled = false;
 
       // 🕵️‍♂️ 6. สำรองข้อมูลลง Sheet (ทำเบื้องหลัง)
@@ -651,7 +687,6 @@
         method: "POST", mode: "no-cors",
         body: JSON.stringify({ action: "submitOrderBackupOnly", formData: pD, orderId: realOrderId })
       });
-
     } catch (err) {
       showError("ระบบขัดข้อง: " + err.message);
       cBtn.innerText = "ยืนยันสั่ง"; cBtn.disabled = false;
@@ -660,6 +695,3 @@
 </script>
 </body>
 </html>
-
-
-
