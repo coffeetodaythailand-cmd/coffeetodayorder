@@ -400,7 +400,10 @@
       messagingSenderId: "949270145151",
       appId: "1:949270145151:web:ae6cbc6c5c5d54a502b74a"
     };
-    firebase.initializeApp(firebaseConfig);
+    // 🛡️ ป้องกันเบราว์เซอร์ลูกค้าโหลด Firebase ซ้ำซ้อนจนเว็บขาว
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
   </script>
 </head>
@@ -608,7 +611,9 @@
       return showError("กรุณากรอกชื่อสาขา");
     }
 
-    const name = elN.value.trim(), phone = elP.value.trim(), branch = elB.value.trim(), email = elE.value.trim();
+    // 🛡️ คลีนข้อมูล ป้องกันแฮกเกอร์ฝังโค้ด (XSS)
+    const cleanTxt = (txt) => txt.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c] || c));
+    const name = cleanTxt(elN.value.trim()), phone = cleanTxt(elP.value.trim()), branch = cleanTxt(elB.value.trim()), email = cleanTxt(elE.value.trim());
 
     const qis = document.querySelectorAll('.qi'), sis = document.querySelectorAll('.si');
     qis.forEach((qi, i) => {
@@ -616,18 +621,23 @@
       if(qVal > 0) {
         // ✅ ปลดล็อกแล้ว: ไม่เช็คสต็อกก่อนส่ง (Unchecked Stock Mode)
         hasItem = true; 
-        const stockVal = sis[i].value.trim() || "-";
+        // 🛡️ ล้างลูกน้ำและวงเล็บทิ้ง ป้องกันตีกับ Regex หลังบ้าน
+        let rawStock = sis[i].value.trim() || "-";
+        const stockVal = rawStock.replace(/[,()]/g, '').replace(/สั่ง:/g, '');
         d += `${qi.dataset.n} (เหลือ:${stockVal}, สั่ง:${qVal})\n`; 
       }
     });
 
     const cns = document.querySelectorAll('.cn'), css = document.querySelectorAll('.cs'), cqs = document.querySelectorAll('.cq');
     cqs.forEach((cq, i) => {
-      let qVal = parseFloat(cq.value) || 0; let n = cns[i].value.trim();
+      let qVal = parseFloat(cq.value) || 0; 
+      // 🛡️ ล้างวงเล็บและลูกน้ำออกจากชื่อสินค้าที่ลูกค้าพิมพ์เอง
+      let n = cns[i].value.trim().replace(/[,()]/g, '');
       if(n && qVal > 0) {
-        // ✅ ปลดล็อกรายการพิเศษเช่นกัน
         hasItem = true; 
-        const stockVal = css[i].value.trim() || "-";
+        // 🛡️ ล้างลูกน้ำและวงเล็บทิ้ง ป้องกันตีกับ Regex หลังบ้าน
+        let rawStock = css[i].value.trim() || "-";
+        const stockVal = rawStock.replace(/[,()]/g, '').replace(/สั่ง:/g, '');
         d += `${n} (เหลือ:${stockVal}, สั่ง:${qVal})\n`;
       }
     });
@@ -704,4 +714,5 @@
 </script>
 </body>
 </html>
+
 
