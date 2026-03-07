@@ -1751,32 +1751,40 @@
     });
     
     scObj = new Chart(ctxStock, {
-      type: 'bar', 
-      data: { 
-        labels: (analyticsData.sL ? analyticsData.sL.slice(0, 15) : []), 
-        datasets: [{ 
-          label: 'คงเหลือหน้าสาขา', 
-          data: (analyticsData.sV ? analyticsData.sV.slice(0, 15) : []), 
-          backgroundColor: 'rgba(243, 156, 18, 0.85)', 
-          borderRadius: 10, 
-          barPercentage: 0.6, 
-          categoryPercentage: 0.8 
-        }] 
-      },
-      options: { 
-        maintainAspectRatio: false, 
-        indexAxis: 'y', 
-        plugins: { legend: { display: false } }, 
-        scales: { 
-          x: { 
-            grid: { color: '#F0F0F0' },
-            title: { display: true, text: 'ปริมาณสินค้าคงเหลือ (ชิ้น)', font: { family: 'Prompt', size: 10 } } 
+      type: 'bar',
+      data: analyticsData.sStacked, // 👈 ใช้ข้อมูลแบบแยกสินค้าที่เราทำไว้ใน Code.gs
+      options: {
+        maintainAspectRatio: false,
+        indexAxis: 'y', // ทำให้เป็นแท่งแนวนอนดูง่ายบนมือถือ
+        plugins: {
+          legend: { 
+            display: true, 
+            position: 'bottom', 
+            labels: { boxWidth: 10, font: { size: 10, family: 'Prompt' } } 
           },
-          y: {
-            grid: { display: false },
-            ticks: { font: { family: 'Sarabun', size: 11 } }
+          tooltip: {
+            enabled: true,
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + context.raw + ' ชิ้น';
+              }
+            }
           }
-        } 
+        },
+        scales: {
+          x: { 
+            stacked: true, // 👈 เปิดระบบซ้อนกัน
+            grid: { color: '#F0F0F0' }, 
+            title: { display: true, text: 'รวมสินค้าคงเหลือทุกรายการ (ชิ้น)', font: { size: 10 } } 
+          },
+          y: { 
+            stacked: true, // 👈 เปิดระบบซ้อนกัน
+            grid: { display: false }, 
+            ticks: { font: { family: 'Sarabun', size: 11, weight: 'bold' } } 
+          }
+        }
       }
     });
   }
