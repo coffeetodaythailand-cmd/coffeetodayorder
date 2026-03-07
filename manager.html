@@ -2126,67 +2126,89 @@
     } 
   }
 
- // 📄 ระบบรายงาน (V13 Master Landscape) - ล็อคหน้าเป๊ะ, หัวตารางครบทุกหน้า, เลขหน้าตรงแผ่น, ชิดขอบล่าง
+ // 📄 ระบบรายงาน (V14 Portrait Header) - แนวตั้ง, เลขหน้าอยู่มุมขวาบน, หัวตารางครบ, โหลดแล้วปิดเอง
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดหน้ากระดาษ...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดหน้ากระดาษแนวตั้ง...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น", eDate = document.getElementById('eDate').value || "ปัจจุบัน";
     
-    // 🚀 ตั้งค่าการคำนวณพื้นที่ (สำหรับแนวนอน A4)
-    const PAGE_HEIGHT_LIMIT = 32; // จำนวนหน่วยพื้นที่ต่อ 1 หน้า
+    // 🚀 ความจุสำหรับ "แนวตั้ง" (Portrait) จะใส่แถวได้มากกว่าแนวนอน
+    const PAGE_HEIGHT_LIMIT = 50; 
     let pagesHtml = '', currentWeight = 0, pageNum = 1, orderBuffer = [];
 
-    // ฟังก์ชันสร้างโครงสร้างหน้ากระดาษ 1 แผ่น
-    function buildPhysicalPage(ordersInPage, isLast) {
+    // ฟังก์ชันสร้างหน้ากระดาษทีละแผ่นแบบเป๊ะๆ (1 Block = 1 หน้า A4)
+    function buildPhysicalPage(ordersInPage) {
       let tableRows = '';
       ordersInPage.forEach(o => {
         const itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
         itemLines.forEach((line, idx) => {
           const isFirst = (idx === 0);
           tableRows += `<tr style="page-break-inside:avoid; ${isFirst ? 'border-top: 1px solid #CCC;' : ''}">
-            <td style="padding:6px 8px; color:#A91D3A; font-weight:bold; vertical-align:top; width:10%;">${isFirst ? o.id : ''}</td>
-            <td style="padding:6px 8px; color:#666; font-size:10px; vertical-align:top; width:12%;">${isFirst ? o.date : ''}</td>
-            <td style="padding:6px 8px; font-weight:bold; vertical-align:top; width:15%;">${isFirst ? o.branch : ''}</td>
-            <td style="padding:6px 8px; vertical-align:top; width:15%;">${isFirst ? o.customer : ''}</td>
-            <td style="padding:6px 8px; border-top:${isFirst ? 'none' : '1px dashed #EEE'}; vertical-align:top; line-height:1.4; width:38%;">${line}</td>
-            <td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top; font-size:10px; width:10%;">${isFirst ? o.status : ''}</td>
+            <td style="padding:6px 5px; color:#A91D3A; font-weight:bold; vertical-align:top; width:12%; word-wrap:break-word;">${isFirst ? o.id : ''}</td>
+            <td style="padding:6px 5px; color:#666; font-size:10px; vertical-align:top; width:14%; word-wrap:break-word;">${isFirst ? o.date : ''}</td>
+            <td style="padding:6px 5px; font-weight:bold; vertical-align:top; width:14%; word-wrap:break-word;">${isFirst ? o.branch : ''}</td>
+            <td style="padding:6px 5px; vertical-align:top; width:15%; word-wrap:break-word;">${isFirst ? o.customer : ''}</td>
+            <td style="padding:6px 5px; border-top:${isFirst ? 'none' : '1px dashed #EEE'}; vertical-align:top; line-height:1.4; width:35%; word-wrap:break-word;">${line}</td>
+            <td style="padding:6px 5px; font-weight:bold; text-align:center; vertical-align:top; font-size:10px; width:10%; word-wrap:break-word;">${isFirst ? o.status : ''}</td>
           </tr>`;
         });
       });
 
-      // สร้างแผ่นกระดาษที่มีความสูงคงที่ (Fixed Height Container)
+      // ✅ ส่วนหัวกระดาษ (Header) เอาเลขหน้ามาไว้ข้างบนตามที่บอสต้องการ
+      let headerHtml = '';
+      if (pageNum === 1) {
+          headerHtml = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+              <div style="width:50px;"></div>
+              <div style="flex:1; text-align:center;">
+                <h2 style="margin:0; color:#A91D3A; font-family:'Prompt', sans-serif;">COFFEETODAY - Branch Summary</h2>
+                <p style="font-size:13px; color:#666; margin:5px 0;">ช่วงวันที่: ${sDate} - ${eDate}</p>
+              </div>
+              <div style="width:50px; text-align:right; font-size:12px; color:#666; font-weight:bold; font-family:'Sarabun', sans-serif;">หน้า ${pageNum}</div>
+            </div>
+          `;
+      } else {
+          // หัวกระดาษหน้า 2 เป็นต้นไป (ย่อขนาดลง แต่ยังคงเลขหน้าไว้ขวาบน)
+          headerHtml = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px; padding-bottom:5px;">
+              <div style="font-size:14px; font-weight:bold; color:#A91D3A; font-family:'Prompt', sans-serif;">COFFEETODAY - Summary</div>
+              <div style="font-size:12px; color:#666; font-weight:bold; font-family:'Sarabun', sans-serif;">หน้า ${pageNum}</div>
+            </div>
+          `;
+      }
+
+      // สร้างแผ่นกระดาษแนวตั้ง A4 
       pagesHtml += `
-        <div class="physical-page" style="position:relative; height:185mm; padding-top:15mm; page-break-after:always;">
-          ${pageNum === 1 ? `<div style="text-align:center; margin-bottom:15px;"><h2 style="margin:0; color:#A91D3A; font-family:Prompt;">COFFEETODAY - Branch Summary Report</h2><p style="font-size:13px; color:#666; margin:5px 0;">ช่วงวันที่: ${sDate} - ${eDate}</p></div>` : ''}
-          <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:Sarabun, sans-serif;">
+        <div class="physical-page" style="position:relative; height:275mm; padding: 10mm; page-break-after:always; box-sizing: border-box; background:#FFF;">
+          ${headerHtml}
+          <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:'Sarabun', sans-serif; table-layout:fixed;">
             <thead style="background:#F8F9FA;">
               <tr>
-                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>
-                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>
-                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>
-                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Customer</th>
-                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>
-                <th style="padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>
+                <th style="padding:10px 5px; border-bottom:2px solid #A91D3A; text-align:left; width:12%;">ID</th>
+                <th style="padding:10px 5px; border-bottom:2px solid #A91D3A; text-align:left; width:14%;">Date</th>
+                <th style="padding:10px 5px; border-bottom:2px solid #A91D3A; text-align:left; width:14%;">Branch</th>
+                <th style="padding:10px 5px; border-bottom:2px solid #A91D3A; text-align:left; width:15%;">Customer</th>
+                <th style="padding:10px 5px; border-bottom:2px solid #A91D3A; text-align:left; width:35%;">Items</th>
+                <th style="padding:10px 5px; border-bottom:2px solid #A91D3A; text-align:center; width:10%;">Status</th>
               </tr>
             </thead>
             <tbody>${tableRows}</tbody>
           </table>
-          <div style="position:absolute; bottom:5mm; left:0; width:100%; text-align:center; font-size:11px; color:#999; font-family:Sarabun;">หน้าที่ ${pageNum}</div>
         </div>`;
       pageNum++;
     }
 
-    // กระบวนการแบ่งออเดอร์ลงหน้ากระดาษ
+    // กระบวนการยัดออเดอร์ลงหน้ากระดาษ
     allOrders.forEach((o, index) => {
       const itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
       const oWeight = 1.5 + itemLines.length;
 
       if (currentWeight + oWeight > PAGE_HEIGHT_LIMIT && orderBuffer.length > 0) {
-        buildPhysicalPage(orderBuffer, false);
+        buildPhysicalPage(orderBuffer);
         orderBuffer = [];
         currentWeight = 0;
       }
@@ -2194,7 +2216,7 @@
       currentWeight += oWeight;
 
       if (index === allOrders.length - 1) {
-        buildPhysicalPage(orderBuffer, true);
+        buildPhysicalPage(orderBuffer);
       }
     });
 
@@ -2210,12 +2232,12 @@
         margin:0, 
         filename:'Branch_Summary_Report.pdf', 
         html2canvas:{scale:2, useCORS:true}, 
-        jsPDF:{unit:'mm', format:'a4', orientation:'landscape'}, 
+        jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}, 
         pagebreak:{mode:'css'} 
       }).from(document.getElementById('pdf-content')).save().then(()=>setTimeout(()=>window.close(), 1200));
     };<\/script></body></html>`;
 
-    const win = window.open('', '', 'width=1200,height=850');
+    const win = window.open('', '', 'width=1000,height=900');
     if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
     win.document.write(html); win.document.close();
     
