@@ -1708,11 +1708,17 @@
       options: { maintainAspectRatio: false, cutout: '82%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Sarabun', size: 10 } } } } } 
     });
     
-    // 🚀 วาดกราฟวิเคราะห์สต็อก (NITRO STACKED - แท่งใหญ่ & จิ้มคลีน)
-    // คำนวณความสูงให้แท่งใหญ่เสมอ
+    // 🚀 เวทมนตร์ลบขีด: เปลี่ยนค่า 0 ให้เป็นความว่างเปล่า (กราฟจะได้ไม่วาดเส้นกวนใจ)
+    if (analyticsData.sStacked && analyticsData.sStacked.datasets) {
+      analyticsData.sStacked.datasets.forEach(function(ds) {
+        ds.data = ds.data.map(function(val) { return val === 0 ? null : val; });
+      });
+    }
+
+    // 🚀 วาดกราฟวิเคราะห์สต็อก (ปรับขนาดให้สมส่วนตามสั่ง)
     const branchesList = analyticsData.sStacked.labels || [];
     const chartDiv = document.getElementById('sC').parentElement;
-    chartDiv.style.height = Math.max(300, branchesList.length * 65) + "px"; 
+    chartDiv.style.height = Math.max(300, branchesList.length * 50) + "px"; // 👈 ลดระยะห่างลงเหลือ 50
 
     scObj = new Chart(ctxStock, {
       type: 'bar',
@@ -1720,20 +1726,20 @@
       options: {
         maintainAspectRatio: false,
         indexAxis: 'y', 
-        barThickness: 40, // แท่งหนาสะใจ
+        barThickness: 28, // 👈 ลดความหนาแท่งจาก 40 เหลือ 28
         plugins: {
           legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Prompt' } } },
           tooltip: {
             enabled: true,
-            mode: 'nearest', // จิ้มก้อนไหน โชว์ก้อนนั้น
+            mode: 'nearest', 
             intersect: true, 
             backgroundColor: 'rgba(0,0,0,0.9)',
             padding: 15,
             callbacks: {
               label: function(context) {
-                if (context.raw <= 0) return null; // ซ่อนรายการที่เป็น 0
+                if (!context.raw || context.raw <= 0) return null; 
                 let labelText = ' ' + context.dataset.label + ': ' + context.raw + ' ชิ้น';
-                if (context.raw <= 5) labelText += ' (⚠️ ใกล้หมด!!)'; // แจ้งเตือน
+                if (context.raw <= 5) labelText += ' (⚠️ ใกล้หมด!!)'; 
                 return labelText;
               }
             }
