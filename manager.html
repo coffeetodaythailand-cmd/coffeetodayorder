@@ -2295,32 +2295,34 @@
   }
 
   // 🚀 ฟังก์ชันทำงานจริง (เวอร์ชันแก้บั๊กหมุนค้าง)
+  // 🚀 ฟังก์ชันทำงานจริง (เวอร์ชันสะอาด 100%)
   function executeManagerClose() {
     const btn = document.getElementById('managerExecBtn');
-    const token = localStorage.getItem(TOKEN_KEY); // 🔑 ดึงกุญแจออกมา
+    const token = localStorage.getItem(TOKEN_KEY); 
     
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสั่งปิดงาน...';
     btn.disabled = true;
 
-    // ส่งครบ 3 อย่าง: ID, สถานะ, และ Token
-    google.script.run
-      .withSuccessHandler(function(isSuccess) {
-        if (isSuccess) {
-          showToast('✅ ปิดงานสำเร็จ! เคลียร์กราฟเรียบร้อย');
-          setTimeout(() => location.reload(), 1000); 
+    const finalUrl = `${GAS_URL}?action=setOrderStatus&id=${currentManagerOrderId}&status=Success&token=${token}`;
+    
+    fetch(finalUrl)
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === 'success') {
+          alert('✅ บอสปิดงานสำเร็จ! เคลียร์กราฟเรียบร้อย');
+          location.reload(); 
         } else {
-          alert('❌ สิทธิ์ไม่พอ หรือเกิดข้อผิดพลาดที่ระบบ');
+          alert('❌ สิทธิ์ไม่พอ หรือเกิดข้อผิดพลาด');
           btn.innerHTML = 'ยืนยันปิดงานเลย!';
           btn.disabled = false;
         }
       })
-      .withFailureHandler(function(err) { // 🛡️ กันค้างถ้าเน็ตหลุดหรือระบบพัง
-        alert('❌ ระบบขัดข้อง: ' + err.message);
+      .catch(err => {
+        alert('❌ ระบบขัดข้อง: ' + err);
         btn.innerHTML = 'ยืนยันปิดงานเลย!';
         btn.disabled = false;
-      })
-      .setOrderStatus(currentManagerOrderId, 'Success', token); 
-  }
+      });
+  } // จบฟังก์ชันแค่ตรงนี้พอครับ!
 </script>
 </body>
 </html>
