@@ -576,7 +576,6 @@
     qis.forEach((qi, i) => {
       let qVal = parseFloat(qi.value) || 0;
       if(qVal > 0) {
-        if(!sis[i].value.trim()) return showError(`ใส่สต็อกของ: ${qi.dataset.n}`);
         hasItem = true; d += `${qi.dataset.n} (เหลือ:${sis[i].value}, สั่ง:${qVal})\n`; 
       }
     });
@@ -584,7 +583,6 @@
     cqs.forEach((cq, i) => {
       let qVal = parseFloat(cq.value) || 0; let n = cns[i].value.trim();
       if(n && qVal > 0) {
-        if(!css[i].value.trim()) return showError(`ใส่สต็อกของ: ${n}`);
         hasItem = true; d += `${n} (เหลือ:${css[i].value}, สั่ง:${qVal})\n`;
       }
     });
@@ -662,4 +660,5 @@
 </script>
 </body>
 </html>
+
 
