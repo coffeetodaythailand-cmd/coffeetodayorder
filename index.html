@@ -588,10 +588,19 @@
       elP.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return showError("กรุณากรอกเบอร์โทรศัพท์");
     }
+    // 3. เช็คอีเมล (ต้องไม่ว่าง)
     if (!elE.value.trim()) {
       elE.focus();
       elE.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return showError("กรุณากรอกอีเมลติดต่อ");
+    }
+
+    // 🚩 ส่วนที่เพิ่มใหม่: ตรวจสอบรูปแบบอีเมล (Email Validation)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(elE.value.trim())) {
+      elE.focus();
+      elE.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("รูปแบบอีเมลไม่ถูกต้อง (ตัวอย่าง: name@email.com)");
     }
     if (!elB.value.trim()) {
       elB.focus();
@@ -695,3 +704,4 @@
 </script>
 </body>
 </html>
+
