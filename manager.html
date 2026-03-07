@@ -2132,32 +2132,54 @@
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังวิเคราะห์หน้ากระดาษ...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
+    
     let tablesContent = '';
-    
-    // ✅ 1. สร้างตารางเดียวแบบยาวๆ ไม่ต้องหั่นทีละ 7 บรรทัดแล้ว
-    tablesContent += '<table style="width:100%; border-collapse:collapse; border:1px solid #EEE; margin-bottom:20px; font-family:sans-serif;">';
-    
-    // ✅ 2. ใช้ display: table-header-group เพื่อบังคับให้หัวตารางตามไปแสดงผลทุกครั้งที่ขึ้นหน้าใหม่
-    tablesContent += '<thead style="display:table-header-group; background:#F8F9FA;"><tr>';
-    tablesContent += '<th style="width:10%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">ID</th>';
-    tablesContent += '<th style="width:12%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Date</th>';
-    tablesContent += '<th style="width:15%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Branch</th>';
-    tablesContent += '<th style="width:15%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Customer</th>';
-    tablesContent += '<th style="width:38%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Items</th>';
-    tablesContent += '<th style="width:10%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:center;">Status</th>';
-    tablesContent += '</tr></thead><tbody>';
+    const MAX_LINES_PER_PAGE = 22; // ⬅️ ความจุสูงสุดต่อ 1 หน้า A4 แนวนอน (เปลี่ยนเลขได้ถ้าอยากให้แน่น/หลวมขึ้น)
+    let currentLines = 0;
+    let isFirstPage = true;
+
+    // ฟังก์ชันช่วยสร้างหัวตารางใหม่เสมอเมื่อขึ้นหน้าใหม่
+    function createNewTable() {
+      if (!isFirstPage) {
+        tablesContent += '</tbody></table><div class="html2pdf__page-break"></div>'; // ปิดตารางเดิม + ตัดหน้า
+      }
+      tablesContent += '<table style="width:100%; border-collapse:collapse; border:1px solid #EEE; margin-bottom:20px; font-family:sans-serif;">';
+      tablesContent += '<thead style="background:#F8F9FA;"><tr>';
+      tablesContent += '<th style="width:10%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">ID</th>';
+      tablesContent += '<th style="width:12%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Date</th>';
+      tablesContent += '<th style="width:15%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Branch</th>';
+      tablesContent += '<th style="width:15%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Customer</th>';
+      tablesContent += '<th style="width:38%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:left;">Items</th>';
+      tablesContent += '<th style="width:10%; padding:12px 8px; border-bottom:2px solid #A91D3A; font-size:12px; text-align:center;">Status</th>';
+      tablesContent += '</tr></thead><tbody>';
+      
+      currentLines = 0;
+      isFirstPage = false;
+    }
+
+    // เริ่มสร้างหน้าแรก
+    createNewTable();
 
     allOrders.forEach(o => {
-      // ปัดบรรทัดรายการสินค้า
-      let itemsFormatted = o.items ? o.items.replace(/\n/g, '<br><br>') : '-';
+      // 🧠 ระบบ AI คำนวณพื้นที่: นับจำนวนรายการสินค้าในบิลนี้
+      let itemsList = o.items ? o.items.split('\n').filter(i => i.trim() !== '') : [];
       
-      // ✅ 3. ใส่ page-break-inside: avoid เพื่อป้องกันไม่ให้ 1 ออเดอร์ถูกตัดขาดครึ่งกลางกระดาษ
-      tablesContent += '<tr style="page-break-inside: avoid;">';
+      // คำนวณความสูง (1 รายการ = 1 บรรทัด + เผื่อช่องว่างหัวท้าย 1.5)
+      let rowHeightCost = itemsList.length + 1.5;
+
+      // ถ้าเอาบิลนี้ใส่แล้วจะล้นหน้า MAX_LINES_PER_PAGE ให้ตัดขึ้นหน้าใหม่พร้อมวาดหัวตารางรอก่อนเลย!
+      if (currentLines + rowHeightCost > MAX_LINES_PER_PAGE && currentLines > 0) {
+        createNewTable();
+      }
+
+      let itemsFormatted = itemsList.join('<br><br>');
+      
+      tablesContent += '<tr>';
       tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; color:#A91D3A; font-weight:bold; vertical-align:top;">${o.id}</td>`;
       tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:10px; color:#666; vertical-align:top;">${o.date}</td>`;
       tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; font-weight:bold; vertical-align:top;">${o.branch}</td>`;
@@ -2165,16 +2187,19 @@
       tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; vertical-align:top; line-height:1.4;">${itemsFormatted}</td>`;
       tablesContent += `<td style="padding:10px 8px; border-bottom:1px solid #F0F0F0; font-size:11px; font-weight:bold; text-align:center; vertical-align:top;">${o.status}</td>`;
       tablesContent += '</tr>';
+
+      // บวกพื้นที่ของบิลนี้สะสมเข้าไปในหน้าปัจจุบัน
+      currentLines += rowHeightCost;
     });
     
+    // ปิดตารางสุดท้าย
     tablesContent += '</tbody></table>';
 
-    // กลับมาใช้ Pop-up ตัวเดิมที่ชัวร์กว่า
+    // เปิด Pop-up สร้าง PDF
     const win = window.open('', '', 'width=1100,height=850');
     if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
     
-    // ✅ เพิ่ม pagebreak mode: 'css' เข้าไปในตั้งค่าเพื่อให้ระบบรองรับคำสั่งหลบการตัดคำ
-    win.document.write(`<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head><body style="padding:20px; font-family:sans-serif;"><h2>Branch Summary Report</h2><p>ช่วงวันที่: ${sDate} - ${eDate}</p>${tablesContent}<script>window.onload=()=>{ html2pdf().set({margin: 10, filename: 'Report.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2 }, pagebreak: { mode: ['css', 'legacy'] }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }}).from(document.body).save().then(()=>{setTimeout(()=>window.close(), 1500)}); }<\/script></body></html>`);
+    win.document.write(`<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head><body style="padding:20px; font-family:sans-serif;"><h2>Branch Summary Report</h2><p>ช่วงวันที่: ${sDate} - ${eDate}</p>${tablesContent}<script>window.onload=()=>{ html2pdf().set({margin: 10, filename: 'Report.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }}).from(document.body).save().then(()=>{setTimeout(()=>window.close(), 1500)}); }<\/script></body></html>`);
     win.document.close();
     
     // ✅ ปลดล็อกปุ่มให้กดซ้ำได้ทันที
