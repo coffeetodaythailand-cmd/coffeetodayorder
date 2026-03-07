@@ -2126,30 +2126,37 @@
     } 
   }
 
- // 📄 ระบบรายงาน (V9 Pro Layout Engine) - แน่นพิเศษ 100% ไร้หน้าว่าง โหลดแล้วปิดอัตโนมัติ
+ // 📄 ระบบรายงาน (V10 Portrait Pro) - แนวตั้ง, มีเลขหน้า, ถมพื้นที่แน่น 100%, ไร้หน้าว่าง
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดเตรียม PDF...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังรันเลขหน้า...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น", eDate = document.getElementById('eDate').value || "ปัจจุบัน";
-    let pagesHtml = '', currentWeight = 0, isFirstPage = true;
-    const PAGE_LIMIT = 45; // 🚀 จูนความแน่นเพิ่มขึ้น ~25% ตามบอสสั่ง
+    let pagesHtml = '', currentWeight = 0, isFirstPage = true, pageNum = 1;
+    
+    // 🚀 จูนความจุสำหรับแนวตั้ง (A4 แนวตั้งยาวกว่า แต่อาจต้องเผื่อระยะบรรทัด)
+    const PAGE_LIMIT = 60; 
 
     function createNewTable() {
+      // ✅ ใส่เลขหน้าไว้ที่ท้ายตารางก่อนตัดหน้า
       if (!isFirstPage) {
-        pagesHtml += '</tbody></table></div><div class="page-break"></div>';
+        pagesHtml += `</tbody></table><div style="text-align:right; font-size:10px; color:#999; margin-top:5px;">หน้า ${pageNum++}</div></div><div class="page-break"></div>`;
       }
-      pagesHtml += `<div class="report-container"><table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:10px; font-family:Sarabun, sans-serif;">
+      pagesHtml += `<div class="report-container">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+           <span style="font-size:10px; color:#999;">${isFirstPage ? '' : 'COFFEETODAY - Summary'}</span>
+           <span style="font-size:10px; color:#999;">${isFirstPage ? '' : 'หน้า ' + pageNum}</span>
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:5px; font-family:Sarabun, sans-serif;">
         <thead style="background:#F8F9FA; display:table-header-group;"><tr>
-          <th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>
-          <th style="width:12%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>
-          <th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>
-          <th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Customer</th>
-          <th style="width:38%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>
-          <th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>
+          <th style="width:12%; padding:8px 5px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>
+          <th style="width:15%; padding:8px 5px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>
+          <th style="width:18%; padding:8px 5px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>
+          <th style="width:45%; padding:8px 5px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>
+          <th style="width:10%; padding:8px 5px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>
         </tr></thead><tbody>`;
       currentWeight = 0; isFirstPage = false;
     }
@@ -2157,34 +2164,34 @@
     createNewTable();
     allOrders.forEach(o => {
       const itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
-      const oWeight = 1.0 + itemLines.length; // 🧠 ปรับน้ำหนักเบาลงเพื่อให้ขยับขึ้นมาต่อกันได้แน่นขึ้น
+      const oWeight = 1.2 + itemLines.length; 
       if (currentWeight + oWeight > PAGE_LIMIT && currentWeight > 0) createNewTable();
 
       itemLines.forEach((line, idx) => {
         const isFirst = (idx === 0);
-        // ✅ กันบิลขาดครึ่งด้วย page-break-inside: avoid
-        pagesHtml += `<tr style="page-break-inside:avoid; ${isFirst ? 'border-top: 1px solid #BBB;' : ''}">
-          <td style="padding:6px 8px; color:#A91D3A; font-weight:bold; vertical-align:top;">${isFirst ? o.id : ''}</td>
-          <td style="padding:6px 8px; color:#666; font-size:11px; vertical-align:top;">${isFirst ? o.date : ''}</td>
-          <td style="padding:6px 8px; font-weight:bold; vertical-align:top;">${isFirst ? o.branch : ''}</td>
-          <td style="padding:6px 8px; vertical-align:top;">${isFirst ? o.customer : ''}</td>
-          <td style="padding:6px 8px; border-top:${isFirst ? 'none' : '1px dashed #EEE'}; vertical-align:top;">${line}</td>
-          <td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top;">${isFirst ? o.status : ''}</td>
+        pagesHtml += `<tr style="page-break-inside:avoid; ${isFirst ? 'border-top: 1px solid #CCC;' : ''}">
+          <td style="padding:6px 5px; color:#A91D3A; font-weight:bold; vertical-align:top;">${isFirst ? o.id : ''}</td>
+          <td style="padding:6px 5px; color:#666; font-size:10px; vertical-align:top;">${isFirst ? o.date : ''}</td>
+          <td style="padding:6px 5px; font-weight:bold; vertical-align:top;">${isFirst ? o.branch : ''}</td>
+          <td style="padding:6px 5px; border-top:${isFirst ? 'none' : '1px dashed #EEE'}; vertical-align:top; line-height:1.4;">${line}</td>
+          <td style="padding:6px 5px; font-weight:bold; text-align:center; vertical-align:top; font-size:10px;">${isFirst ? o.status : ''}</td>
         </tr>`;
       });
       currentWeight += oWeight;
     });
 
-    pagesHtml += '</tbody></table></div>';
-    // ✅ เคล็ดลับวิชาบอส: ลบ page-break ตัวสุดท้ายทิ้งกันหน้าว่างท้ายไฟล์
+    // ปิดหน้าสุดท้ายพร้อมเลขหน้าตัวจบ
+    pagesHtml += `</tbody></table><div style="text-align:right; font-size:10px; color:#999; margin-top:5px;">หน้า ${pageNum}</div></div>`;
+    
+    // Cleanup page-break ส่วนเกิน (ถ้ามี)
     pagesHtml = pagesHtml.replace(/<div class="page-break"><\/div>\s*$/, '');
 
     const html = `<html><head><meta charset="UTF-8"><style>
       @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
       body { font-family:'Sarabun', sans-serif; color:#333; margin:0; padding:0; }
-      #pdf-content { padding:10mm; }
-      .header-title { font-family:'Prompt', sans-serif; color:#A91D3A; text-align:center; font-size:24px; margin-bottom:5px; }
-      .date-range { text-align:center; color:#666; font-size:14px; margin-bottom:20px; }
+      #pdf-content { padding:12mm 10mm; }
+      .header-title { font-family:'Prompt', sans-serif; color:#A91D3A; text-align:center; font-size:22px; margin-bottom:5px; }
+      .date-range { text-align:center; color:#666; font-size:13px; margin-bottom:20px; }
       .page-break { page-break-before:always; height:0; margin:0; padding:0; }
     </style><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head>
     <body><div id="pdf-content">
@@ -2192,11 +2199,16 @@
       <div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>
       ${pagesHtml}
     </div><script>window.onload=()=>{
-      html2pdf().set({ margin:0, filename:'Report.pdf', html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:'mm', format:'a4', orientation:'landscape'}, pagebreak:{mode:'css'} })
-      .from(document.getElementById('pdf-content')).save().then(()=>setTimeout(()=>window.close(), 1000));
+      html2pdf().set({ 
+        margin:0, 
+        filename:'Branch_Report.pdf', 
+        html2canvas:{scale:2, useCORS:true}, 
+        jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}, 
+        pagebreak:{mode:'css'} 
+      }).from(document.getElementById('pdf-content')).save().then(()=>setTimeout(()=>window.close(), 1000));
     };<\/script></body></html>`;
 
-    const win = window.open('', '', 'width=1200,height=850');
+    const win = window.open('', '', 'width=1000,height=900');
     if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
     win.document.write(html); win.document.close();
     
