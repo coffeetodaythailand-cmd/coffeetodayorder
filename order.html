@@ -386,6 +386,28 @@
     .copy-btn:hover { 
       color: var(--primary); 
     }
+    /* 🛡️ สไตล์สำหรับสินค้าที่ของหมด (Nitro Sold Out) */
+    .sold-out-row {
+      opacity: 0.4; /* ทำให้แถวจางลง */
+      background-color: #f9f9f9;
+      position: relative;
+    }
+    
+    .sold-out-row .qty-in {
+      background: #eee !important;
+      cursor: not-allowed; /* เปลี่ยนรูปเมาส์เป็นห้ามกด */
+    }
+
+    .badge-soldout {
+      background: #666;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 5px;
+      font-family: 'Prompt';
+      display: inline-block;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -532,7 +554,20 @@
       const s = document.createElement('div'); s.id = `s-${i}`; s.className = `table-section ${i===0?'active':''}`;
       let h = `<table width="100%"><thead><tr><th>สินค้า</th><th width="100">คงเหลือ</th><th width="75">สั่ง</th></tr></thead><tbody>`;
       initData.products[c].forEach(p => { 
-        h += `<tr><td style="padding-right:10px;">${p.name}</td><td><input type="text" class="qty-in si" placeholder="..."></td><td><input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0"></td></tr>`; 
+        // 🚀 1. ถ้าสถานะเป็น Inactive ให้ "ซ่อน" ทันที (หน้าเว็บจะโหลดเร็วขึ้น)
+        if (p.status === 'Inactive') return;
+
+        // 🚀 2. เช็คสถานะ SoldOut (ของหมด)
+        const isSoldOut = (p.status === 'SoldOut');
+        const rowClass = isSoldOut ? 'sold-out-row' : '';
+        const inputAttr = isSoldOut ? 'disabled readonly' : ''; // ล็อกช่องกรอกข้อมูล
+        const badge = isSoldOut ? '<span class="badge-soldout">หมด</span>' : '';
+
+        h += `<tr class="${rowClass}">
+                <td style="padding-right:10px;">${p.name} ${badge}</td>
+                <td><input type="text" class="qty-in si" placeholder="..." ${inputAttr}></td>
+                <td><input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0" ${inputAttr}></td>
+              </tr>`;
       });
       s.innerHTML = h + `</tbody></table>`; l.appendChild(s);
     });
