@@ -1749,132 +1749,87 @@
    */
     function renderMenuAccordion(menuData) {
     if(!menuData || !menuData.categories) return;
-    
     menuObj = menuData; 
-    let chipsHtmlContent = ''; 
-    let itemsHtmlContent = '';
-    let selectOptionsHtml = '';
-    
-    if(!currentCat && menuData.categories.length > 0) {
-      currentCat = menuData.categories[0];
-    }
-    
-    // 1. สร้างปุ่มหมวดหมู่ (เพิ่มเลขลำดับ idx + 1)
-    menuData.categories.forEach(function(categoryName, idx) {
-      const itemCount = menuData.grouped[categoryName] ? menuData.grouped[categoryName].length : 0;
-      const isSelected = (categoryName === currentCat ? 'active' : '');
-      
-      selectOptionsHtml += '<option value="' + categoryName + '">' + categoryName + '</option>';
-      
-      chipsHtmlContent += '<div class="chip ' + isSelected + '" ';
-      chipsHtmlContent += 'onclick="selectCat(\'' + categoryName + '\')" ';
-      chipsHtmlContent += 'draggable="true" ';
-      chipsHtmlContent += 'ondragstart="dragStartCat(event, ' + idx + ')" ';
-      chipsHtmlContent += 'ondragover="dragOverCat(event)" ';
-      chipsHtmlContent += 'ondrop="dropCat(event, ' + idx + ')" ';
-      chipsHtmlContent += 'style="cursor: grab;"';
-      chipsHtmlContent += '>';
-      chipsHtmlContent += '<i class="fas fa-grip-vertical" style="margin-right: 8px; color: #CCC;"></i>';
-      // ✅ ใส่ตัวเลขลำดับ 1. 2. 3. หน้าชื่อหมวดหมู่
-      chipsHtmlContent += '<b style="margin-right:5px; opacity:0.6;">' + (idx + 1) + '.</b> ' + categoryName + ' (' + itemCount + ')';
-      chipsHtmlContent += '</div>';
-    });
-    
-    // 2. สร้างรายการสินค้า (เพิ่มเลขลำดับ idx + 1)
-    if(currentCat && menuData.grouped[currentCat]) {
-      menuData.grouped[currentCat].forEach(function(product, idx) { 
-        const isProductActive = (product.status === 'Active' ? 'checked' : '');
-        
-        itemsHtmlContent += '<div class="cat-item" ';
-        itemsHtmlContent += 'draggable="true" ';
-        itemsHtmlContent += 'ondragstart="dragStartItem(event, ' + idx + ')" ';
-        itemsHtmlContent += 'ondragover="dragOverItem(event)" ';
-        itemsHtmlContent += 'ondrop="dropItem(event, ' + idx + ')" ';
-        itemsHtmlContent += 'style="display:flex; justify-content:space-between; padding:20px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor: grab;">';
-        
-        itemsHtmlContent += '<div style="display:flex; align-items:center; gap: 15px;">';
-        itemsHtmlContent += '<i class="fas fa-grip-lines" style="color: #DDD; font-size: 20px;"></i>';
-        itemsHtmlContent += '<div>';
-        // ✅ ใส่ตัวเลขลำดับ 1. 2. 3. หน้าชื่อสินค้า
-        itemsHtmlContent += '<span style="font-weight:600; color:#333; font-size:16px;"><span style="color:var(--red); margin-right:8px;">' + (idx + 1) + '.</span>' + product.name + '</span>';
-        itemsHtmlContent += '<div style="font-size:11px; color:#AAA; margin-top:5px;">ID Ref: ' + product.rowId + '</div>';
-        itemsHtmlContent += '</div>';
-        itemsHtmlContent += '</div>';
+    let chipsHtml = '', itemsHtml = '', selectHtml = '';
+    if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
 
-        itemsHtmlContent += '<div style="display:flex; gap:32px; align-items:center;">';
-        itemsHtmlContent += '<label class="switch">';
-        itemsHtmlContent += '<input type="checkbox" ' + isProductActive + ' onchange="toggleItem(\'' + product.rowId + '\', \'' + product.name + '\', \'' + currentCat + '\', this)">';
-        itemsHtmlContent += '<span class="slider"></span>';
-        itemsHtmlContent += '</label>';
-        itemsHtmlContent += '<i class="fas fa-edit" style="color:#CCCCCC; cursor:pointer; font-size:18px; transition:0.3s;" onmouseover="this.style.color=\'var(--red)\'" onmouseout="this.style.color=\'#CCCCCC\'" onclick="openProdModal(' + product.rowId + ', \'' + product.name + '\', \'' + currentCat + '\')"></i>';
-        itemsHtmlContent += '</div>';
-        itemsHtmlContent += '</div>'; 
+    // 1. ส่วนจัดการหมวดหมู่ (Category Chips)
+    menuData.categories.forEach((cat, idx) => {
+      const isSelected = (cat === currentCat ? 'active' : '');
+      selectHtml += `<option value="${cat}">${cat}</option>`;
+      chipsHtml += `
+        <div class="chip ${isSelected}" draggable="true" ondragstart="dragStartCat(event, ${idx})" ondragover="dragOverCat(event)" ondrop="dropCat(event, ${idx})" style="cursor:grab; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
+          <input type="number" value="${idx + 1}" onchange="moveCatManual(${idx}, this.value - 1)" style="width:35px; border:none; background:rgba(0,0,0,0.05); border-radius:4px; text-align:center; font-size:12px; font-weight:bold; color:inherit;">
+          <span onclick="selectCat('${cat}')">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
+          <i class="fas fa-trash-alt" style="margin-left:8px; font-size:12px; opacity:0.5; cursor:pointer;" onclick="deleteCat('${cat}')"></i>
+        </div>`;
+    });
+
+    // 2. ส่วนจัดการรายการสินค้า (Menu Items)
+    if(currentCat && menuData.grouped[currentCat]) {
+      menuData.grouped[currentCat].forEach((p, idx) => {
+        const isActive = (p.status === 'Active' ? 'checked' : '');
+        itemsHtml += `
+          <div class="cat-item" draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})" style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:grab;">
+            <div style="display:flex; align-items:center; gap:15px;">
+              <i class="fas fa-grip-lines" style="color:#DDD;"></i>
+              <input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" style="width:40px; padding:5px; border:1px solid #EEE; border-radius:8px; text-align:center; font-weight:bold; color:var(--red);">
+              <div>
+                <span style="font-weight:600; color:#333; font-size:16px;">${p.name}</span>
+                <div style="font-size:10px; color:#AAA; margin-top:2px;">ID: ${p.rowId}</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:25px; align-items:center;">
+              <label class="switch"><input type="checkbox" ${isActive} onchange="toggleItem('${p.rowId}', '${p.name}', '${currentCat}', this)"><span class="slider"></span></label>
+              <i class="fas fa-edit" style="color:#CCC; cursor:pointer;" onclick="openProdModal(${p.rowId}, '${p.name}', '${currentCat}')"></i>
+              <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#EEE'" onclick="deleteProd('${p.rowId}', '${p.name}')"></i>
+            </div>
+          </div>`;
       });
     }
-    
-    document.getElementById('catChips').innerHTML = chipsHtmlContent; 
-    document.getElementById('menuItems').innerHTML = itemsHtmlContent; 
-    document.getElementById('pCatSelect').innerHTML = selectOptionsHtml;
+    document.getElementById('catChips').innerHTML = chipsHtml; 
+    document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:40px; color:#CCC;">ไม่มีสินค้าในหมวดนี้</div>';
+    document.getElementById('pCatSelect').innerHTML = selectHtml;
   }
 
-  // ---------------------------------------------------------
-  // Drag & Drop Event Handlers (สำหรับหมวดหมู่)
-  // ---------------------------------------------------------
-  function dragStartCat(event, index) {
-    dragCatIndex = index;
-    event.dataTransfer.effectAllowed = 'move';
-    event.target.classList.add('dragging');
+  function moveCatManual(from, to) {
+    if (to < 0 || to >= menuObj.categories.length) return renderMenuAccordion(menuObj);
+    const item = menuObj.categories.splice(from, 1)[0];
+    menuObj.categories.splice(to, 0, item);
+    renderMenuAccordion(menuObj);
   }
 
-  function dragOverCat(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+  function moveItemManual(from, to) {
+    const items = menuObj.grouped[currentCat];
+    if (to < 0 || to >= items.length) return renderMenuAccordion(menuObj);
+    const item = items.splice(from, 1)[0];
+    items.splice(to, 0, item);
+    renderMenuAccordion(menuObj);
   }
 
-  function dropCat(event, targetIndex) {
-    event.preventDefault();
-    const activeElem = document.querySelector('.chip.dragging');
-    if (activeElem) activeElem.classList.remove('dragging');
+  function deleteCat(name) {
+    if (!confirm(`ลบหมวดหมู่ "${name}"?`)) return;
+    fetch(`${GAS_URL}?action=deleteCategory&catName=${encodeURIComponent(name)}&token=${localStorage.getItem(TOKEN_KEY)}`)
+      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("🗑️ ลบหมวดหมู่สำเร็จ"); });
+  }
 
-    if (dragCatIndex !== null && dragCatIndex !== targetIndex) {
-      // สลับ Array ของหมวดหมู่ในหน้าจอ (ยังไม่เซฟขึ้น Google Sheets)
-      const categoriesArray = menuObj.categories;
-      const movedCategory = categoriesArray.splice(dragCatIndex, 1)[0];
-      categoriesArray.splice(targetIndex, 0, movedCategory);
-      
-      // วาดหน้าจอใหม่ทันที
-      renderMenuAccordion(menuObj);
-    }
+  function deleteProd(id, name) {
+    if (!confirm(`ลบสินค้า "${name}"?`)) return;
+    fetch(`${GAS_URL}?action=deleteProduct&id=${id}&token=${localStorage.getItem(TOKEN_KEY)}`)
+      .then(res => res.json()).then(d => { renderMenuAccordion(d); showToast("🗑️ ลบสินค้าสำเร็จ"); });
+  }
+
+  function dragStartCat(e, i) { dragCatIndex = i; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); }
+  function dragOverCat(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+  function dropCat(e, target) { 
+    e.preventDefault(); if (dragCatIndex !== null && dragCatIndex !== target) moveCatManual(dragCatIndex, target);
     dragCatIndex = null;
   }
-
-  // ---------------------------------------------------------
-  // Drag & Drop Event Handlers (สำหรับสินค้า)
-  // ---------------------------------------------------------
-  function dragStartItem(event, index) {
-    dragItemIndex = index;
-    event.dataTransfer.effectAllowed = 'move';
-    event.target.classList.add('dragging');
-  }
-
-  function dragOverItem(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }
-
-  function dropItem(event, targetIndex) {
-    event.preventDefault();
-    const activeElem = document.querySelector('.cat-item.dragging');
-    if (activeElem) activeElem.classList.remove('dragging');
-
-    if (dragItemIndex !== null && dragItemIndex !== targetIndex) {
-      // สลับ Array ของสินค้าภายใต้หมวดหมู่ปัจจุบัน
-      const itemsArray = menuObj.grouped[currentCat];
-      const movedItem = itemsArray.splice(dragItemIndex, 1)[0];
-      itemsArray.splice(targetIndex, 0, movedItem);
-      
-      renderMenuAccordion(menuObj);
-    }
+  function dragStartItem(e, i) { dragItemIndex = i; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); }
+  function dragOverItem(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+  function dropItem(e, target) {
+    e.preventDefault(); if (dragItemIndex !== null && dragItemIndex !== target) moveItemManual(dragItemIndex, target);
     dragItemIndex = null;
   }
 
