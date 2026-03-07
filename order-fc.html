@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root { 
+      --primary: #A91D3A; [cite: 1]
+      --dark: #2D3133; [cite: 2]
+      --bg: #F8F9FA; 
+    }
+    
+    body { 
+      font-family: 'Sarabun', sans-serif; [cite: 2]
+      background: var(--bg); [cite: 3]
+      margin: 0; 
+      padding: 20px; 
+    }
+    
+    .card { 
+      max-width: 600px; [cite: 3]
+      margin: auto; [cite: 4]
+      background: #FFF; 
+      border-radius: 24px; 
+      border-top: 10px solid var(--primary); 
+      padding: 35px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+      position: relative; [cite: 4]
+    }
+    
+    h2 { 
+      text-align: center; [cite: 5]
+      color: var(--primary); [cite: 6]
+      margin-bottom: 30px; 
+      font-family: 'Prompt'; [cite: 6]
+    }
+    
+    label { 
+      font-size: 13px; [cite: 6]
+      font-weight: 600; [cite: 7]
+      color: #666; 
+      margin-bottom: 5px; 
+      display: block; [cite: 7]
+    }
+    
+    input.main-in { 
+      width: 100%; [cite: 7]
+      padding: 14px; [cite: 8]
+      margin-bottom: 20px; 
+      border: 1px solid #DDD; 
+      border-radius: 12px; 
+      box-sizing: border-box; 
+      outline: none; [cite: 8]
+    }
+    
+    input:focus { 
+      border-color: var(--primary); [cite: 9]
+    }
+    
+    .tab-btn { 
+      padding: 10px 22px; [cite: 10]
+      border: 1px solid #EEE; [cite: 11]
+      background: #FFF; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      margin: 0 5px 10px 0; 
+      font-weight: 600; 
+      transition:0.2s; [cite: 11]
+    }
+    
+    .tab-btn.active { 
+      background: var(--primary); [cite: 12]
+      color: #FFF; [cite: 13]
+      border-color: var(--primary); 
+      box-shadow: 0 4px 10px rgba(169,29,58,0.3); [cite: 13]
+    }
+    
+    .table-section { 
+      display: none; [cite: 13]
+    }
+    
+    .table-section.active { 
+      display: block; [cite: 14]
+      animation: fadeIn 0.4s; [cite: 15]
+    }
+    
+    @keyframes fadeIn { 
+      from { opacity: 0; [cite: 15]
+      transform: translateY(5px); } [cite: 16]
+      to { opacity: 1; transform: translateY(0); [cite: 16]
+      } 
+    }
+    
+    table { 
+      width: 100%; [cite: 17]
+      border-collapse: separate; [cite: 18]
+      border-spacing: 0 8px; 
+      margin-top: 5px; [cite: 18]
+    }
+    
+    th { 
+      text-align: left; [cite: 18]
+      color: #999; [cite: 19]
+      font-size: 12px; 
+      padding-bottom: 5px; [cite: 19]
+    }
+    
+    td { 
+      vertical-align: middle; [cite: 19]
+    }
+    
+    .input-wrap { 
+      position: relative; [cite: 20]
+      width: 100%; [cite: 20]
+    }
+    
+    .qty-in { 
+      width: 100%; [cite: 21]
+      padding: 10px; [cite: 22]
+      text-align: center; 
+      border: 1px solid #EEE; 
+      border-radius: 10px; 
+      font-weight: 600; 
+      background: #FAFAFA; 
+      box-sizing: border-box; 
+      outline: none; 
+      transition: 0.2s; 
+      font-size: 16px; [cite: 22]
+    }
+    
+    .qty-in:focus { 
+      border-color: var(--primary); [cite: 23]
+      background: #FFF; [cite: 24]
+    }
+
+    .submit-btn { 
+      width: 100%; [cite: 24]
+      padding: 18px; [cite: 25]
+      background: var(--dark); 
+      color: #FFF; [cite: 25]
+      border: none; [cite: 26]
+      border-radius: 15px; 
+      font-size: 18px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      margin-top: 30px; 
+      transition: 0.2s; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1); [cite: 26]
+    }
+    
+    .submit-btn:hover { 
+      transform: translateY(-2px); [cite: 26]
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15); [cite: 27]
+    }
+
+    .other-header { 
+      display: flex; [cite: 27]
+      gap: 10px; [cite: 28]
+      font-size: 11px; 
+      color: #AAA; 
+      margin-bottom: 10px; 
+      padding: 0 5px; 
+      font-weight: 600; 
+      text-transform: uppercase; [cite: 28]
+    }
+    
+    .other-row { 
+      display: flex; [cite: 29]
+      gap: 10px; [cite: 30]
+      margin-bottom: 12px; 
+      align-items: center; 
+      animation: fadeIn 0.3s; [cite: 30]
+    }
+    
+    .col-name { flex: 1; [cite: 30]
+    }
+    .col-stock { width: 100px; } [cite: 31]
+    .col-qty { width: 75px; [cite: 31]
+    }
+    
+    .btn-del { 
+      color: #DDD; [cite: 32]
+      cursor: pointer; [cite: 33]
+      font-size: 16px; 
+      padding: 5px; 
+      transition: 0.2s; [cite: 33]
+    }
+    
+    .btn-del:hover { 
+      color: var(--primary); [cite: 33]
+    }
+    
+    .overlay { 
+      display: none; [cite: 34]
+      position: fixed; [cite: 35]
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.8); 
+      backdrop-filter: blur(5px); 
+      align-items: center; 
+      justify-content: center; [cite: 35]
+    }
+    
+    .modal { 
+      background: #FFF; [cite: 36]
+      padding: 40px; [cite: 37]
+      border-radius: 30px; 
+      width: 90%; 
+      max-width: 450px; 
+      text-align: center; 
+      border-top: 12px solid var(--primary); 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3); [cite: 37]
+    }
+    
+    .summary-list { 
+      text-align: left; [cite: 38]
+      margin: 20px 0; [cite: 39]
+      background: #FDFDFD; 
+      padding: 20px; 
+      border-radius: 15px; 
+      max-height: 250px; 
+      overflow-y: auto; 
+      line-height: 1.8; 
+      border: 1px solid #F5F5F5; [cite: 39]
+      font-size: 14px; [cite: 40]
+    }
+
+    #errT { 
+      position: fixed; [cite: 40]
+      bottom: -100px; 
+      left: 50%; [cite: 41]
+      transform: translateX(-50%); 
+      background: linear-gradient(135deg, #A91D3A 0%, #7a152a 100%); 
+      color: white; 
+      padding: 16px 30px; 
+      border-radius: 50px; 
+      z-index: 9999; 
+      font-family: 'Prompt'; [cite: 41]
+      font-size: 14px; [cite: 42]
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      box-shadow: 0 10px 30px rgba(169,29,58,0.4); 
+      transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); [cite: 42]
+    }
+    
+    #errT.show { 
+      bottom: 40px; [cite: 43]
+    }
+
+    .loading-container { 
+      display: flex; [cite: 44]
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; [cite: 45]
+      padding: 60px 0; 
+      color: #BBB; [cite: 45]
+    }
+    
+    .spinner { 
+      width: 45px; [cite: 45]
+      height: 45px; [cite: 46]
+      border: 4px solid #F3F3F3; 
+      border-top: 4px solid var(--primary); 
+      border-radius: 50%; 
+      animation: spin 1s linear infinite; 
+      margin-bottom: 15px; [cite: 46]
+    }
+    
+    @keyframes spin { 
+      0% { transform: rotate(0deg); [cite: 47]
+      } 
+      100% { transform: rotate(360deg); [cite: 48]
+      } 
+    }
+
+    .fab-container { 
+      position: fixed; [cite: 49]
+      bottom: 25px; [cite: 50]
+      right: 25px; 
+      z-index: 999; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-end; 
+      gap: 15px; [cite: 50]
+    }
+    
+    .fab-btn { 
+      width: 55px; [cite: 51]
+      height: 55px; [cite: 52]
+      background: var(--primary); 
+      color: white; 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 22px; 
+      cursor: pointer; [cite: 52]
+      box-shadow: 0 10px 25px rgba(169,29,58,0.4); [cite: 53]
+      transition: 0.3s; 
+      opacity: 0.85; 
+      border: none; [cite: 53]
+    }
+    
+    .fab-btn:hover { 
+      transform: scale(1.1); [cite: 54]
+      opacity: 1; [cite: 55]
+    }
+    
+    .help-menu { 
+      display: none; [cite: 55]
+      background: white; [cite: 56]
+      padding: 20px; 
+      border-radius: 20px; 
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15); 
+      width: 240px; 
+      border-bottom: 5px solid var(--primary); 
+      animation: slideInUp 0.3s ease-out; [cite: 56]
+    }
+    
+    @keyframes slideInUp { 
+      from { opacity: 0; [cite: 57]
+      transform: translateY(20px); } [cite: 58]
+      to { opacity: 1; transform: translateY(0); [cite: 58]
+      } 
+    }
+    
+    .help-item-wrap { 
+      display: flex; [cite: 59]
+      align-items: center; [cite: 60]
+      justify-content: space-between; 
+      background: #F9F9F9; 
+      border-radius: 12px; 
+      margin-bottom: 8px; 
+      padding-right: 10px; [cite: 60]
+    }
+    
+    .help-link { 
+      display: flex; [cite: 61]
+      align-items: center; [cite: 62]
+      gap: 12px; 
+      padding: 12px; 
+      text-decoration: none; 
+      color: var(--dark); 
+      flex: 1; 
+      font-size: 14px; 
+      font-weight: 600; [cite: 62]
+    }
+    
+    .help-item { 
+      display: flex; [cite: 63]
+      align-items: center; [cite: 64]
+      gap: 12px; 
+      padding: 12px; 
+      text-decoration: none; 
+      color: var(--dark); 
+      border-radius: 12px; 
+      transition: 0.2s; 
+      font-size: 14px; 
+      font-weight: 600; 
+      margin-bottom: 5px; 
+      background: #F9F9F9; [cite: 64]
+    }
+    
+    .help-item:hover, .help-link:hover { 
+      background: #F0F0F0; [cite: 65]
+      color: var(--primary); [cite: 66]
+    }
+    
+    .help-item i, .help-link i { 
+      font-size: 18px; [cite: 66]
+    }
+    
+    .line-color { color: #06C755; } [cite: 67]
+    .phone-color { color: #3498db; [cite: 67]
+    }
+    
+    .copy-btn { 
+      background: none; [cite: 68]
+      border: none; [cite: 69]
+      color: #CCC; 
+      cursor: pointer; 
+      padding: 8px; 
+      transition: 0.2s; 
+      font-size: 16px; 
+      border-left: 1px solid #EEE; 
+      margin-left: 5px; [cite: 69]
+    }
+    
+    .copy-btn:hover { 
+      color: var(--primary); [cite: 70]
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9p-JEXH95pjW6H5IkkHR3O7hkJuxg7v8",
+      authDomain: "coffeetoday-db.firebaseapp.com",
+      projectId: "coffeetoday-db",
+      storageBucket: "coffeetoday-db.firebasestorage.app",
+      messagingSenderId: "949270145151",
+      appId: "1:949270145151:web:ae6cbc6c5c5d54a502b74a"
+    };
+    firebase.initializeApp(firebaseConfig); [cite: 71, 72]
+    const db = firebase.firestore(); [cite: 72]
+  </script>
+</head>
+<body>
+
+<div id="errT"><i class="fas fa-exclamation-circle"></i> <span id="errM"></span></div>
+
+<div class="card">
+  <div style="text-align:center; margin-bottom:15px;">
+    <img src="https://raw.githubusercontent.com/coffeetodaythailand-cmd/coffeetodayorder/main/emailLogo2025-09-11-03-46-29-029.png" style="width:110px; height:auto;">
+  </div>
+
+  <h2>CoffeeToday Order</h2>
+  
+  <label>ชื่อผู้สั่ง</label>
+  <input type="text" id="cN" class="main-in" placeholder="ระบุชื่อของคุณ">
+  
+  <label>เบอร์โทรศัพท์</label>
+  <input type="tel" id="cP" class="main-in" placeholder="08x-xxx-xxxx" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+  
+  <label>อีเมลติดต่อ (บังคับ)</label>
+  <input type="email" id="cE" class="main-in" placeholder="example@email.com">
+  
+  <label>สาขา</label>
+  <input type="text" id="cB" class="main-in" placeholder="ระบุชื่อสาขา">
+  
+  <div id="tabs" style="margin-bottom:20px; display:flex; flex-wrap:wrap;"></div>
+  
+  <div id="loading-area" class="loading-container">
+    <div class="spinner"></div>
+    <span style="font-size:12px; [cite: 72]
+    font-family:'Prompt'; letter-spacing:1px;">กำลังเตรียมเมนู...</span> [cite: 73]
+  </div>
+
+  <div id="lists"></div>
+
+  <div id="sec-others" class="table-section">
+    <h4 style="color:var(--primary); [cite: 73]
+    margin:15px 0 5px;"><i class="fas fa-magic"></i> รายการพิเศษอื่นๆ</h4> [cite: 74]
+    <p style="font-size: 12px; color: #888; margin-bottom: 20px; line-height: 1.5; [cite: 74]
+    font-family: 'Prompt';"> [cite: 75]
+      * หากท่านต้องการสั่งรายการสินค้าอื่นๆ นอกเหนือจากเมนูหลักด้านบน กรุณาระบุชื่อสินค้า พร้อมจำนวนคงเหลือและยอดที่ต้องการสั่งซื้อในส่วนนี้
+    </p>
+    
+    <div class="other-header">
+      <div class="col-name">ชื่อสินค้า</div>
+      <div class="col-stock" style="text-align:center;">คงเหลือ</div>
+      <div class="col-qty" style="text-align:center;">สั่ง</div>
+      <div style="width:26px;"></div>
+    </div>
+    
+    <div id="custom-tbody"></div>
+    <button type="button" onclick="addRow()" style="width:100%; [cite: 75]
+    margin-top:10px; padding:15px; border:2px dashed #EEE; border-radius:12px; background:#FAFAFA; color:#999; font-weight:600; cursor:pointer; [cite: 76]
+    font-family: 'Prompt';">+ เพิ่มแถวรายการใหม่</button> [cite: 77]
+  </div>
+
+  <button class="submit-btn" onclick="reviewOrder()">ตรวจสอบรายการสั่งซื้อ <i class="fas fa-chevron-right"></i></button>
+</div>
+
+<div class="fab-container">
+  <div id="helpMenu" class="help-menu">
+    <div style="font-size: 12px; [cite: 77]
+    color: #999; margin-bottom: 12px; font-family: 'Prompt';">ติดต่อแจ้งปัญหาการใช้งาน</div> [cite: 78]
+    <a href="https://line.me/R/oaMessage/@sat8850n" target="_blank" class="help-item">
+      <i class="fab fa-line line-color"></i> แชทหาเรา (Line OA)
+    </a>
+    <div class="help-item-wrap">
+      <a href="tel:023756953" class="help-link">
+        <i class="fas fa-phone-alt phone-color"></i> 02-375-6953
+      </a>
+      <button onclick="copyPhone('023756953')" class="copy-btn"><i class="far fa-copy"></i></button>
+    </div>
+  </div>
+  <button class="fab-btn" onclick="toggleHelp()"><i class="fas fa-question-circle" id="helpIcon"></i></button>
+</div>
+
+<div id="rM" class="overlay">
+  <div class="modal">
+    <h3>📝 สรุปรายการสั่งซื้อ</h3>
+    <div id="rL" class="summary-list"></div>
+  
+    <div style="display:flex; gap:10px;"> [cite: 79]
+      <button onclick="document.getElementById('rM').style.display='none'" style="flex:1; padding:15px; border:none; border-radius:12px; background:#F5F5F5; font-weight:600; [cite: 79]
+      cursor:pointer;">แก้ไข</button> [cite: 80]
+      <button onclick="confirmSubmit()" id="cBtn" style="flex:1; padding:15px; background:var(--primary); color:#FFF; border:none; border-radius:12px; font-weight:bold; [cite: 80]
+      cursor:pointer;">ยืนยันสั่ง</button> [cite: 81]
+    </div>
+  </div>
+</div>
+
+<div id="successModal" class="overlay">
+  <div class="modal">
+    <i class="fas fa-check-circle" style="font-size:60px; color:#22c55e; [cite: 81]
+    margin-bottom:20px;"></i> [cite: 82]
+    <h2 style="color:#22c55e; margin:0;">สั่งสำเร็จ!</h2>
+    <p id="showOrderId" style="font-size:24px; font-weight:bold; color:var(--dark); [cite: 82]
+    margin:15px 0;"></p> [cite: 83]
+    <button onclick="resetOrderUI()" style="padding:12px 50px; background:var(--dark); color:#FFF; border:none; border-radius:50px; font-weight:600; [cite: 83]
+    cursor:pointer;">ตกลง</button> [cite: 84]
+  </div>
+</div>
+
+<script>
+  let pD = null, appData = null; 
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
+  const CACHE_KEY = "coffee_today_menu_cache";
+
+  window.onload = () => {
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+      appData = JSON.parse(cachedData);
+      buildProductUI(appData);
+      document.getElementById('loading-area').style.display = 'none';
+    }
+    fetch(GAS_URL + "?action=getClientData")
+      .then(res => res.json())
+      .then(data => {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          if (!appData) buildProductUI(data); [cite: 84, 85]
+          appData = data;
+          document.getElementById('loading-area').style.display = 'none';
+      });
+  };
+
+  function buildProductUI(initData) {
+    const t = document.getElementById('tabs'), l = document.getElementById('lists');
+    t.innerHTML = ""; [cite: 85]
+    l.innerHTML = ""; [cite: 86]
+    initData.categories.forEach((c, i) => {
+      const b = document.createElement('button'); b.className = `tab-btn tbtn ${i===0?'active':''}`; b.innerText = c;
+      b.onclick = () => { 
+        document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); 
+        document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); 
+        document.getElementById(`s-${i}`).classList.add('active'); 
+      };
+      t.appendChild(b);
+      const s = document.createElement('div'); s.id = `s-${i}`; s.className = `table-section ${i===0?'active':''}`;
+      let h = `<table [cite: 86]
+      width="100%"><thead><tr><th>สินค้า</th><th width="100">คงเหลือ</th><th width="75">สั่ง</th></tr></thead><tbody>`; [cite: 87]
+      initData.products[c].forEach(p => { 
+        h += `<tr><td style="padding-right:10px;">${p.name}</td><td><input type="text" class="qty-in si" placeholder="..."></td><td><input type="number" class="qty-in qi" data-n="${p.name}" placeholder="0"></td></tr>`; [cite: 87]
+      }); [cite: 88]
+      s.innerHTML = h + `</tbody></table>`; l.appendChild(s);
+    });
+    const oB = document.createElement('button'); oB.className='tab-btn tbtn'; oB.innerText='อื่นๆ'; [cite: 88]
+    oB.onclick = () => { [cite: 89]
+      document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); oB.classList.add('active'); 
+      document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); 
+      document.getElementById('sec-others').classList.add('active'); 
+    };
+    t.appendChild(oB); addRow(); [cite: 89]
+  } [cite: 90]
+
+  function addRow() {
+    const d = document.createElement('div'); d.className = 'other-row'; [cite: 90]
+    d.innerHTML = `<div class="col-name"><input type="text" class="main-in cn" style="margin:0;" placeholder="ชื่อสินค้า"></div><div class="col-stock"><input type="text" class="qty-in cs" placeholder="..."></div><div class="col-qty"><input type="number" class="qty-in cq" placeholder="0"></div><i class="fas fa-trash-alt btn-del" onclick="this.parentElement.remove()"></i>`; [cite: 91]
+    document.getElementById('custom-tbody').appendChild(d); [cite: 92]
+  }
+
+  function toggleHelp() {
+    const menu = document.getElementById('helpMenu'), icon = document.getElementById('helpIcon'); [cite: 92]
+    const isHidden = menu.style.display === 'none' || menu.style.display === ''; [cite: 93]
+    menu.style.display = isHidden ? 'block' : 'none'; [cite: 93]
+    icon.className = isHidden ? 'fas fa-times' : 'fas fa-question-circle'; [cite: 94]
+  }
+
+  function copyPhone(num) { navigator.clipboard.writeText(num); showError("คัดลอกเบอร์โทรศัพท์แล้ว"); [cite: 94]
+  } [cite: 95]
+
+  function resetOrderUI() {
+    document.querySelectorAll('input').forEach(i => i.value = ''); 
+    document.getElementById('successModal').style.display = 'none'; 
+    if(document.querySelector('.tbtn')) document.querySelector('.tbtn').click(); window.scrollTo(0,0); [cite: 95]
+  } [cite: 96]
+
+  function showError(m) {
+    const t = document.getElementById('errT'); document.getElementById('errM').innerText = m;
+    t.classList.add('show'); [cite: 96]
+    setTimeout(() => { t.classList.remove('show'); }, 4000); [cite: 97]
+  }
+
+  // 🛡️ ระบบตรวจสอบออเดอร์ (เวอร์ชันดุ: ล็อคสต็อก + Nitro Focus)
+  function reviewOrder() {
+    let d = "", h = "", hasItem = false; [cite: 97]
+    
+    // ดึง Element ออกมาเพื่อใช้คำสั่งเลื่อนหน้าจอ
+    const elN = document.getElementById('cN'), 
+          elP = document.getElementById('cP'), 
+          elE = document.getElementById('cE'), 
+          elB = document.getElementById('cB'); [cite: 98]
+
+    // 🚩 เช็คข้อมูลส่วนตัว (Focus & Scroll)
+    if (!elN.value.trim()) {
+      elN.focus(); elN.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกชื่อผู้สั่ง");
+    }
+    if (!elP.value.trim()) {
+      elP.focus(); elP.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกเบอร์โทรศัพท์");
+    }
+    if (!elE.value.trim()) {
+      elE.focus(); elE.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกอีเมลติดต่อ");
+    }
+
+    // 🚩 ตรวจรูปแบบอีเมล (Regex)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; [cite: 103]
+    if (!emailRegex.test(elE.value.trim())) {
+      elE.focus(); elE.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("รูปแบบอีเมลไม่ถูกต้อง");
+    }
+
+    if (!elB.value.trim()) {
+      elB.focus(); elB.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError("กรุณากรอกชื่อสาขา");
+    }
+
+    const name = elN.value.trim(), phone = elP.value.trim(), branch = elB.value.trim(), email = elE.value.trim(); [cite: 98, 103]
+
+    // 🚩 ตรวจสอบสต็อกรายการเมนูหลัก (ล็อคเข้ม!)
+    const qis = document.querySelectorAll('.qi'), sis = document.querySelectorAll('.si'); [cite: 99]
+    for(let i=0; i < qis.length; i++) {
+      let qVal = parseFloat(qis[i].value) || 0;
+      if(qVal > 0) {
+        // ถ้าไม่ใส่สต็อก ให้เด้งกลับไปโฟกัสช่องนั้นทันที
+        if(!sis[i].value.trim()) {
+          sis[i].focus();
+          sis[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return showError(`กรุณาใส่สต็อกของ: ${qis[i].dataset.n}`); [cite: 99]
+        }
+        hasItem = true; 
+        d += `${qis[i].dataset.n} (เหลือ:${sis[i].value.trim()}, สั่ง:${qVal})\n`; [cite: 99]
+      }
+    }
+
+    // 🚩 ตรวจสอบสต็อกรายการพิเศษ (ล็อคเข้ม!)
+    const cns = document.querySelectorAll('.cn'), css = document.querySelectorAll('.cs'), cqs = document.querySelectorAll('.cq'); [cite: 100]
+    for(let i=0; i < cqs.length; i++) { [cite: 101]
+      let qVal = parseFloat(cqs[i].value) || 0; let n = cns[i].value.trim();
+      if(n && qVal > 0) {
+        if(!css[i].value.trim()) {
+          css[i].focus();
+          css[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return showError(`กรุณาใส่สต็อกของ: ${n}`); [cite: 101]
+        }
+        hasItem = true; 
+        d += `${n} (เหลือ:${css[i].value.trim()}, สั่ง:${qVal})\n`; [cite: 101]
+      }
+    }
+
+    if(!hasItem) return showError("เลือกสินค้าก่อน"); [cite: 102]
+    h += `<div style="margin-bottom:10px;"><b>ผู้สั่ง:</b> ${name}<br><b>สาขา:</b> ${branch}</div><ul>`; [cite: 102]
+    d.split('\n').filter(Boolean).forEach(line => h += `<li>${line}</li>`); [cite: 103]
+    
+    pD = { name, phone, email, branch, details: d }; [cite: 103]
+    document.getElementById('rL').innerHTML = h + "</ul>"; [cite: 104]
+    document.getElementById('rM').style.display = 'flex'; [cite: 104]
+  }
+
+// 🚀 ระบบ NITRO SYNC + GUARD (เช็คแบนและ Device ID)
+  async function confirmSubmit() {
+    const cBtn = document.getElementById('cBtn'); [cite: 104]
+    cBtn.innerText = "กำลังตรวจสอบความปลอดภัย..."; [cite: 105]
+    cBtn.disabled = true;
+
+    try {
+      // 🕵️‍♂️ 1. จัดการ Device ID
+      let deviceId = localStorage.getItem('coffee_today_device_id'); [cite: 105]
+      if (!deviceId) { [cite: 106]
+        deviceId = 'DEV-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+        localStorage.setItem('coffee_today_device_id', deviceId); [cite: 106]
+      } [cite: 107]
+
+      // 🛡️ 2. ด่านตรวจ Blacklist
+      const banDoc = await db.collection("blacklist").doc(deviceId).get(); [cite: 107]
+      if (banDoc.exists) { [cite: 108]
+        alert("⚠️ ขออภัย! อุปกรณ์ของคุณถูกระงับการสั่งซื้อชั่วคราว \nกรุณาติดต่อแอดมินเพื่อตรวจสอบ");
+        cBtn.innerText = "ถูกระงับการเข้าถึง";
+        cBtn.disabled = true; [cite: 108]
+        return; [cite: 109]
+      }
+
+      cBtn.innerText = "กำลังส่ง..."; [cite: 109]
+      
+      // ⚡ 3. รันเลข ORD-XXXX แบบเรียลไทม์
+      const counterRef = db.collection("metadata").doc("counters"); [cite: 110]
+      const realOrderId = await db.runTransaction(async (transaction) => { [cite: 111]
+        const doc = await transaction.get(counterRef);
+        let nextId = 1;
+        if (doc.exists) nextId = (doc.data().lastOrderId || 0) + 1;
+        transaction.set(counterRef, { lastOrderId: nextId }, { merge: true });
+        return "ORD-" + ("0000" + nextId).slice(-4);
+      }); [cite: 111]
+
+      // 🚀 4. บันทึกลง Firebase พร้อมระบุ Device ID
+      await db.collection("orders").doc(realOrderId).set({ [cite: 112]
+        orderId: realOrderId, 
+        name: pD.name, 
+        phone: pD.phone, 
+        email: pD.email,
+        branch: pD.branch, 
+        details: pD.details, 
+        status: "Pending",
+        deviceId: deviceId, 
+        timestamp: firebase.firestore.FieldValue.serverTimestamp() [cite: 112, 113]
+      }); [cite: 114]
+
+      // ✅ 5. แสดงผลสำเร็จ
+      document.getElementById('rM').style.display = 'none'; [cite: 114]
+      document.getElementById('showOrderId').innerText = realOrderId; 
+      document.getElementById('successModal').style.display = 'flex'; [cite: 114]
+      cBtn.innerText = "ยืนยันสั่ง"; [cite: 115]
+      cBtn.disabled = false;
+
+      // 🕵️‍♂️ 6. สำรองข้อมูลลง Sheet (ทำงานเบื้องหลัง)
+      fetch(GAS_URL, {
+        method: "POST", mode: "no-cors",
+        body: JSON.stringify({ action: "submitOrderBackupOnly", formData: pD, orderId: realOrderId })
+      }); [cite: 115]
+    } catch (err) { [cite: 116]
+      showError("ระบบขัดข้อง: " + err.message);
+      cBtn.innerText = "ยืนยันสั่ง"; [cite: 116]
+      cBtn.disabled = false;
+    } [cite: 117]
+  }
+</script>
+</body>
+</html>
