@@ -576,7 +576,7 @@
     qis.forEach((qi, i) => {
       let qVal = parseFloat(qi.value) || 0;
       if(qVal > 0) {
-        hasItem = true; d += `${qi.dataset.n} (เหลือ:${sis[i].value}, สั่ง:${qVal})\n`; 
+        hasItem = true; d += `${qi.dataset.n} (เหลือ:${sis[i].value || "-"}, สั่ง:${qVal})\n`; 
       }
     });
     const cns = document.querySelectorAll('.cn'), css = document.querySelectorAll('.cs'), cqs = document.querySelectorAll('.cq');
@@ -660,5 +660,6 @@
 </script>
 </body>
 </html>
+
 
 
