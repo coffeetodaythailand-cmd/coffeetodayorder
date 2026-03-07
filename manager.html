@@ -2126,7 +2126,7 @@
     } 
   }
 
- // 📄 ระบบรายงาน (Nitro Native Print V3) - ซอยแถวอัตโนมัติ แก้บั๊กหัวตาราง Chrome 100% กระดาษไม่แหว่ง
+  // 📄 ระบบรายงาน (Nitro Native Print V3) - ซอยแถวอัตโนมัติ แก้บั๊กหัวตาราง Chrome 100% กระดาษไม่แหว่ง
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
@@ -2276,7 +2276,7 @@
     win.document.close();
 
     // ✅ ปลดล็อกปุ่มให้กดซ้ำได้ทันที
-    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
   }
 
   // 🖨️ ฟังก์ชันปริ้น - ปรับหน้าตาให้เหมือน PDF ตัวอย่าง (ไม่มีช่องเช็ค) [cite: 91, 102, 103, 104]
