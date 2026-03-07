@@ -314,31 +314,31 @@
       =========================================================================
     */
     .approve-card { 
-      border-top: 10px solid var(--green); 
-      padding: 30px 45px; 
+      border-top: 6px solid var(--green); /* ลดความหนาเส้นบน [cite: 88] */
+      padding: 20px 30px; /* ลด Padding ให้ดูไม่เทอะทะ [cite: 88] */
     }
     
     .approve-list { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
-      gap: 25px; 
-      margin-top: 20px; 
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* ปรับให้ช่องแคบลงเพื่อความเพียว  */
+      gap: 15px; /* ลดระยะห่างระหว่างรายการ  */
+      margin-top: 15px; 
     }
     
     .approve-item { 
-      background-color: #f0fdf4; 
+      background-color: #f0fdf4;
       border: 1px solid #dcfce7; 
-      padding: 22px; 
-      border-radius: 28px;
+      padding: 15px 20px; /* ลดขนาดพื้นที่ด้านในรายการ  */
+      border-radius: 20px; /* ปรับความโค้งให้ดูทันสมัยขึ้น  */
       display: flex; 
       justify-content: space-between; 
-      align-items: center; 
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      align-items: center;
+      transition: all 0.3s ease; /* ปรับ Animation ให้สมูทขึ้น [cite: 91] */
     }
     
     .approve-item:hover { 
-      transform: translateY(-5px); 
-      box-shadow: 0 10px 25px rgba(34,197,94,0.12); 
+      transform: translateY(-3px); /* ลดระยะกระดกตอนเอาเมาส์วาง [cite: 92] */
+      box-shadow: 0 8px 20px rgba(34,197,94,0.1); 
     }
 
     /*
@@ -758,12 +758,25 @@
   <div class="container">
     
     <div class="card approve-card" id="approveCard" style="display:none;">
-      <div class="section-header" style="margin-bottom: 15px;">
-        <h4 class="section-title" style="color: var(--green);">
+      <div class="section-header" style="margin-bottom: 10px;">
+        <h4 class="section-title" style="color: var(--green); font-size: 18px;">
           <i class="fas fa-check-double"></i> อนุมัติการส่งมอบ (Approve Queue)
         </h4>
       </div>
-      <div id="approveList" class="approve-list"></div>
+      <div id="approveList" class="approve-list" style="margin-bottom: 20px;"></div>
+      
+      <div class="pagination-footer" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
+        <div style="margin-right: auto; color: #999; font-size: 12px;">รายการรออนุมัติ</div>
+        <span style="font-size: 12px; color: #666;">แสดง:</span>
+        <select id="apRowSel" class="styled-select" onchange="apChangeLimit()" style="padding: 5px 8px; font-size: 12px; border-radius: 8px;">
+          <option value="5">5 รายการ</option>
+          <option value="15">15 รายการ</option>
+          <option value="30">30 รายการ</option>
+        </select>
+        <button class="page-btn" style="width: 32px; height: 32px; border-radius: 10px;" onclick="apPrev()"><i class="fas fa-chevron-left"></i></button> 
+        <span id="apPI" style="font-weight:600; min-width:45px; text-align:center; font-size: 13px; font-family: 'Prompt';">1 / 1</span> 
+        <button class="page-btn" style="width: 32px; height: 32px; border-radius: 10px;" onclick="apNext()"><i class="fas fa-chevron-right"></i></button>
+      </div>
     </div>
 
     <div class="chart-grid">
@@ -1013,6 +1026,10 @@
   let allOrders = [];
   let pgNum = 1;
   let pgLim = 8;
+  // 🚀 เพิ่มตัวแปรคุมเลขหน้าของส่วน อนุมัติการส่งมอบ (Approve Queue)
+  let apAllOrders = []; 
+  let apPgNum = 1;
+  let apPgLim = 5; // เริ่มต้นที่ 5 รายการต่อหน้า
   
   let menuObj = {};
   let editTargetId = null;
@@ -1332,58 +1349,63 @@
     return packedTimeValue;
   }
 
+  /** ✅ ฟังก์ชันโหลดและแบ่งหน้า Approve Queue (V17 Master) */
   function loadApproveList(token) {
-    
     const currentToken = token || localStorage.getItem(TOKEN_KEY);
     const apiUrl = GAS_URL + '?action=getOrdersByStatus&status=Packed&token=' + currentToken;
     
     fetch(apiUrl)
-      .then(function(res) { 
-        return res.json(); 
-      })
-      .then(function(data) {
-        
-        const approveCardElement = document.getElementById('approveCard');
-        const approveListContainer = document.getElementById('approveList');
-        
-        if(!data || data.length === 0) { 
-          approveCardElement.style.display = 'none'; 
-          return; 
-        }
-        
-        approveCardElement.style.display = 'block';
-        
-        const listItems = data.map(function(order) {
-          
-          let matched = allOrders.find(function(item) { 
-            return item.id === order.id; 
-          });
-          
-          let pTimeValue = (matched && matched.packedTime) ? matched.packedTime : "-";
-          let pTimeFormatted = formatPackedTime(pTimeValue);
-          
-          let timeBadgeHtml = '';
-          if (pTimeFormatted !== "-") {
-            timeBadgeHtml = '<div style="font-size:11px; color:#d97706; background:#fef3c7; padding:5px 12px; border-radius:8px; display:inline-block; margin-bottom:12px; font-weight:600;"><i class="fas fa-box-open"></i> แพ็คเสร็จเมื่อ: ' + pTimeFormatted + '</div><br>';
-          }
-
-          let itemRow = '<div class="approve-item">';
-          itemRow += '<div class="approve-info">';
-          itemRow += timeBadgeHtml;
-          itemRow += '<b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:17px;" onclick="viewOrderDetail(\'' + order.id + '\')">' + order.id + '</b>';
-          itemRow += ' - ' + order.branch + '<br>';
-          itemRow += '<small style="color:#666; font-size: 13px;">' + order.items.replace(/\n/g, ', ').substring(0, 48) + '...</small>';
-          itemRow += '</div>';
-          itemRow += '<button class="btn-approve" onclick="approveOrder(\'' + order.id + '\')">อนุมัติจัดส่ง</button>';
-          itemRow += '</div>';
-          
-          return itemRow;
-          
-        });
-        
-        approveListContainer.innerHTML = listItems.join('');
+      .then(res => res.json())
+      .then(data => {
+        apAllOrders = data || []; // เก็บข้อมูลดิบไว้ในตัวแปร
+        renderApproveList(); // สั่งให้วาดหน้าจอ
       });
   }
+
+  // ฟังก์ชันวาดรายการ (Render) พร้อมระบบตัดหน้า
+  function renderApproveList() {
+    const approveCard = document.getElementById('approveCard');
+    const approveList = document.getElementById('approveList');
+    
+    if(!apAllOrders || apAllOrders.length === 0) { 
+      approveCard.style.display = 'none'; 
+      return; 
+    }
+    
+    approveCard.style.display = 'block';
+    
+    // คำนวณหน้ากระดาษ
+    const total = apAllOrders.length;
+    const maxPages = Math.ceil(total / apPgLim) || 1;
+    if (apPgNum > maxPages) apPgNum = maxPages;
+    
+    const offset = (apPgNum - 1) * apPgLim;
+    const pagedData = apAllOrders.slice(offset, offset + apPgLim);
+    
+    const listItems = pagedData.map(order => {
+      let matched = allOrders.find(item => item.id === order.id);
+      let pTimeFormatted = formatPackedTime((matched && matched.packedTime) ? matched.packedTime : "-");
+      
+      return `
+        <div class="approve-item">
+          <div>
+            ${pTimeFormatted !== "-" ? `<div style="font-size:10px; color:#d97706; margin-bottom:5px; font-weight:600;"><i class="fas fa-box-open"></i> ${pTimeFormatted}</div>` : ''}
+            <b style="color:var(--red); cursor:pointer; text-decoration:underline; font-size:15px;" onclick="viewOrderDetail('${order.id}')">${order.id}</b>
+            <span style="font-size:13px; color:#333;"> - ${order.branch}</span><br>
+            <small style="color:#666; font-size:11px;">${order.items.replace(/\n/g, ', ').substring(0, 40)}...</small>
+          </div>
+          <button class="btn-approve" style="padding: 8px 15px; font-size: 12px; border-radius: 12px;" onclick="approveOrder('${order.id}')">อนุมัติ</button>
+        </div>`;
+    });
+    
+    approveList.innerHTML = listItems.join('');
+    document.getElementById('apPI').innerText = apPgNum + " / " + maxPages;
+  }
+
+  // ฟังก์ชันควบคุมปุ่ม (Limit, Next, Prev)
+  function apChangeLimit() { apPgNum = 1; apPgLim = parseInt(document.getElementById('apRowSel').value); renderApproveList(); }
+  function apNext() { const max = Math.ceil(apAllOrders.length / apPgLim); if(apPgNum < max) { apPgNum++; renderApproveList(); } }
+  function apPrev() { if(apPgNum > 1) { apPgNum--; renderApproveList(); } }
 
   function approveOrder(id) {
     pendingApproveId = id;
