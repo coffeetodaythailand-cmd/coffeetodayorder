@@ -1515,13 +1515,23 @@
       rowsHtml += '<td style="font-weight:700; color:var(--blue);">' + (item.phone || '-') + '</td>';
       rowsHtml += '<td style="font-size:12px; color:#555; line-height:1.4;">' + item.items.replace(/\n/g,'<br>') + '</td>';
       rowsHtml += '<td align="center">';
-      rowsHtml += '<div style="display:flex; gap:18px; justify-content:center; align-items:center;">';
-      rowsHtml += '<div style="text-align:center; min-width: 75px;">';
+      rowsHtml += '<div style="display:flex; gap:12px; justify-content:center; align-items:center;">';
+      
+      // ส่วนที่ 1: โชว์ข้อความสถานะ
+      rowsHtml += '<div style="text-align:center; min-width: 60px;">';
       rowsHtml += '<span style="font-size:12px; font-weight:bold; color:' + colorStatus + '">' + item.status + '</span>';
       rowsHtml += '</div>';
-      rowsHtml += '<button class="page-btn" style="width:36px; height:36px; background:#FFF; border:1px solid #EEE;" onclick="printOrder(\'' + encodeURIComponent(JSON.stringify(item)) + '\')">';
-      rowsHtml += '<i class="fas fa-print" style="font-size:14px; color:#666;"></i>';
+
+      // 🚀 ส่วนที่ 2: ปุ่ม God Mode (โชว์เฉพาะรายการที่ยังไม่ Success)
+      if (item.status !== 'Success') {
+        rowsHtml += '<button onclick="managerCloseOrder(\'' + item.id + '\')" style="background-color: var(--green); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: \'Prompt\', sans-serif; box-shadow: 0 4px 10px rgba(34,197,94,0.2); transition: 0.3s;"><i class="fas fa-check-circle"></i> ปิดงาน</button>';
+      }
+
+      // ส่วนที่ 3: ปุ่มปริ้นเตอร์ (ของเดิม)
+      rowsHtml += '<button class="page-btn" style="width:32px; height:32px; background:#FFF; border:1px solid #EEE;" onclick="printOrder(\'' + encodeURIComponent(JSON.stringify(item)) + '\')">';
+      rowsHtml += '<i class="fas fa-print" style="font-size:13px; color:#666;"></i>';
       rowsHtml += '</button>';
+      
       rowsHtml += '</div>';
       rowsHtml += '</td>';
       rowsHtml += '</tr>';
@@ -2257,7 +2267,25 @@
       win.document.close();
     } catch (e) { console.error(e); }
   }
-
+// =========================================================================
+  // 🚀 NEW FEATURE: God Mode (Manager Approve & Auto-Clear)
+  // =========================================================================
+  function managerCloseOrder(orderId) {
+    if (confirm('บอสต้องการปิดงานจัดส่ง (Success) สำหรับออเดอร์: ' + orderId + ' ใช่หรือไม่?\n\n*หากยืนยัน กราฟแจ้งเตือนสาขานี้จะหายไปทันที')) {
+      
+      // ยิงคำสั่งตรงไปหาฟังก์ชัน setOrderStatus ที่อยู่หลังบ้าน (Code.gs)
+      google.script.run.withSuccessHandler(function(isSuccess) {
+        if (isSuccess) {
+          alert('✅ ปิดงานสำเร็จ! ออเดอร์ถูกตัดออกจากกราฟแจ้งเตือนแล้ว');
+          // บังคับรีเฟรชหน้าเว็บ 1 รอบเพื่อโหลดกราฟใหม่ที่ล้างค่าแล้ว
+          location.reload(); 
+        } else {
+          alert('❌ เกิดข้อผิดพลาด ไม่สามารถปิดงานได้');
+        }
+      }).setOrderStatus(orderId, 'Success');
+      
+    }
+  }
 </script>
 </body>
 </html>
