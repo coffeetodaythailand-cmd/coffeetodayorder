@@ -2126,110 +2126,105 @@
     } 
   }
 
-  // 📄 ระบบรายงาน (Nitro Native Print V3 - ซอยแถว) ข้อมูลชิดแน่น หัวตารางโชว์ชัวร์ 100%
+  // 📄 ระบบรายงาน (Nitro Auto-PDF + ซอยแถว) โหลดอัตโนมัติ, ปิดหน้าต่างเอง, ไม่มีช่องว่าง, หัวมาครบ!
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียมเอกสาร...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสร้าง PDF...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
+
+    // 💡 1. นำข้อมูลมา "ซอยแถว" (Flatten) 1 สินค้า = 1 แถว เพื่อให้เรียงได้แน่นที่สุด
+    let flatRows = [];
+    allOrders.forEach(o => {
+      let itemArray = o.items ? o.items.split('\n').filter(line => line.trim() !== '') : [];
+      if (itemArray.length === 0) itemArray = ['-'];
+      
+      itemArray.forEach((itemLine, index) => {
+        flatRows.push({
+          id: index === 0 ? o.id : '',
+          date: index === 0 ? o.date : '',
+          branch: index === 0 ? o.branch : '',
+          customer: index === 0 ? o.customer : '',
+          status: index === 0 ? o.status : '',
+          item: itemLine,
+          isFirst: (index === 0)
+        });
+      });
+    });
+
+    // 💡 2. หั่นหน้ากระดาษเป๊ะๆ หน้าละ 25 แถว (เพื่อให้มีหัวตารางทุกหน้าและกระดาษไม่แหว่ง)
+    const ROWS_PER_PAGE = 25;
+    let tablesContent = '';
+
+    for (let i = 0; i < flatRows.length; i += ROWS_PER_PAGE) {
+      if (i > 0) tablesContent += '<div class="html2pdf__page-break"></div>';
+
+      tablesContent += '<table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">';
+      tablesContent += '<thead style="background: #F8F9FA;"><tr>';
+      tablesContent += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>';
+      tablesContent += '<th style="width:12%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>';
+      tablesContent += '<th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>';
+      tablesContent += '<th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Customer</th>';
+      tablesContent += '<th style="width:38%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>';
+      tablesContent += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>';
+      tablesContent += '</tr></thead><tbody>';
+
+      let chunk = flatRows.slice(i, i + ROWS_PER_PAGE);
+      chunk.forEach(r => {
+        let trStyle = r.isFirst ? 'border-top: 1px solid #BBB;' : '';
+        let tdItemBorder = r.isFirst ? 'none' : '1px dashed #EEE';
+        
+        tablesContent += `<tr style="${trStyle}">`;
+        tablesContent += `<td style="padding:6px 8px; color:#A91D3A; font-weight:bold; vertical-align:top;">${r.id}</td>`;
+        tablesContent += `<td style="padding:6px 8px; color:#666; font-size:11px; vertical-align:top;">${r.date}</td>`;
+        tablesContent += `<td style="padding:6px 8px; font-weight:bold; vertical-align:top;">${r.branch}</td>`;
+        tablesContent += `<td style="padding:6px 8px; vertical-align:top;">${r.customer}</td>`;
+        tablesContent += `<td style="padding:6px 8px; border-top:${tdItemBorder}; vertical-align:top;">${r.item}</td>`;
+        tablesContent += `<td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top;">${r.status}</td>`;
+        tablesContent += `</tr>`;
+      });
+      tablesContent += '</tbody></table>';
+    }
 
     let html = `
     <!DOCTYPE html>
     <html lang="th">
     <head>
       <meta charset="UTF-8">
-      <title>Branch Summary Report</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
-        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 0; margin: 0; }
-        .header-title { font-family: 'Prompt', sans-serif; color: #A91D3A; margin-top: 20px; margin-bottom: 5px; text-align: center; font-size: 24px; }
+        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 20px; }
+        .header-title { font-family: 'Prompt', sans-serif; color: #A91D3A; text-align: center; font-size: 24px; margin-bottom: 5px; }
         .date-range { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        
-        /* 💡 หัวใจสำคัญ 1: ให้หัวตารางตามไปทุกหน้า */
-        thead { display: table-header-group; } 
-        tbody { display: table-row-group; }
-        
-        /* 💡 หัวใจสำคัญ 2: ไม่ให้บรรทัดขาดครึ่ง (เมื่อซอยแถวแล้ว จะไม่มีช่องว่างบานเบอะอีกต่อไป) */
-        tr { page-break-inside: avoid; break-inside: avoid; }
-        
-        th { background-color: #F8F9FA !important; padding: 10px 8px; border-bottom: 2px solid #A91D3A; border-top: 1px solid #EEE; text-align: left; font-size: 13px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        td { padding: 6px 8px; vertical-align: top; }
-        
-        /* เส้นกั้นออเดอร์ให้ดูชัดเจน */
-        .order-start td { border-top: 1px solid #BBB; padding-top: 10px; }
-        .order-cont td { padding-top: 4px; }
-        .order-cont .td-items { border-top: 1px dashed #EEE; }
-
-        .td-id { color: #A91D3A; font-weight: bold; }
-        .td-date { color: #666; font-size: 11px; }
-        .td-branch { font-weight: bold; }
-        .td-status { font-weight: bold; text-align: center; }
-
-        @media print {
-          @page { size: A4 landscape; margin: 10mm; }
-          body { padding: 0; -webkit-print-color-adjust: exact; }
-        }
       </style>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
     </head>
     <body>
-      <div class="header-title">COFFEETODAY - Branch Summary Report</div>
-      <div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>
-      <table>
-        <thead>
-          <tr>
-            <th style="width:10%;">ID</th>
-            <th style="width:12%;">Date</th>
-            <th style="width:15%;">Branch</th>
-            <th style="width:15%;">Customer</th>
-            <th style="width:38%;">Items</th>
-            <th style="width:10%; text-align:center;">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
-    allOrders.forEach(o => {
-      // 💡 แยกรายการสินค้าออกเป็น Array เพื่อนำไป "ซอยแถว"
-      let itemArray = o.items ? o.items.split('\n').filter(line => line.trim() !== '') : [];
-      if (itemArray.length === 0) itemArray = ['-'];
-
-      itemArray.forEach((itemLine, index) => {
-        let isFirst = (index === 0);
-        let trClass = isFirst ? 'order-start' : 'order-cont';
-        
-        // ถ้าเป็นสินค้าชิ้นแรกของบิล ให้โชว์ข้อมูล ถ้าเป็นชิ้นที่ 2 เป็นต้นไป ให้เว้นว่างไว้
-        let idCol = isFirst ? '<td class="td-id">' + o.id + '</td>' : '<td></td>';
-        let dateCol = isFirst ? '<td class="td-date">' + o.date + '</td>' : '<td></td>';
-        let branchCol = isFirst ? '<td class="td-branch">' + o.branch + '</td>' : '<td></td>';
-        let custCol = isFirst ? '<td>' + o.customer + '</td>' : '<td></td>';
-        let statusCol = isFirst ? '<td class="td-status">' + o.status + '</td>' : '<td></td>';
-
-        html += '<tr class="' + trClass + '">' +
-                  idCol +
-                  dateCol +
-                  branchCol +
-                  custCol +
-                  '<td class="td-items">' + itemLine + '</td>' +
-                  statusCol +
-                '</tr>';
-      });
-    });
-
-    html += `
-        </tbody>
-      </table>
+      <div id="pdf-content">
+        <div class="header-title">COFFEETODAY - Branch Summary Report</div>
+        <div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>
+        ${tablesContent}
+      </div>
       <script>
         window.onload = () => {
-          setTimeout(() => {
-            window.print();
-            setTimeout(() => { window.close(); }, 500);
-          }, 500);
+          const element = document.getElementById('pdf-content');
+          const opt = {
+            margin:       10,
+            filename:     'Branch_Summary_Report.pdf',
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+          };
+          
+          // 💡 สั่งแปลงเป็น PDF > โหลดลงเครื่อง > แล้วปิดหน้าต่างตัวเองทิ้งทันที
+          html2pdf().set(opt).from(element).save().then(() => {
+            setTimeout(() => { window.close(); }, 1500);
+          });
         };
       <\/script>
     </body>
