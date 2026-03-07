@@ -2126,28 +2126,33 @@
     } 
   }
 
- // 📄 ระบบรายงาน (V7 Smart Weight) - คำนวณพื้นที่ออโต้ หน้าไม่แหว่ง ไม่มีหน้าว่าง โหลดแล้วปิดเอง!
+ // 📄 ระบบรายงาน (V8 Zero Blank Page) - จับชุดข้อความออโต้ ถมพื้นที่แน่น ไม่มีหน้าว่าง และปิดหน้าต่างเอง!
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดพื้นที่...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังวิเคราะห์พื้นที่...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
     let pagesHtml = '';
-    const PAGE_LIMIT = 32; // ⬅️ ชั่งน้ำหนักพื้นที่หน้ากระดาษ (ปรับเลขนี้เพื่อเพิ่ม/ลดความแน่น)
+    // 🚀 เพิ่มความจุหน้ากระดาษเป็น 40 หน่วย (เพื่อให้ยัดได้แน่นขึ้นและลดโอกาสหน้าว่าง)
+    const PAGE_LIMIT = 40; 
     let currentWeight = 0;
     let isFirstPage = true;
 
     function createNewTable() {
+      // ✅ แก้ปัญหาหน้าว่าง: ใช้ DIV ครอบและสั่งตัดหน้าเฉพาะเมื่อไม่ใช่หน้าแรกจริงๆ
       if (!isFirstPage) {
-        pagesHtml += '</tbody></table><div class="html2pdf__page-break"></div>';
+        pagesHtml += '</tbody></table></div><div class="page-break"></div><div class="report-container">';
+      } else {
+        pagesHtml += '<div class="report-container">';
       }
-      pagesHtml += '<table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:20px; font-family:Sarabun, sans-serif;">';
+      
+      pagesHtml += '<table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:10px; font-family:Sarabun, sans-serif;">';
       pagesHtml += '<thead style="background:#F8F9FA;"><tr>';
       pagesHtml += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>';
       pagesHtml += '<th style="width:12%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>';
@@ -2156,6 +2161,7 @@
       pagesHtml += '<th style="width:38%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>';
       pagesHtml += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>';
       pagesHtml += '</tr></thead><tbody>';
+      
       currentWeight = 0;
       isFirstPage = false;
     }
@@ -2164,8 +2170,8 @@
 
     allOrders.forEach(o => {
       let itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
-      // 🧠 ระบบ Smart Weight: คำนวณความสูงตามจำนวนรายการสินค้าจริง
-      let oWeight = 2 + itemLines.length;
+      // 🧠 ปรับน้ำหนักให้เบาลง (1.2 ต่อรายการ) เพื่อให้ยัดออเดอร์ถัดไปขยับขึ้นมาได้อีกตามที่บอสบอก
+      let oWeight = 1.2 + itemLines.length;
 
       if (currentWeight + oWeight > PAGE_LIMIT && currentWeight > 0) {
         createNewTable();
@@ -2188,24 +2194,26 @@
       currentWeight += oWeight;
     });
 
-    pagesHtml += '</tbody></table>';
+    pagesHtml += '</tbody></table></div>';
 
     let html = `
     <!DOCTYPE html>
-    <html lang="th">
+    <html>
     <head>
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
-        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 15mm; }
+        body { font-family: 'Sarabun', sans-serif; color: #333; margin: 0; padding: 0; }
+        #pdf-content { padding: 10mm; }
         .header-title { font-family: 'Prompt', sans-serif; color: #A91D3A; text-align: center; font-size: 24px; margin-bottom: 5px; }
         .date-range { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
-        .html2pdf__page-break { page-break-before: always; }
+        .page-break { page-break-before: always; height: 0; margin: 0; padding: 0; }
+        .report-container { width: 100%; }
       </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
     </head>
     <body>
-      <div id="pdf-area">
+      <div id="pdf-content">
         <div class="header-title">COFFEETODAY - Branch Summary Report</div>
         <div class="date-range">ช่วงวันที่: ${sDate} - ${eDate}</div>
         ${pagesHtml}
@@ -2213,14 +2221,15 @@
       <script>
         window.onload = () => {
           const opt = {
-            margin: 10, 
+            margin: 0, 
             filename: 'Branch_Summary_Report.pdf',
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak: { mode: 'css' }
           };
-          html2pdf().set(opt).from(document.getElementById('pdf-area')).save().then(() => {
-            setTimeout(() => { window.close(); }, 1200);
+          html2pdf().set(opt).from(document.getElementById('pdf-content')).save().then(() => {
+            setTimeout(() => { window.close(); }, 1000);
           });
         };
       <\/script>
