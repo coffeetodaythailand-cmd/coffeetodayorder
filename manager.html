@@ -1750,39 +1750,44 @@
       } 
     });
     
+    // 🚀 1. ตั้งค่าความสูงกราฟให้ขยายตามจำนวนสาขา (เพื่อให้แท่งหนาสม่ำเสมอ)
+    const branchCount = analyticsData.sStacked.labels.length;
+    const chartDiv = document.getElementById('sC').parentElement;
+    chartDiv.style.height = Math.max(300, branchCount * 70) + "px"; 
+
     scObj = new Chart(ctxStock, {
       type: 'bar',
-      data: analyticsData.sStacked, // 👈 ใช้ข้อมูลแบบแยกสินค้าที่เราทำไว้ใน Code.gs
+      data: analyticsData.sStacked,
       options: {
         maintainAspectRatio: false,
-        indexAxis: 'y', // ทำให้เป็นแท่งแนวนอนดูง่ายบนมือถือ
+        indexAxis: 'y', 
+        barThickness: 45, // 👈 สั่งให้แท่งหนาขึ้นทันตาเห็น
         plugins: {
           legend: { 
             display: true, 
-            position: 'bottom', 
+            position: 'bottom',
             labels: { boxWidth: 10, font: { size: 10, family: 'Prompt' } } 
           },
           tooltip: {
             enabled: true,
-            mode: 'index',
-            intersect: false,
+            mode: 'nearest', // 👈 จิ้มสีไหน โชว์แค่ชิ้นนั้น
+            intersect: true, 
+            backgroundColor: 'rgba(0,0,0,0.85)',
             callbacks: {
               label: function(context) {
-                return context.dataset.label + ': ' + context.raw + ' ชิ้น';
+                // ✅ กรองออก: ถ้าสินค้าชิ้นไหนเหลือ 0 จะไม่โชว์ในกล่องดำให้รก
+                if (context.raw <= 0) return null; 
+                return ' ' + context.dataset.label + ': ' + context.raw + ' ชิ้น';
               }
             }
           }
         },
         scales: {
-          x: { 
-            stacked: true, // 👈 เปิดระบบซ้อนกัน
-            grid: { color: '#F0F0F0' }, 
-            title: { display: true, text: 'รวมสินค้าคงเหลือทุกรายการ (ชิ้น)', font: { size: 10 } } 
-          },
+          x: { stacked: true, grid: { color: '#F0F0F0' } },
           y: { 
-            stacked: true, // 👈 เปิดระบบซ้อนกัน
+            stacked: true, 
             grid: { display: false }, 
-            ticks: { font: { family: 'Sarabun', size: 11, weight: 'bold' } } 
+            ticks: { font: { family: 'Sarabun', size: 12, weight: 'bold' } } 
           }
         }
       }
