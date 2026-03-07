@@ -2126,7 +2126,7 @@
     } 
   }
 
- // 📄 ระบบรายงาน (Nitro Native Print V2) - จัดช่องว่างให้ชิดแน่น หัวตารางโชว์ทุกหน้า 100%
+ // 📄 ระบบรายงาน (Nitro Native Print V3) - ซอยแถวอัตโนมัติ แก้บั๊กหัวตาราง Chrome 100% กระดาษไม่แหว่ง
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
@@ -2138,7 +2138,6 @@
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // 1. สร้างหน้า HTML สำหรับสั่งพิมพ์
     let html = `
     <!DOCTYPE html>
     <html lang="th">
@@ -2172,23 +2171,13 @@
           border-collapse: collapse; 
           font-size: 12px; 
         }
-        
-        /* 💡 หัวใจสำคัญ 1: บังคับหัวตารางให้ตามไปทุกหน้า */
+        /* 💡 บังคับหัวตารางทุกหน้า */
         thead { display: table-header-group; } 
         tbody { display: table-row-group; }
         
-        /* 💡 หัวใจสำคัญ 2: ยอมให้แถวถูกตัดข้ามหน้าได้ เพื่อให้ข้อมูลชิดกัน ไม่เหลือช่องว่าง */
-        tr { page-break-inside: auto; break-inside: auto; }
+        /* 💡 บังคับให้แถวแต่ละเส้นไม่ขาดครึ่ง */
+        tr { page-break-inside: avoid; break-inside: avoid; }
         
-        /* 💡 หัวใจสำคัญ 3: ป้องกันไม่ให้รายการสินค้า 1 ชิ้น โดนกรรไกรตัดขาดครึ่งบรรทัด */
-        .item-line { 
-          page-break-inside: avoid; 
-          break-inside: avoid; 
-          margin-bottom: 4px; 
-          padding-bottom: 4px;
-          border-bottom: 1px dashed #f0f0f0;
-        }
-
         th { 
           background-color: #F8F9FA !important; 
           padding: 10px 8px; 
@@ -2199,15 +2188,13 @@
           print-color-adjust: exact;
         }
         td { 
-          padding: 8px 8px; 
-          border-bottom: 1px solid #EEE; 
+          padding: 6px 8px; 
           vertical-align: top; 
         }
         .td-id { color: #A91D3A; font-weight: bold; }
         .td-date { color: #666; font-size: 11px; }
         .td-branch { font-weight: bold; }
-        .td-items { line-height: 1.4; }
-        .td-status { font-weight: bold; text-align: center; }
+        .td-status { font-weight: bold; }
 
         @media print {
           @page { size: A4 landscape; margin: 10mm; }
@@ -2233,29 +2220,38 @@
     `;
 
     allOrders.forEach(o => {
-      // จับสินค้าแต่ละรายการใส่กล่อง <div> ป้องกันการถูกตัดขาดครึ่งตัวอักษร
-      let itemsFormatted = '';
-      if(o.items) {
-         let itemArray = o.items.split('\n');
-         itemArray.forEach(line => {
-            if(line.trim() !== '') {
-               itemsFormatted += '<div class="item-line">' + line + '</div>';
-            }
-         });
-      } else {
-         itemsFormatted = '-';
-      }
+      // 🧠 แตกรายการสินค้าออกเป็น Array
+      let itemsList = o.items ? o.items.split('\n').filter(i => i.trim() !== '') : [];
+      if (itemsList.length === 0) itemsList = ['-'];
 
-      html += `
-        <tr>
-          <td class="td-id">${o.id}</td>
-          <td class="td-date">${o.date}</td>
-          <td class="td-branch">${o.branch}</td>
-          <td>${o.customer}</td>
-          <td class="td-items">${itemsFormatted}</td>
-          <td class="td-status">${o.status}</td>
-        </tr>
-      `;
+      // วนลูปสร้างตารางทีละ 1 บรรทัดสินค้า
+      itemsList.forEach((item, index) => {
+        let isFirst = (index === 0);
+        let isLast = (index === itemsList.length - 1);
+        
+        // ข้อมูลออเดอร์จะโชว์แค่บรรทัดแรก บรรทัดต่อไปปล่อยว่างให้ดูเหมือนรวมช่อง
+        let idText = isFirst ? `<span class="td-id">${o.id}</span>` : '';
+        let dateText = isFirst ? `<span class="td-date">${o.date}</span>` : '';
+        let branchText = isFirst ? `<span class="td-branch">${o.branch}</span>` : '';
+        let customerText = isFirst ? o.customer : '';
+        let statusText = isFirst ? `<span class="td-status">${o.status}</span>` : '';
+        
+        // ขีดเส้นใต้ทึบเมื่อจบ 1 ออเดอร์
+        let bottomBorder = isLast ? 'border-bottom: 1px solid #CCC;' : 'border-bottom: none;';
+        // ขีดเส้นประระหว่างรายการสินค้าในออเดอร์เดียวกัน
+        let itemBorder = isLast ? 'border-bottom: 1px solid #CCC;' : 'border-bottom: 1px dashed #EEE;';
+
+        html += `
+          <tr>
+            <td style="${bottomBorder}">${idText}</td>
+            <td style="${bottomBorder}">${dateText}</td>
+            <td style="${bottomBorder}">${branchText}</td>
+            <td style="${bottomBorder}">${customerText}</td>
+            <td style="${itemBorder}">${item}</td>
+            <td style="${bottomBorder} text-align:center;">${statusText}</td>
+          </tr>
+        `;
+      });
     });
 
     html += `
