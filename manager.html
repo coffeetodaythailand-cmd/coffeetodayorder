@@ -2126,27 +2126,29 @@
     } 
   }
 
- // 📄 ระบบรายงาน (V6 Smart Auto-Fill) ถมกระดาษแน่น หัวตารางมาครบ โหลดออโต้ และปิดหน้าต่างเอง!
+ // 📄 ระบบรายงาน (V7 Smart Weight) - คำนวณพื้นที่ออโต้ หน้าไม่แหว่ง ไม่มีหน้าว่าง โหลดแล้วปิดเอง!
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียม PDF...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดพื้นที่...';
     btn.disabled = true;
 
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // 🚀 คำนวณความจุ: A4 แนวนอนใส่ได้ประมาณ 38-40 หน่วย (1 สินค้า = 1 หน่วย, หัวบิล = 1.5 หน่วย)
-    const MAX_PAGE_CAPACITY = 38; 
-    let currentUsed = 0;
     let pagesHtml = '';
+    const PAGE_LIMIT = 32; // ⬅️ ชั่งน้ำหนักพื้นที่หน้ากระดาษ (ปรับเลขนี้เพื่อเพิ่ม/ลดความแน่น)
+    let currentWeight = 0;
+    let isFirstPage = true;
 
-    function startTable(isFirst) {
-      if (!isFirst) pagesHtml += '</tbody></table><div class="html2pdf__page-break"></div>';
-      pagesHtml += '<table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; font-family: Sarabun, sans-serif;">';
-      pagesHtml += '<thead style="background: #F8F9FA;"><tr>';
+    function createNewTable() {
+      if (!isFirstPage) {
+        pagesHtml += '</tbody></table><div class="html2pdf__page-break"></div>';
+      }
+      pagesHtml += '<table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:20px; font-family:Sarabun, sans-serif;">';
+      pagesHtml += '<thead style="background:#F8F9FA;"><tr>';
       pagesHtml += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">ID</th>';
       pagesHtml += '<th style="width:12%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Date</th>';
       pagesHtml += '<th style="width:15%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Branch</th>';
@@ -2154,18 +2156,19 @@
       pagesHtml += '<th style="width:38%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:left;">Items</th>';
       pagesHtml += '<th style="width:10%; padding:10px 8px; border-bottom:2px solid #A91D3A; text-align:center;">Status</th>';
       pagesHtml += '</tr></thead><tbody>';
-      currentUsed = 0;
+      currentWeight = 0;
+      isFirstPage = false;
     }
 
-    startTable(true);
+    createNewTable();
 
-    allOrders.forEach((o) => {
+    allOrders.forEach(o => {
       let itemLines = o.items ? o.items.split('\n').filter(l => l.trim() !== '') : ['-'];
-      let orderWeight = 1.5 + itemLines.length;
+      // 🧠 ระบบ Smart Weight: คำนวณความสูงตามจำนวนรายการสินค้าจริง
+      let oWeight = 2 + itemLines.length;
 
-      // ถ้าบิลนี้ใส่แล้วล้นหน้า ให้ขึ้นหน้าใหม่พร้อมหัวตาราง
-      if (currentUsed + orderWeight > MAX_PAGE_CAPACITY) {
-        startTable(false);
+      if (currentWeight + oWeight > PAGE_LIMIT && currentWeight > 0) {
+        createNewTable();
       }
 
       itemLines.forEach((line, idx) => {
@@ -2182,21 +2185,22 @@
         pagesHtml += `<td style="padding:6px 8px; font-weight:bold; text-align:center; vertical-align:top;">${isFirst ? o.status : ''}</td>`;
         pagesHtml += `</tr>`;
       });
-      currentUsed += orderWeight;
+      currentWeight += oWeight;
     });
 
     pagesHtml += '</tbody></table>';
 
     let html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="th">
     <head>
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&family=Prompt:wght@600&display=swap');
-        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 10mm; }
+        body { font-family: 'Sarabun', sans-serif; color: #333; padding: 15mm; }
         .header-title { font-family: 'Prompt', sans-serif; color: #A91D3A; text-align: center; font-size: 24px; margin-bottom: 5px; }
         .date-range { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
+        .html2pdf__page-break { page-break-before: always; }
       </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
     </head>
@@ -2215,9 +2219,8 @@
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
           };
-          // ✅ โหลดไฟล์แล้วปิดหน้าต่างทันที
           html2pdf().set(opt).from(document.getElementById('pdf-area')).save().then(() => {
-            setTimeout(() => { window.close(); }, 1000);
+            setTimeout(() => { window.close(); }, 1200);
           });
         };
       <\/script>
