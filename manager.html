@@ -1186,13 +1186,12 @@
                          if (stockReg) {
                             let stockStr = stockReg[1].trim();
                             let stockNumReg = stockStr.match(/[\d.]+/);
-                            let numVal = stockNumReg ? parseFloat(stockNumReg[0]) : 0;
-                            
-                            let branchKeyStr = "[" + bNameStr + "] " + nameOnlyStr;
-                            
-                            // เก็บเฉพาะค่าใหม่ที่สุด
-                            if(stockSum[branchKeyStr] === undefined) {
-                               stockSum[branchKeyStr] = numVal;
+                            // ✅ แก้ไข: ถ้าเป็นตัวเลขจริงเท่านั้นถึงจะเอาลงกราฟ (ไม่เอาเครื่องหมาย -)
+                            if (stockNumReg) {
+                               let numVal = parseFloat(stockNumReg[0]);
+                               let branchKeyStr = "[" + bNameStr + "] " + nameOnlyStr;
+                               if(stockSum[branchKeyStr] === undefined) {
+                                  stockSum[branchKeyStr] = numVal;
                             }
                          }
                       }
