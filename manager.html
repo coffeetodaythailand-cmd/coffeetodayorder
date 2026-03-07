@@ -2126,7 +2126,7 @@
     } 
   }
 
-  // 📄 ระบบรายงาน (Nitro Native Print) - ใช้เอนจิ้นเบราว์เซอร์จัดหน้าให้ ไร้รอยต่อ หัวตารางครบ!
+ // 📄 ระบบรายงาน (Nitro Native Print V2) - จัดช่องว่างให้ชิดแน่น หัวตารางโชว์ทุกหน้า 100%
   function downloadSummaryReport() {
     if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
     
@@ -2138,7 +2138,7 @@
     const sDate = document.getElementById('sDate').value || "เริ่มต้น";
     const eDate = document.getElementById('eDate').value || "ปัจจุบัน";
 
-    // 1. สร้างหน้า HTML สำหรับสั่งพิมพ์โดยเฉพาะ
+    // 1. สร้างหน้า HTML สำหรับสั่งพิมพ์
     let html = `
     <!DOCTYPE html>
     <html lang="th">
@@ -2150,11 +2150,13 @@
         body { 
           font-family: 'Sarabun', sans-serif; 
           color: #333; 
-          padding: 20px; 
+          padding: 0; 
+          margin: 0;
         }
         .header-title { 
           font-family: 'Prompt', sans-serif; 
           color: #A91D3A; 
+          margin-top: 20px;
           margin-bottom: 5px; 
           text-align: center; 
           font-size: 24px;
@@ -2163,20 +2165,33 @@
           text-align: center; 
           color: #666; 
           font-size: 14px; 
-          margin-bottom: 30px; 
+          margin-bottom: 20px; 
         }
         table { 
           width: 100%; 
           border-collapse: collapse; 
           font-size: 12px; 
         }
-        /* 💡 หัวใจสำคัญ: ทำให้หัวตารางโชว์ทุกหน้าตอนปรินต์ */
-        thead { display: table-header-group; } 
-        tr { page-break-inside: avoid; }
         
+        /* 💡 หัวใจสำคัญ 1: บังคับหัวตารางให้ตามไปทุกหน้า */
+        thead { display: table-header-group; } 
+        tbody { display: table-row-group; }
+        
+        /* 💡 หัวใจสำคัญ 2: ยอมให้แถวถูกตัดข้ามหน้าได้ เพื่อให้ข้อมูลชิดกัน ไม่เหลือช่องว่าง */
+        tr { page-break-inside: auto; break-inside: auto; }
+        
+        /* 💡 หัวใจสำคัญ 3: ป้องกันไม่ให้รายการสินค้า 1 ชิ้น โดนกรรไกรตัดขาดครึ่งบรรทัด */
+        .item-line { 
+          page-break-inside: avoid; 
+          break-inside: avoid; 
+          margin-bottom: 4px; 
+          padding-bottom: 4px;
+          border-bottom: 1px dashed #f0f0f0;
+        }
+
         th { 
           background-color: #F8F9FA !important; 
-          padding: 12px 10px; 
+          padding: 10px 8px; 
           border-bottom: 2px solid #A91D3A; 
           text-align: left; 
           font-size: 13px;
@@ -2184,20 +2199,19 @@
           print-color-adjust: exact;
         }
         td { 
-          padding: 12px 10px; 
+          padding: 8px 8px; 
           border-bottom: 1px solid #EEE; 
           vertical-align: top; 
         }
         .td-id { color: #A91D3A; font-weight: bold; }
         .td-date { color: #666; font-size: 11px; }
         .td-branch { font-weight: bold; }
-        .td-items { line-height: 1.6; }
+        .td-items { line-height: 1.4; }
         .td-status { font-weight: bold; text-align: center; }
 
-        /* 💡 ตั้งค่ากระดาษ A4 แนวนอน */
         @media print {
           @page { size: A4 landscape; margin: 10mm; }
-          body { padding: 0; }
+          body { padding: 0; -webkit-print-color-adjust: exact; }
         }
       </style>
     </head>
@@ -2219,8 +2233,19 @@
     `;
 
     allOrders.forEach(o => {
-      // จัดบรรทัดรายการสินค้าให้สวยงาม
-      let itemsFormatted = o.items ? o.items.replace(/\n/g, '<br>') : '-';
+      // จับสินค้าแต่ละรายการใส่กล่อง <div> ป้องกันการถูกตัดขาดครึ่งตัวอักษร
+      let itemsFormatted = '';
+      if(o.items) {
+         let itemArray = o.items.split('\n');
+         itemArray.forEach(line => {
+            if(line.trim() !== '') {
+               itemsFormatted += '<div class="item-line">' + line + '</div>';
+            }
+         });
+      } else {
+         itemsFormatted = '-';
+      }
+
       html += `
         <tr>
           <td class="td-id">${o.id}</td>
@@ -2237,11 +2262,9 @@
         </tbody>
       </table>
       <script>
-        // 💡 ให้เบราว์เซอร์เปิดหน้าต่าง Print (Save as PDF) อัตโนมัติเมื่อโหลดเสร็จ
         window.onload = () => {
           setTimeout(() => {
             window.print();
-            // ปิดหน้าต่างนี้ทิ้งหลังจากกด Save หรือ Cancel
             setTimeout(() => { window.close(); }, 500);
           }, 500);
         };
