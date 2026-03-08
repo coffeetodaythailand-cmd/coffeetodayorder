@@ -523,18 +523,24 @@
   const CACHE_KEY = "coffee_today_menu_cache";
 
   window.onload = () => {
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    if (cachedData) {
-      appData = JSON.parse(cachedData);
-      buildProductUI(appData);
-      document.getElementById('loading-area').style.display = 'none';
-    }
-    fetch(GAS_URL + "?action=getClientData")
+    // 🚀 สั่งตัวหมุนทำงานทันที
+    document.getElementById('loading-area').style.display = 'flex';
+    document.getElementById('lists').innerHTML = ""; 
+
+    // ⚡ สร้างเลขสุ่ม (Timestamp) เพื่อหลอกเบราว์เซอร์ LINE ให้ไม่ใช้แคชเดิม
+    const v = new Date().getTime();
+    
+    // ดึงข้อมูลสดจาก Server พร้อมส่งเลข v ไปด้วย
+    fetch(GAS_URL + "?action=getClientData&v=" + v)
       .then(res => res.json())
       .then(data => {
           localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-          if (!appData) buildProductUI(data);
+          buildProductUI(data);
           appData = data;
+          document.getElementById('loading-area').style.display = 'none';
+      })
+      .catch(err => {
+          console.error(err);
           document.getElementById('loading-area').style.display = 'none';
       });
   };
@@ -749,6 +755,7 @@
 </script>
 </body>
 </html>
+
 
 
 
