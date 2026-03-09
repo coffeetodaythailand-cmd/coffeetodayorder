@@ -719,6 +719,44 @@
       animation: blink 2s infinite;
     }
   </style>
+  <style>
+.display-options-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+.display-options-group input[type="radio"] {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+.display-options-group label {
+    display: block;
+    flex: 1;
+    padding: 10px 15px;
+    background-color: #fdfdfd;
+    color: #666;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.display-options-group label:hover {
+    background-color: #f9f9f9;
+    border-color: #ccc;
+}
+.display-options-group input[type="radio"]:checked + label {
+    background-color: #fdf2f2;
+    border-color: #A91D3A;
+    color: #A91D3A;
+    box-shadow: 0 0 5px rgba(169, 29, 58, 0.2);
+}
+</style>
 </head>
 <body>
 
@@ -1031,10 +1069,15 @@
     <input type="text" id="editCatInput" class="login-input" style="font-size:22px; text-align:center; padding:15px; margin-bottom: 20px; border-color: var(--blue);">
     
     <p style="color: #777; margin: 10px 0 10px; font-size: 14px; font-weight: bold;">แสดงผลที่หน้าสั่งสินค้า:</p>
-    <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; background: #f9f9f9; padding: 15px; border-radius: 15px;">
-      <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="catDisplay" value="normal" checked> หน้าปกติ</label>
-      <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="catDisplay" value="locked"> หน้าล็อคสต็อก</label>
-      <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="catDisplay" value="both"> ทั้งคู่</label>
+    <div class="display-options-group" style="margin-bottom: 25px;">
+      <input type="radio" id="cat_normal" name="catDisplay" value="normal">
+      <label for="cat_normal">หน้าปกติ</label>
+      
+      <input type="radio" id="cat_locked" name="catDisplay" value="locked">
+      <label for="cat_locked">หน้าล็อคสต็อก</label>
+      
+      <input type="radio" id="cat_both" name="catDisplay" value="both" checked>
+      <label for="cat_both">ทั้งคู่</label>
     </div>
 
     <div style="display: flex; gap: 15px;">
@@ -2349,16 +2392,15 @@ window.showAlert = (msg) => {
   // 🚀 ระบบเปลี่ยนชื่อหมวดหมู่แบบรักษาออเดอร์เดิม
 let oldCatName = ""; 
 
-// ✅ ฟังก์ชันเปิด Modal แก้ไขหมวดหมู่ (เวอร์ชันอัปเกรด: ติ๊กค่าเดิมให้บอสอัตโนมัติ)
+// ✅ ฟังก์ชันเปิด Modal แก้ไขหมวดหมู่ (เวอร์ชันคลีน)
 window.openEditCatModal = (catName) => {
     oldCatName = catName;
     document.getElementById('editCatInput').value = catName;
 
-    // 🕵️‍♂️ ส่วนที่เพิ่ม: ไปดึงค่าที่เคยตั้งไว้ในระบบ (ถ้ายังไม่เคยตั้ง ให้เป็น 'both' เป็นค่าเริ่มต้น)
     const currentSetting = (menuObj.categorySettings && menuObj.categorySettings[catName]) 
                            ? menuObj.categorySettings[catName] 
                            : 'both';
-    
+
     // 🎯 สั่งให้ปุ่ม Radio ที่มี value ตรงกับค่าเดิม "ถูกเลือก" (Checked)
     const radioToSelect = document.querySelector(`input[name="catDisplay"][value="${currentSetting}"]`);
     if (radioToSelect) {
@@ -2369,10 +2411,9 @@ window.openEditCatModal = (catName) => {
     setTimeout(() => document.getElementById('editCatInput').focus(), 300);
 };
 
-// ✅ ชุดอัปเกรด: บันทึกค่าปุ่ม Radio ได้แม้ไม่ได้เปลี่ยนชื่อหมวดหมู่
+// ✅ ชุดอัปเกรด: บันทึกค่าปุ่ม Radio (แก้บั๊กชื่อฟังก์ชันแล้ว)
 window.executeEditCategory = () => {
     const newName = document.getElementById('editCatInput').value.trim();
-    // 🕵️‍♂️ ดึงค่าหน้าสั่งที่เลือก (normal/locked/both)
     const displayType = document.querySelector('input[name="catDisplay"]:checked').value;
     
     // กันแค่กรณีลบชื่อจนว่างเปล่า
@@ -2394,7 +2435,7 @@ window.executeEditCategory = () => {
             delete menuObj.grouped[oldCatName];
         }
         
-        // 🛡️ หัวใจหลัก: บันทึกการตั้งค่าหน้าสั่งเสมอ! (ไม่ว่าจะเปลี่ยนชื่อหรือไม่ก็ตาม)
+        // 🛡️ หัวใจหลัก: บันทึกการตั้งค่าหน้าสั่งเสมอ!
         if (!menuObj.categorySettings) menuObj.categorySettings = {};
         menuObj.categorySettings[newName] = displayType;
 
@@ -2403,11 +2444,13 @@ window.executeEditCategory = () => {
             delete menuObj.categorySettings[oldCatName];
         }
 
-        renderMenu();
+        renderMenuAccordion(menuObj); // 👈 แก้ให้เรียกฟังก์ชันถูกต้องแล้ว!
         closeM('editCatModal');
         isUnsaved = true;
-        // 🚨 แจ้งเตือนให้บอสกดยืนยันปุ่มส้ม
-        document.getElementById('saveBtn').style.display = 'block';
+        
+        // 🚨 แจ้งเตือนให้บอสกดยืนยันปุ่มสีส้ม
+        const saveBtn = document.getElementById('saveOrderBtn'); // 👈 แก้ ID ปุ่มถูกต้องแล้ว!
+        if (saveBtn) saveBtn.style.display = 'inline-flex';
     }
 };
 </script>
