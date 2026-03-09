@@ -590,7 +590,7 @@
       s.innerHTML = h + `</tbody></table>`; l.appendChild(s);
     });
     
-    const oB = document.createElement('button'); oB.className='tab-btn tbtn'; oB.innerText='อื่นๆ';
+    const oB = document.createElement('button'); oB.className='tab-btn tbtn'; oB.innerText='รายการอื่นๆ (พิมพ์ระบุ)';
     oB.onclick = () => { 
       document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); oB.classList.add('active'); 
       document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); 
@@ -769,6 +769,7 @@
 </script>
 </body>
 </html>
+
 
 
 
