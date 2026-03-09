@@ -467,18 +467,18 @@
       border-radius: 12px;
     }
     
-/* ✅ แก้ไขให้ขยายเต็มพื้นที่ฝั่งขวา และเพิ่มเอฟเฟกต์ขยับหลบ */
+/* ✅ สไตล์หมวดหมู่ (ย่อขนาดให้เพรียวและมินิมอลขึ้น) */
 .chips-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-    gap: 15px; 
-    padding: 10px 0 30px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* ลดความกว้างขั้นต่ำของแต่ละกล่อง */
+    gap: 12px; 
+    padding: 10px 0 20px;
 }
 
 .chip {
     background-color: var(--white);
-    padding: 12px 20px; 
-    border-radius: 20px;
+    padding: 8px 14px; /* ลดความพองของกล่อง */
+    border-radius: 14px; /* ลดความโค้งให้ดูผู้ดีขึ้น */
     border: 1px solid #EEEEEE; 
     font-family: 'Prompt'; 
     cursor: pointer !important;
@@ -490,7 +490,7 @@
     box-sizing: border-box;
 }
 
-/* เอฟเฟกต์ตอนลากหมวดหมู่มาทับ (ให้มันเด้งหลบ) */
+/* เอฟเฟกต์ตอนลากหมวดหมู่มาทับ */
 .chip.drag-over {
     border: 2px dashed var(--red) !important;
     background-color: #fff5f5 !important;
@@ -502,21 +502,22 @@
     flex: 1;
     white-space: normal;
     word-break: break-word;
-    margin-right: 10px;
-    line-height: 1.4;
+    margin-right: 8px;
+    line-height: 1.3;
+    font-size: 14px; /* ลดขนาดฟอนต์หมวดหมู่ */
 }
 
 .chip.active { 
     background-color: var(--red); 
     color: var(--white);
-    border-color: var(--red); 
-    box-shadow: 0 8px 25px rgba(169, 29, 58, 0.25); 
+    border-color: var(--red);
+    box-shadow: 0 5px 15px rgba(169, 29, 58, 0.2); 
 }
 
 .cat-item.dragging, .chip.dragging {
     opacity: 0.5;
     transform: scale(0.95);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
     /*
@@ -1945,42 +1946,70 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     menuObj = menuData;
     let chipsHtml = '', itemsHtml = '', selectHtml = '';
 
-    // 🔍 โหมดค้นหา: วนหาทุกหมวดหมู่
+    // 🔍 กรณี A: โหมดค้นหา
     if (menuSearchQuery !== "") {
-      document.getElementById('catChips').innerHTML = `
-        <div class="chip active" style="background:var(--dark); color:white; border-color:var(--dark); justify-content:center; cursor:default; grid-column: 1 / -1;">
-          <span style="text-align:center; flex:none;"><i class="fas fa-search"></i> ผลการค้นหาสำหรับ: "${menuSearchQuery}"</span>
-        </div>`;
-      
+      document.getElementById('catChips').innerHTML = `<div class="chip active" style="background:var(--dark); color:white; border-color:var(--dark); width:100%; justify-content:center; cursor:default; grid-column: 1 / -1; font-size:14px;"><span style="text-align:center;"><i class="fas fa-search"></i> ผลการค้นหาสำหรับ: "${menuSearchQuery}"</span></div>`;
       menuData.categories.forEach(cat => {
         if(menuData.grouped[cat]) {
           menuData.grouped[cat].forEach((p, originalIdx) => {
-            if(p.name.toLowerCase().includes(menuSearchQuery)) {
-              itemsHtml += buildProductRow(p, originalIdx, cat, true); // true = โหมดค้นหา
-            }
+            if(p.name.toLowerCase().includes(menuSearchQuery)) itemsHtml += buildProductRow(p, originalIdx, cat, false);
           });
         }
       });
-      document.getElementById('menuItems').innerHTML = itemsHtml || `<div style="text-align:center; padding:40px; color:#CCC;">ไม่พบสินค้าที่ตรงกับ "${menuSearchQuery}"</div>`;
+      document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:30px; font-size:14px; color:#CCC;">ไม่พบสินค้า...</div>';
       return; 
     }
 
-    // 📦 โหมดปกติ: วาดปุ่มหมวดหมู่
+    // 📦 กรณี B: โหมดปกติ
     if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
-    
     menuData.categories.forEach((cat, idx) => {
       const isSelected = (cat === currentCat ? 'active' : '');
       selectHtml += `<option value="${cat}">${cat}</option>`;
       chipsHtml += `
-        <div class="chip ${isSelected}" draggable="true" onclick="selectCat('${cat}')" ondragstart="dragStartCat(event, ${idx})" ondragover="dragOverCat(event, this)" ondragleave="dragLeaveCat(this)" ondrop="dropCat(event, ${idx}, this)" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding: 10px 18px;">
-          <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
-          <input type="number" value="${idx + 1}" onclick="event.stopPropagation()" onchange="moveCatManual(${idx}, this.value - 1)" style="width:50px; height:30px; padding:0; line-height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-weight:bold; background: white; color:var(--red);">
+        <div class="chip ${isSelected}" draggable="true" onclick="selectCat('${cat}')" ondragstart="dragStartCat(event, ${idx})" ondragover="dragOverCat(event, this)" ondragleave="dragLeaveCat(this)" ondrop="dropCat(event, ${idx}, this)" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-grip-vertical" style="color:#CCC; font-size:13px;"></i>
+          <input type="number" value="${idx + 1}" onclick="event.stopPropagation()" onchange="moveCatManual(${idx}, this.value - 1)" style="width:40px; height:26px; padding:0; border:1px solid rgba(0,0,0,0.1); border-radius:6px; text-align:center; font-weight:bold; font-size:13px; background: white; color:var(--red);">
           <span style="flex:1; margin-left:5px; white-space:normal; word-break:break-word;" title="${cat}">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
-          <div style="display:flex; gap:12px; align-items:center;">
-            <i class="fas fa-edit" style="font-size:16px; color:#CCC; cursor:pointer;" onclick="event.stopPropagation(); openEditCatModal('${cat}')"></i>
-            <i class="fas fa-trash-alt" style="font-size:16px; color:#ffb3b3; cursor:pointer;" onclick="event.stopPropagation(); prepareDelete('cat', '${cat}')"></i>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <i class="fas fa-edit" style="font-size:14px; color:#CCC; cursor:pointer;" onclick="event.stopPropagation(); openEditCatModal('${cat}')"></i>
+            <i class="fas fa-trash-alt" style="font-size:14px; color:#ffb3b3; cursor:pointer;" onclick="event.stopPropagation(); prepareDelete('cat', '${cat}')"></i>
           </div>
         </div>`;
+    });
+
+    if(currentCat && menuData.grouped[currentCat]) {
+      menuData.grouped[currentCat].forEach((p, idx) => { itemsHtml += buildProductRow(p, idx, currentCat, true); });
+    }
+
+    document.getElementById('catChips').innerHTML = chipsHtml;
+    document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:30px; font-size:14px; color:#CCC;">หมวดนี้ยังไม่มีสินค้า...</div>';
+    document.getElementById('pCatSelect').innerHTML = selectHtml;
+  }
+
+  // ✅ ตัวช่วยสร้างแถวสินค้า (ย่อขนาดให้เพรียวบางลง)
+  function buildProductRow(p, idx, catName, isDraggable) {
+    const s = p.status || 'Active', sClass = (s === 'Active' ? 'status-active' : (s === 'SoldOut' ? 'status-soldout' : 'status-inactive')), sText = (s === 'Active' ? 'ปกติ' : (s === 'SoldOut' ? 'ของหมด' : 'ซ่อนอยู่'));
+    const dragAttr = isDraggable ? `draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})"` : '';
+    const nameSafe = p.name.replace(/'/g, "\\'");
+
+    return `
+      <div class="cat-item" ${dragAttr} style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:${isDraggable ? 'grab' : 'default'};">
+        <div style="display:flex; align-items:center; gap:12px;">
+          ${isDraggable ? `<i class="fas fa-grip-lines" style="color:#DDD; font-size:13px;"></i><input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" style="width:40px; height:28px; border:1px solid var(--red); border-radius:6px; text-align:center; font-weight:bold; font-size:13px; color:var(--red); background:white;">` : `<div style="background:#f0f0f0; padding:4px 8px; border-radius:6px; font-size:11px; color:#666; font-weight:bold; border:1px solid #e5e7eb;">${catName}</div>`}
+          <div>
+            <span style="font-weight:600; color:#333; font-size:15px;">${p.name}</span>
+            <div style="margin-top:3px;"><span class="status-badge ${sClass}" style="padding:2px 8px; font-size:10px;">${sText}</span></div>
+          </div>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <select class="status-select" style="padding:4px; font-size:12px; border-radius:6px;" onchange="toggleItem('${p.rowId}', '${nameSafe}', '${catName}', this.value)">
+            <option value="Active" ${s === 'Active' ? 'selected' : ''}>ปกติ</option><option value="SoldOut" ${s === 'SoldOut' ? 'selected' : ''}>ของหมด</option><option value="Inactive" ${s === 'Inactive' ? 'selected' : ''}>ซ่อนไว้</option>
+          </select>
+          <i class="fas fa-edit" style="color:#CCC; cursor:pointer; font-size:16px;" onclick="openProdModal('${p.rowId}', '${nameSafe}', '${catName}')"></i>
+          <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:16px;" onclick="prepareDelete('prod', ${idx}, '${nameSafe}', '${catName}')"></i>
+        </div>
+      </div>`;
+  }
     });
 
     // วาดสินค้าในหมวดที่เลือก
