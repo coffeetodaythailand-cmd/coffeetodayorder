@@ -467,6 +467,57 @@
       border-radius: 12px;
     }
     
+/* ✅ แก้ไขให้ขยายเต็มพื้นที่ฝั่งขวา และเพิ่มเอฟเฟกต์ขยับหลบ */
+.chips-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 15px; 
+    padding: 10px 0 30px;
+}
+
+.chip {
+    background-color: var(--white);
+    padding: 12px 20px; 
+    border-radius: 20px;
+    border: 1px solid #EEEEEE; 
+    font-family: 'Prompt'; 
+    cursor: pointer !important;
+    transition: all 0.2s ease; 
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* เอฟเฟกต์ตอนลากหมวดหมู่มาทับ (ให้มันเด้งหลบ) */
+.chip.drag-over {
+    border: 2px dashed var(--red) !important;
+    background-color: #fff5f5 !important;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+
+.chip span {
+    flex: 1;
+    white-space: normal;
+    word-break: break-word;
+    margin-right: 10px;
+    line-height: 1.4;
+}
+
+.chip.active { 
+    background-color: var(--red); 
+    color: var(--white);
+    border-color: var(--red); 
+    box-shadow: 0 8px 25px rgba(169, 29, 58, 0.25); 
+}
+
+.cat-item.dragging, .chip.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
 
     /*
       =========================================================================
@@ -939,11 +990,6 @@
           <i class="fas fa-plus-circle"></i> เพิ่มสินค้าใหม่
         </button>
       </div>
-    </div>
-
-    <div style="margin-bottom: 20px; display:flex; align-items:center; gap:15px; background: #fff; padding: 12px 25px; border-radius: 20px; border: 1px solid #EEE; box-shadow: var(--shadow-soft);">
-      <i class="fas fa-search" style="color:#CCC; font-size:18px;"></i>
-      <input type="text" id="menuSearchInput" oninput="handleMenuSearch(this.value)" placeholder="ค้นหาสินค้าจากทุกหมวดหมู่ (พิมพ์ชื่อสินค้า)..." style="border:none; outline:none; width:100%; font-family:'Prompt'; font-size:15px; background:transparent; color:var(--dark);">
     </div>
 
     <div id="catChips" class="chips-container"></div>
@@ -1840,68 +1886,49 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     // 🚀 ระบบ V17: ช่องเลขใหญ่ขึ้น, ลบหายทันที, Modal สวยงาม
   let delTarget = null; // เก็บเป้าหมายที่จะลบ
 
-  // -------------------------------------------------------------
-  // 🌟 ฟีเจอร์ใหม่: ระบบค้นหาสินค้าทั้งหมด (Global Search)
-  // -------------------------------------------------------------
-  let menuSearchQuery = "";
+  // ✅ 1. แก้ไขการวาด Chips ให้กดง่าย (Hitbox เต็มพื้นที่)
+  function renderMenuAccordion(menuData) {
+    if(!menuData || !menuData.categories) return;
+    menuObj = menuData;
+    let chipsHtml = '', itemsHtml = '', selectHtml = '';
+    if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
 
-  function handleMenuSearch(val) {
-    menuSearchQuery = val.trim().toLowerCase();
-    renderMenuAccordion(menuObj); // ส่งกลับไปให้ฟังก์ชันหลักจัดการสลับโหมดให้
-  }
-
-  function renderMenuSearchResults() {
-    let itemsHtml = '';
-    let resultCount = 0;
-
-    // เปลี่ยนแถบหมวดหมู่ด้านบนให้เป็นป้ายบอกว่ากำลังค้นหา
-    document.getElementById('catChips').innerHTML = `
-      <div class="chip active" style="background:var(--dark); color:white; border-color:var(--dark); justify-content:center; cursor:default;">
-        <span style="text-align:center; flex:none;"><i class="fas fa-search"></i> ผลการค้นหา: "${menuSearchQuery}"</span>
-      </div>`;
-
-    menuObj.categories.forEach(cat => {
-      if(menuObj.grouped[cat]) {
-        menuObj.grouped[cat].forEach((p, originalIdx) => {
-          if(p.name.toLowerCase().includes(menuSearchQuery)) {
-            resultCount++;
-            const s = p.status || 'Active';
-            let statusClass = (s === 'Active' ? 'status-active' : (s === 'SoldOut' ? 'status-soldout' : 'status-inactive'));
-            let statusText = (s === 'Active' ? 'ปกติ' : (s === 'SoldOut' ? 'ของหมด' : 'ซ่อนอยู่'));
-
-            itemsHtml += `
-              <div class="cat-item" style="display:flex; justify-content:space-between; padding:18px 0; border-bottom:1px solid #F8F9FA; align-items:center;">
-                <div style="display:flex; align-items:center; gap:18px;">
-                  <div style="background:#f0f0f0; padding:6px 12px; border-radius:10px; font-size:12px; color:#666; font-weight:bold; border:1px solid #e5e7eb;">${cat}</div>
-                  <div>
-                    <span style="font-weight:600; color:#333; font-size:17px;">${p.name}</span>
-                    <div style="margin-top:5px;">
-                      <span class="status-badge ${statusClass}">${statusText}</span>
-                    </div>
-                  </div>
-                </div>
-                <div style="display:flex; gap:15px; align-items:center;">
-                  <select class="status-select" onchange="toggleItem('${p.rowId}', '${p.name}', '${cat}', this.value)">
-                    <option value="Active" ${s === 'Active' ? 'selected' : ''}>ปกติ</option>
-                    <option value="SoldOut" ${s === 'SoldOut' ? 'selected' : ''}>ของหมด</option>
-                    <option value="Inactive" ${s === 'Inactive' ? 'selected' : ''}>ซ่อนไว้</option>
-                  </select>
-                  <i class="fas fa-edit" style="color:#CCC; cursor:pointer; font-size:20px;" onclick="openProdModal(${p.rowId}, '${p.name}', '${cat}')"></i>
-                  <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:20px;" onclick="prepareDelete('prod', ${originalIdx}, '${p.name}', '${cat}')"></i>
-                </div>
-              </div>`;
-          }
-        });
-      }
+    menuData.categories.forEach((cat, idx) => {
+      const isSelected = (cat === currentCat ? 'active' : '');
+      selectHtml += `<option value="${cat}">${cat}</option>`;
+      chipsHtml += `
+  <div class="chip ${isSelected}" 
+       draggable="true" 
+       ondragstart="dragStartCat(event, ${idx})" 
+       onclick="selectCat('${cat}')"
+       ondragover="dragOverCat(event, this)" 
+       ondragleave="dragLeaveCat(this)"
+       ondrop="dropCat(event, ${idx}, this)" 
+       style="cursor:pointer; display:flex; align-items:center; gap:10px; padding: 10px 18px;">
+    
+    <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
+    <input type="number" value="${idx + 1}" onclick="event.stopPropagation()" onchange="moveCatManual(${idx}, this.value - 1)" 
+           style="width:50px; height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-weight:bold; background: white; color:var(--red);">
+    
+    <span style="flex:1; margin-left:5px; white-space:normal; word-break:break-word;" title="${cat}">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
+    
+    <div style="display:flex; gap:12px; align-items:center;">
+      <i class="fas fa-edit" style="font-size:16px; color:#CCC; cursor:pointer;" onclick="event.stopPropagation(); openEditCatModal('${cat}')"></i>
+      <i class="fas fa-trash-alt" style="font-size:16px; color:#ffb3b3; cursor:pointer;" onclick="event.stopPropagation(); prepareDelete('cat', '${cat}')"></i>
+    </div>
+  </div>`;
     });
-
-    document.getElementById('menuItems').innerHTML = itemsHtml || `<div style="text-align:center; padding:40px; color:#CCC;">ไม่พบสินค้าที่ตรงกับ "${menuSearchQuery}"</div>`;
+    // ... ส่วนวาดรายการสินค้าคงเดิม ...
+    document.getElementById('catChips').innerHTML = chipsHtml; 
+    document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:40px; color:#CCC;">หมวดนี้ยังไม่มีสินค้า...</div>';
+    document.getElementById('pCatSelect').innerHTML = selectHtml;
   }
 
-  // 🗑️ ระบบลบแบบใหม่ (รองรับการลบจากทั้งโหมดปกติ และ โหมดค้นหา)
-  function prepareDelete(type, target, name, specificCat) {
-    if (!name) name = target; 
-    delTarget = { type, target, name, specificCat }; // เก็บชื่อหมวดหมู่ที่เจอตอนค้นหาไว้ด้วย
+  
+  // 🗑️ ระบบลบแบบใหม่ (ลบในเครื่องทันที + เด้งปุ่มเซฟ)
+  function prepareDelete(type, target, name) {
+    if (!name) name = target; // กันเหนียวกรณีไม่ได้ส่งชื่อมา
+    delTarget = { type, target, name };
     document.getElementById('delMsg').innerText = `คุณแน่ใจใช่ไหมว่าจะลบ "${name}"?\n(รายการจะหายจากหน้าจอทันที และจะถูกลบถาวรเมื่อกดบันทึกลำดับ)`;
     document.getElementById('confirmDelBtn').onclick = executeDelete;
     document.getElementById('delConfirmModal').style.display = 'flex';
@@ -1909,6 +1936,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
 
   function executeDelete() {
     if (delTarget.type === 'cat') {
+      // ลบหมวดหมู่
       const idx = menuObj.categories.indexOf(delTarget.target);
       if (idx > -1) {
         menuObj.categories.splice(idx, 1);
@@ -1916,18 +1944,20 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
         if (currentCat === delTarget.target) currentCat = menuObj.categories[0];
       }
     } else {
-      const targetCat = delTarget.specificCat || currentCat; // 👈 ถ้าลบจากหน้าค้นหา ให้ลบให้ถูกหมวด
-      menuObj.grouped[targetCat].splice(delTarget.target, 1);
+      // ลบสินค้าในหมวด
+      menuObj.grouped[currentCat].splice(delTarget.target, 1);
     }
     
     closeM('delConfirmModal');
-    renderMenuAccordion(menuObj); // 👈 อัปเดตหน้าจอทันที (ถ้าหาอยู่ ก็จะโหลดผลลัพธ์ใหม่)
+    renderMenuAccordion(menuObj);
     showToast("🗑️ ลบออกจากหน้าจอแล้ว (กดยืนยันปุ่มสีส้มเพื่อเซฟถาวร)");
     
+    // 🚨 เปิดสถานะ Unsaved และโชว์ปุ่มสีส้มให้บอสรู้ว่าต้องเซฟ
     isUnsaved = true;
     const saveBtn = document.getElementById('saveOrderBtn');
     if (saveBtn) saveBtn.style.display = 'inline-flex';
   }
+
   function moveCatManual(from, to) {
     if (to < 0 || to >= menuObj.categories.length) return renderMenuAccordion(menuObj);
     const item = menuObj.categories.splice(from, 1)[0];
@@ -1950,25 +1980,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     e.target.classList.add('dragging'); 
   }
 
-  function dragOverCat(e, el) { 
-    e.preventDefault(); 
-    e.dataTransfer.dropEffect = 'move'; 
-    if(el && el.classList) el.classList.add('drag-over'); 
-  }
-  
-  function dragLeaveCat(el) { 
-    if(el && el.classList) el.classList.remove('drag-over'); 
-  }
-
-  function dropCat(e, target, el) { 
-    e.preventDefault(); 
-    if(el && el.classList) el.classList.remove('drag-over'); 
-    if (dragCatIndex !== null && dragCatIndex !== target) {
-      moveCatManual(dragCatIndex, target);
-    }
-    dragCatIndex = null;
-  }
-
+ 
   function dragStartItem(e, i) { dragItemIndex = i; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); }
   function dragOverItem(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
   function dropItem(e, target) {
@@ -1976,10 +1988,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     if (dragItemIndex !== null && dragItemIndex !== target) moveItemManual(dragItemIndex, target);
     dragItemIndex = null;
   }
-  function selectCat(catName) { 
-    currentCat = catName; 
-    renderMenuAccordion(menuObj); 
-  }
+
   // ---------------------------------------------------------
   // ✅ saveMenuOrder (เวอร์ชันสมบูรณ์: ส่งป้ายกำกับหน้าสั่งไปบันทึก)
   // ---------------------------------------------------------
