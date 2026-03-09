@@ -1026,8 +1026,17 @@
       <i class="fas fa-edit" style="font-size: 75px; color: var(--blue); filter: drop-shadow(0 5px 15px rgba(52,152,219,0.3));"></i>
     </div>
     <h2 style="margin:0; font-family:'Prompt'; color:var(--dark); font-size: 24px;">แก้ไขชื่อหมวดหมู่</h2>
+    
     <p style="color: #777; margin: 15px 0 5px; font-size: 14px;">พิมพ์ชื่อใหม่ที่ต้องการเปลี่ยน</p>
-    <input type="text" id="editCatInput" class="login-input" style="font-size:22px; text-align:center; padding:15px; margin-bottom: 30px; border-color: var(--blue);">
+    <input type="text" id="editCatInput" class="login-input" style="font-size:22px; text-align:center; padding:15px; margin-bottom: 20px; border-color: var(--blue);">
+    
+    <p style="color: #777; margin: 10px 0 10px; font-size: 14px; font-weight: bold;">แสดงผลที่หน้าสั่งสินค้า:</p>
+    <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; background: #f9f9f9; padding: 15px; border-radius: 15px;">
+      <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="catDisplay" value="normal" checked> หน้าปกติ</label>
+      <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="catDisplay" value="locked"> หน้าล็อคสต็อก</label>
+      <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="catDisplay" value="both"> ทั้งคู่</label>
+    </div>
+
     <div style="display: flex; gap: 15px;">
       <button class="btn" style="flex: 1; background-color: #F5F5F5; color: #333;" onclick="closeM('editCatModal')">ยกเลิก</button>
       <button class="btn" style="flex: 1.5; background-color: var(--blue); color: white;" onclick="executeEditCategory()">บันทึกการแก้ไข</button>
@@ -1116,7 +1125,7 @@
     const pInput = document.getElementById('passInput');
     
     if (pInput.value.length < 4) {
-      return alert("กรุณากรอกรหัสผ่านให้ครบ 4 หลัก");
+      return showAlert("กรุณากรอกรหัสผ่านให้ครบ 4 หลัก");
     }
     
     lBtn.disabled = true; 
@@ -1141,7 +1150,7 @@
           
         } else {
           
-          alert(res.message);
+          showAlert(res.message);
           lBtn.disabled = false;
           lBtn.innerHTML = '<i class="fas fa-key"></i> UNLOCK SYSTEM';
           pInput.value = '';
@@ -1151,7 +1160,7 @@
       })
       .catch(function(err) {
         
-        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+        showAlert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
         lBtn.disabled = false;
         lBtn.innerHTML = '<i class="fas fa-key"></i> UNLOCK SYSTEM';
         
@@ -1489,7 +1498,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
           
         } else {
           
-          alert("ไม่สามารถยืนยันสถานะได้");
+          showAlert("ไม่สามารถยืนยันสถานะได้"); [cite: 568]
           
         }
       });
@@ -1698,7 +1707,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     });
 
     const pdfWindow = window.open('', '', 'width=900,height=950');
-    if(!pdfWindow) return alert("⚠️ กรุณาอนุญาต Pop-up เพื่อโหลดไฟล์ครับ");
+    if(!pdfWindow) return showAlert("⚠️ กรุณาอนุญาต Pop-up เพื่อโหลดไฟล์ครับ");
 
     pdfWindow.document.write('<!DOCTYPE html><html lang="th"><head><style>body{font-family:sans-serif;padding:40px;color:#333;}.main-container{padding:60px;border:2px solid #EEE;border-radius:30px;max-width:700px;margin:0 auto;}.title-main{text-align:center;color:#A91D3A;font-size:32px;font-weight:bold;}.grid-data{display:flex;justify-content:space-between;background:#F9F9F9;padding:25px;border-radius:20px;margin-bottom:30px;}.grid-col-label{font-size:10px;color:#999;text-transform:uppercase;font-weight:bold;}table{width:100%;border-collapse:collapse;}th{text-align:left;padding:15px;border-bottom:2px solid #333;font-size:14px;}</style><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script></head><body>');
     pdfWindow.document.write('<div id="p-area" class="main-container"><div class="title-main">COFFEETODAY</div><div style="text-align:center;color:#999;margin-bottom:40px;">ORDER CONFIRMATION RECEIPT</div>');
@@ -1710,29 +1719,6 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
   }
 
   // 🖨️ 2. แก้ไขปุ่มปริ้นขวาสุด (printOrder) - ให้กดแล้วเด้งใบสั่งงานแบบไม่มีช่องเช็ค
-  function printOrder(encodedData) {
-    const item = JSON.parse(decodeURIComponent(encodedData));
-    const win = window.open('', '', 'width=800,height=900');
-    if(!win) return alert("⚠️ กรุณาอนุญาต Pop-up เพื่อทำการปริ้นครับ");
-    
-    let rowsHtml = '';
-    item.items.split('\n').forEach(line => {
-      const parts = line.match(/(.+?)\s*\(\s*เหลือ:\s*(.*?)\s*,\s*สั่ง:\s*(.*?)\s*\)/);
-      if(parts) {
-        rowsHtml += `<tr><td style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${parts[1]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9;">${parts[2]}</td><td align="center" style="padding:15px 10px; border-bottom:1px solid #f9f9f9; font-weight:bold; color:#A91D3A;">${parts[3]}</td></tr>`;
-      }
-    });
-
-    win.document.write(`<html><head><style>body{font-family:sans-serif;padding:50px;color:#333;}.label{font-size:10px;color:#999;text-transform:uppercase;}.val{font-size:16px;font-weight:bold;margin-bottom:20px;}table{width:100%;border-collapse:collapse;}th{text-align:left;padding:12px;background:#F9FAFB;border-bottom:2px solid #333;font-size:13px;}</style></head><body>
-      <div style="text-align:center;margin-bottom:30px;"><h2 style="margin:0;color:#A91D3A;letter-spacing:2px;">COFFEETODAY</h2><div style="font-size:12px;color:#999;">ORDER CONFIRMATION RECEIPT</div></div>
-      <div style="display:flex;justify-content:space-between;background:#F9F9F9;padding:25px;border-radius:20px;margin-bottom:30px;">
-        <div><div class="label">REFERENCE ID</div><div class="val">${item.id}</div><div class="label">BRANCH STORE</div><div class="val">${item.branch}</div></div>
-        <div style="text-align:right;"><div class="label">ISSUE DATE</div><div class="val">${item.date}</div><div class="label">CONTACT PHONE</div><div class="val">${item.phone || '-'}</div></div>
-      </div>
-      <table><thead><tr><th>Product Item</th><th style="text-align:center;">Last Stock</th><th style="text-align:center;">Qty</th></tr></thead><tbody>${rowsHtml}</tbody></table>
-      <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script></body></html>`);
-    win.document.close();
-  }
   
   function renderCharts(analyticsData) {
     
@@ -1934,44 +1920,40 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
   }
 
   // ---------------------------------------------------------
-  // Save Reordered Menu Function (บันทึกข้อมูลทั้งหมดกลับขึ้นเซิร์ฟเวอร์)
+  // ✅ saveMenuOrder (เวอร์ชันสมบูรณ์: ส่งป้ายกำกับหน้าสั่งไปบันทึก)
   // ---------------------------------------------------------
   function saveMenuOrder() {
-    
     const adminToken = localStorage.getItem(TOKEN_KEY);
     const saveBtn = document.getElementById('saveOrderBtn');
     
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังอัปเดตฐานข้อมูล...';
     saveBtn.disabled = true;
 
-    // รวบรวมข้อมูลจาก Object ที่ถูกจัดเรียงใหม่ในหน้าจอ
     let masterPayload = [];
-    
+
     menuObj.categories.forEach(function(category) {
-      
-      const itemsInCat = menuObj.grouped[category];
-      
-      if (itemsInCat && itemsInCat.length > 0) {
-        
-        itemsInCat.forEach(function(product) {
-          masterPayload.push({
-            cat: category,
-            name: product.name,
-            status: product.status
-          });
-        });
-        
-      } else {
-        
-        // ส่งหมวดหมู่เปล่าๆ ไปจองที่ไว้ก่อน
-        masterPayload.push({
-          cat: category,
-          name: "",
-          status: "Active"
-        });
-        
-      }
-      
+        const itemsInCat = menuObj.grouped[category];
+        // 🕵️‍♂️ ดึงป้ายกำกับมา ถ้าไม่มีให้เป็น both (แสดงทั้งคู่) เป็นค่าเริ่มต้น
+        const displayTag = (menuObj.categorySettings && menuObj.categorySettings[category]) ? menuObj.categorySettings[category] : 'both';
+
+        if (itemsInCat && itemsInCat.length > 0) {
+            itemsInCat.forEach(function(product) {
+                masterPayload.push({
+                    cat: category,
+                    name: product.name,
+                    status: product.status,
+                    display: displayTag // ✅ ส่งป้ายกำกับไปด้วย
+                });
+            });
+        } else {
+            // กรณีหมวดหมู่ว่างเปล่า
+            masterPayload.push({ 
+                cat: category, 
+                name: "", 
+                status: "Active", 
+                display: displayTag 
+            });
+        }
     });
 
     const postPayload = {
@@ -1984,29 +1966,22 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
       method: 'POST',
       body: JSON.stringify(postPayload)
     })
-    .then(function(res) { 
-      return res.json(); 
-    })
-    // แก้ไขในส่วน .then ของ fetch (ประมาณบรรทัด 612)
-.then(function(d) {
-  if (d.status === 'success') {
-    isUnsaved = false; // ✅ ปลดล็อคระบบให้รีเฟรชได้ตามปกติ
-    renderMenuAccordion(d.data); 
-    showToast("✅ การจัดเรียงระบบเมนูสำเร็จ และออนไลน์แล้ว!");
-  } else {
-    alert("เกิดข้อผิดพลาด: " + d.message);
-  }
-      
+    .then(res => res.json())
+    .then(d => {
+      if (d.status === 'success') {
+        isUnsaved = false; // ปลดล็อคระบบ
+        renderMenuAccordion(d.data); 
+        showToast("✅ บันทึกลำดับและตั้งค่าหน้าสั่งสำเร็จ!");
+      } else {
+        showAlert("เกิดข้อผิดพลาด: " + d.message);
+      }
       saveBtn.innerHTML = '<i class="fas fa-save"></i> บันทึกลำดับ';
       saveBtn.disabled = false;
-      
     })
-    .catch(function(err) {
-      
-      alert("เครือข่ายมีปัญหา ไม่สามารถบันทึกข้อมูลได้");
+    .catch(err => {
+      showAlert("เครือข่ายมีปัญหา ไม่สามารถบันทึกข้อมูลได้");
       saveBtn.innerHTML = '<i class="fas fa-save"></i> บันทึกลำดับ';
       saveBtn.disabled = false;
-      
     });
   }
 
@@ -2078,7 +2053,7 @@ window.showAlert = (msg) => {
     const finalName = categoryNameInput.value.trim(); 
     
     if (finalName === "") {
-      alert("กรุณาระบุชื่อหมวดหมู่ที่ต้องการสร้าง");
+      showAlert("กรุณาระบุชื่อหมวดหมู่ที่ต้องการสร้าง");
       return;
     }
     
@@ -2119,7 +2094,7 @@ window.showAlert = (msg) => {
     const finalCName = cNameSelect.value; 
     
     if (finalPName === "") {
-      alert("กรุณาระบุชื่อสินค้าและขนาดบรรจุให้ชัดเจน");
+      showAlert("กรุณาระบุชื่อสินค้าและขนาดบรรจุให้ชัดเจน");
       return;
     }
     
@@ -2176,7 +2151,7 @@ window.showAlert = (msg) => {
 
  // 📄 ระบบรายงาน (V14 Portrait Header) - แนวตั้ง, เลขหน้าอยู่มุมขวาบน, หัวตารางครบ, โหลดแล้วปิดเอง
   function downloadSummaryReport() {
-    if (!allOrders || allOrders.length === 0) return alert("ไม่มีข้อมูลออเดอร์ในระบบ");
+    if (!allOrders || allOrders.length === 0) return showAlert("ไม่มีข้อมูลออเดอร์ในระบบ");
     const btn = document.getElementById('summaryBtn');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังจัดหน้ากระดาษแนวตั้ง...';
@@ -2286,7 +2261,7 @@ window.showAlert = (msg) => {
     };<\/script></body></html>`;
 
     const win = window.open('', '', 'width=1000,height=900');
-    if (!win) { btn.disabled = false; btn.innerHTML = originalText; return alert("กรุณาเปิด Pop-up"); }
+    if (!win) { btn.disabled = false; btn.innerHTML = originalText; return showAlert("กรุณาเปิด Pop-up"); }
     win.document.write(html); win.document.close();
     
     // ✅ ปลดล็อกปุ่มให้กดซ้ำได้ทันที
@@ -2298,7 +2273,7 @@ window.showAlert = (msg) => {
     try {
       const item = JSON.parse(decodeURIComponent(encodedData));
       const win = window.open('', '', 'width=850,height=950');
-      if(!win) return alert("กรุณาอนุญาต Pop-up");
+      if(!win) return showAlert("⚠️ กรุณาอนุญาต Pop-up เพื่อทำการปริ้นครับ");
 
       let rowsHtml = '';
       item.items.split('\n').forEach(line => {
@@ -2360,13 +2335,13 @@ window.showAlert = (msg) => {
           showToast('✅ ปิดงานสำเร็จ! เคลียร์กราฟเรียบร้อย'); 
           setTimeout(() => location.reload(), 1500); 
         } else {
-          alert('❌ สิทธิ์ไม่พอ หรือเกิดข้อผิดพลาด');
+          showAlert('❌ สิทธิ์ไม่พอ หรือเกิดข้อผิดพลาด');
           btn.innerHTML = 'ยืนยันปิดงานเลย!';
           btn.disabled = false;
         }
       })
       .catch(err => {
-        alert('❌ ระบบขัดข้อง: ' + err);
+        showAlert('❌ ระบบขัดข้อง: ' + err);
         btn.innerHTML = 'ยืนยันปิดงานเลย!';
         btn.disabled = false;
       });
@@ -2374,18 +2349,34 @@ window.showAlert = (msg) => {
   // 🚀 ระบบเปลี่ยนชื่อหมวดหมู่แบบรักษาออเดอร์เดิม
 let oldCatName = ""; 
 
+// ✅ ฟังก์ชันเปิด Modal แก้ไขหมวดหมู่ (เวอร์ชันอัปเกรด: ติ๊กค่าเดิมให้บอสอัตโนมัติ)
 window.openEditCatModal = (catName) => {
     oldCatName = catName;
     document.getElementById('editCatInput').value = catName;
+
+    // 🕵️‍♂️ ส่วนที่เพิ่ม: ไปดึงค่าที่เคยตั้งไว้ในระบบ (ถ้ายังไม่เคยตั้ง ให้เป็น 'both' เป็นค่าเริ่มต้น)
+    const currentSetting = (menuObj.categorySettings && menuObj.categorySettings[catName]) 
+                           ? menuObj.categorySettings[catName] 
+                           : 'both';
+    
+    // 🎯 สั่งให้ปุ่ม Radio ที่มี value ตรงกับค่าเดิม "ถูกเลือก" (Checked)
+    const radioToSelect = document.querySelector(`input[name="catDisplay"][value="${currentSetting}"]`);
+    if (radioToSelect) {
+        radioToSelect.checked = true;
+    }
+
     document.getElementById('editCatModal').style.display = 'flex';
     setTimeout(() => document.getElementById('editCatInput').focus(), 300);
 };
 
+// ✅ ชุดที่ 1.2: เก็บค่าป้ายกำกับหน้าสั่ง (วางทับบรรทัด 1490-1506)
 window.executeEditCategory = () => {
     const newName = document.getElementById('editCatInput').value.trim();
+    // 🕵️‍♂️ ดึงค่าหน้าสั่งที่เลือก (normal/locked/both)
+    const displayType = document.querySelector('input[name="catDisplay"]:checked').value;
+    
     if (newName === "" || newName === oldCatName) return closeM('editCatModal');
 
-    // 🔒 1. ดักชื่อซ้ำ: ถ้าชื่อใหม่มีอยู่ในรายการหมวดหมู่แล้ว ให้เตือนและหยุดทำงาน
     if (menuObj.categories.includes(newName)) {
         showAlert("❌ ชื่อหมวดหมู่นี้มีอยู่แล้ว!");
         return;
@@ -2395,16 +2386,19 @@ window.executeEditCategory = () => {
     if (idx > -1) {
         menuObj.categories[idx] = newName;
         menuObj.grouped[newName] = menuObj.grouped[oldCatName];
-        delete menuObj.grouped[oldCatName];
-        if (currentCat === oldCatName) currentCat = newName;
+        
+        // 🛡️ บันทึกการตั้งค่าหน้าสั่งลงในหมวดนั้นๆ
+        if (!menuObj.categorySettings) menuObj.categorySettings = {};
+        menuObj.categorySettings[newName] = displayType;
 
-        // 🔒 2. สั่งล็อคระบบ: กันการรีเฟรชจนกว่าจะกดปุ่มสีส้ม
+        if (oldCatName !== newName) delete menuObj.grouped[oldCatName];
+        if (currentCat === oldCatName) currentCat = newName;
         isUnsaved = true; 
     }
 
     closeM('editCatModal');
     renderMenuAccordion(menuObj);
-    showToast("✏️ เปลี่ยนชื่อหมวดหมู่เรียบร้อย (อย่าลืมกดบันทึกลำดับสีส้ม)");
+    showToast("✏️ แก้ไขข้อมูลและตั้งค่าหน้าสั่งเรียบร้อย (อย่าลืมกดสีส้ม)");
 };
 </script>
 </body>
