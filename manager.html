@@ -1048,6 +1048,14 @@
       <button class="btn" style="flex: 1; background-color: #f3f4f6; color: #444; border-radius: 15px;" onclick="closeM('managerConfirmModal')">ไว้ก่อน</button>
       <button id="managerExecBtn" class="btn" style="flex: 1.5; background-color: var(--green); color: white; border-radius: 15px; box-shadow: 0 8px 20px rgba(34,197,94,0.3);" onclick="executeManagerClose()">ยืนยันปิดงานเลย!</button>
     </div>
+  </div> </div> <div id="systemAlertModal" class="overlay">
+  <div class="modal-card" style="text-align: center; max-width: 400px; border-top: 15px solid var(--orange);">
+    <div style="margin-bottom: 20px;">
+      <i class="fas fa-exclamation-triangle" style="font-size: 70px; color: var(--orange); filter: drop-shadow(0 5px 15px rgba(243,156,18,0.3));"></i>
+    </div>
+    <h2 style="margin:0; font-family:'Prompt'; color:var(--dark); font-size: 22px;">แจ้งเตือนจากระบบ</h2>
+    <p id="systemAlertMsg" style="color: #666; margin: 15px 0 30px; font-size: 15px; line-height: 1.6;"></p>
+    <button class="btn" style="width: 100%; background-color: var(--orange); color: white; border-radius: 15px; box-shadow: 0 8px 20px rgba(243,156,18,0.25);" onclick="closeM('systemAlertModal')">รับทราบครับบอส</button>
   </div>
 </div>
 <script>
@@ -1165,7 +1173,7 @@
     
     setInterval(function() {
       // 🛡️ เช็คว่ามีหน้าต่างเด้ง (Modal) เปิดค้างไว้ หรือกำลังลากเมนูอยู่หรือไม่
-     const isBusy = ['receiptModal', 'confirmModal', 'cM', 'pM', 'delConfirmModal', 'editCatModal'].some(function(id) {
+  const isBusy = ['receiptModal', 'confirmModal', 'cM', 'pM', 'delConfirmModal', 'editCatModal', 'systemAlertModal'].some(function(id) {
   const el = document.getElementById(id);
   return el && el.style.display === 'flex';
 });
@@ -2054,7 +2062,11 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
       toastElement.remove(); 
     }, 3200);
   }
-  
+  // ✅ ฟังก์ชันเรียกหน้าต่างแจ้งเตือนแบบพรีเมียม (บอกลาความลาว!)
+window.showAlert = (msg) => {
+    document.getElementById('systemAlertMsg').innerText = msg;
+    document.getElementById('systemAlertModal').style.display = 'flex';
+};
   const toastAnim = "@keyframes toastSlideIn { 0% { opacity:0; bottom:15px; } 15% { opacity:1; bottom:35px; } 85% { opacity:1; bottom:35px; } 100% { opacity:0; bottom:15px; } }";
   const styleSheet = document.createElement("style");
   styleSheet.innerText = toastAnim;
@@ -2375,7 +2387,7 @@ window.executeEditCategory = () => {
 
     // 🔒 1. ดักชื่อซ้ำ: ถ้าชื่อใหม่มีอยู่ในรายการหมวดหมู่แล้ว ให้เตือนและหยุดทำงาน
     if (menuObj.categories.includes(newName)) {
-        alert("❌ ชื่อหมวดหมู่นี้มีอยู่แล้ว กรุณาใช้ชื่ออื่นครับบอส!");
+        showAlert("❌ ชื่อหมวดหมู่นี้มีอยู่แล้ว กรุณาใช้ชื่ออื่นครับ!");
         return;
     }
 
