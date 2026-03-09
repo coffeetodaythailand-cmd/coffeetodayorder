@@ -755,6 +755,29 @@
     border-color: var(--blue); /* ขอบสีฟ้า */
     color: var(--blue); /* ตัวหนังสือสีฟ้า */
     box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+  }
+  /* ----------------------------------------------------------------------------
+   🛡️ ชุด CSS แก้บั๊กไอคอนค้างและล่องหน (หายลาวแบบถาวร)
+   ---------------------------------------------------------------------------- */
+.fa-edit, .fa-trash-alt {
+    transition: all 0.2s ease !important; /* เพิ่มความสมูทตอนแตะ */
+}
+
+/* 1. ปุ่มแก้ไข: เมื่อเอาเมาส์ไปแตะ ให้เป็นสีฟ้าและขยายใหญ่ขึ้นนิดนึง */
+.fa-edit:hover {
+    color: var(--blue) !important;
+    transform: scale(1.2);
+}
+
+/* 2. ปุ่มถังขยะ: เมื่อเอาเมาส์ไปแตะ ให้เป็นสีแดงสด (ไม่หายไปในพื้นขาว) */
+.fa-trash-alt:hover {
+    color: #ff4d4d !important;
+    transform: scale(1.2);
+}
+
+/* 3. พิเศษ: เมื่อไอคอนอยู่ในหมวดหมู่ที่เลือก (พื้นแดง) ให้สี hover เด่นขึ้น */
+.chip.active .fa-edit:hover { color: #93c5fd !important; } 
+.chip.active .fa-trash-alt:hover { color: #ffffff !important; }
 }
 </style>
 </head>
@@ -1865,33 +1888,28 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
 
   function renderMenuAccordion(menuData) {
     if(!menuData || !menuData.categories) return;
-    menuObj = menuData; 
+    menuObj = menuData;
     let chipsHtml = '', itemsHtml = '', selectHtml = '';
     if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
 
-    // 1. หมวดหมู่ (ขยายช่องเลขให้ใหญ่ขึ้น)
+    // 1. วาดหมวดหมู่ (Chips)
     menuData.categories.forEach((cat, idx) => {
       const isSelected = (cat === currentCat ? 'active' : '');
       selectHtml += `<option value="${cat}">${cat}</option>`;
       chipsHtml += `
   <div class="chip ${isSelected}" draggable="true" ondragstart="dragStartCat(event, ${idx})" ondragover="dragOverCat(event)" ondrop="dropCat(event, ${idx})" style="cursor:grab; display:flex; align-items:center; gap:10px; padding: 10px 18px;">
     <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
-    
     <input type="number" value="${idx + 1}" onchange="moveCatManual(${idx}, this.value - 1)" 
            style="width:50px; height:30px; padding:0; line-height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-size:14px; font-weight:bold; background: white; color:var(--red);">
-    
     <span onclick="selectCat('${cat}')" style="margin-left:5px;">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
-    
-    <i class="fas fa-edit" style="margin-left:10px; font-size:14px; color:#CCC; cursor:pointer;" onclick="openEditCatModal('${cat}')" onmouseover="this.style.color='var(--blue)'"></i>
-    
-    <i class="fas fa-trash-alt" style="margin-left:8px; font-size:14px; color:#ffb3b3; cursor:pointer;" onclick="prepareDelete('cat', '${cat}')" onmouseover="this.style.color='white'"></i>
+    <i class="fas fa-edit" style="margin-left:10px; font-size:14px; color:#CCC; cursor:pointer;" onclick="openEditCatModal('${cat}')"></i>
+    <i class="fas fa-trash-alt" style="margin-left:8px; font-size:14px; color:#ffb3b3; cursor:pointer;" onclick="prepareDelete('cat', '${cat}')"></i>
   </div>`;
     });
 
-    // 2. สินค้า (ขยายช่องเลขและเพิ่มปุ่มลบถาวร)
+    // 2. วาดรายการสินค้า
     if(currentCat && menuData.grouped[currentCat]) {
       menuData.grouped[currentCat].forEach((p, idx) => {
-        // 🚀 เปลี่ยนจากการติ๊กถูก เป็นตัวเลือก 3 สถานะ
         const s = p.status || 'Active';
         let statusClass = (s === 'Active' ? 'status-active' : (s === 'SoldOut' ? 'status-soldout' : 'status-inactive'));
         let statusText = (s === 'Active' ? 'ปกติ' : (s === 'SoldOut' ? 'ของหมด' : 'ซ่อนอยู่'));
@@ -1900,8 +1918,8 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
           <div class="cat-item" draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})" style="display:flex; justify-content:space-between; padding:18px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:grab;">
             <div style="display:flex; align-items:center; gap:18px;">
               <i class="fas fa-grip-lines" style="color:#DDD;"></i>
-      <input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" 
-       style="width:55px; height:35px; padding:0; line-height:35px; border:2px solid var(--red); border-radius:10px; text-align:center; font-weight:bold; font-size:16px; color:var(--red); background:white;">
+              <input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" 
+                     style="width:55px; height:35px; padding:0; line-height:35px; border:2px solid var(--red); border-radius:10px; text-align:center; font-weight:bold; font-size:16px; color:var(--red); background:white;">
               <div>
                 <span style="font-weight:600; color:#333; font-size:17px;">${p.name}</span>
                 <div style="margin-top:5px;">
