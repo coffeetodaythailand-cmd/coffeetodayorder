@@ -499,12 +499,13 @@
     box-sizing: border-box;
 }
 
+/* ✅ ชุดแก้ตัวหนังสือโดนตัด (ยอมให้แสดงหลายบรรทัด) */
 .chip span {
     flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;      /* 🔓 ยอมให้ขึ้นบรรทัดใหม่ได้แล้ว */
+    word-break: break-word;   /* ป้องกันคำยาวพิเศษไม่ให้หลุดขอบ */
     margin-right: 10px;
+    line-height: 1.4;         /* ปรับระยะห่างบรรทัดให้อ่านสบายตา */
 }
 
 .chip.active { 
@@ -1904,7 +1905,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
     <input type="number" value="${idx + 1}" onchange="moveCatManual(${idx}, this.value - 1)" 
            style="width:50px; height:30px; padding:0; line-height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-size:14px; font-weight:bold; background: white; color:var(--red);">
-    <span onclick="selectCat('${cat}')" style="margin-left:5px;">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
+    <span onclick="selectCat('${cat}')" style="margin-left:5px;" title="${cat}">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
     <i class="fas fa-edit" style="margin-left:10px; font-size:14px; color:#CCC; cursor:pointer;" onclick="openEditCatModal('${cat}')"></i>
     <i class="fas fa-trash-alt" style="margin-left:8px; font-size:14px; color:#ffb3b3; cursor:pointer;" onclick="prepareDelete('cat', '${cat}')"></i>
   </div>`;
