@@ -1079,6 +1079,7 @@
   // ตัวแปรสำหรับระบบ Drag & Drop
   let dragCatIndex = null;
   let dragItemIndex = null;
+  let isUnsaved = false;
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwiFMRKwx__Gj2tTPgOsd4qe8BXKxgv78P7gMEsL9PejXbHkjRHFrO8kyOXahCbtt81/exec";
   const TOKEN_KEY = "coffee_today_admin_token";
@@ -1164,15 +1165,15 @@
     
     setInterval(function() {
       // 🛡️ เช็คว่ามีหน้าต่างเด้ง (Modal) เปิดค้างไว้ หรือกำลังลากเมนูอยู่หรือไม่
-      const isBusy = ['receiptModal', 'confirmModal', 'cM', 'pM', 'delConfirmModal'].some(function(id) {
-        const el = document.getElementById(id);
-        return el && el.style.display === 'flex';
-      });
+     const isBusy = ['receiptModal', 'confirmModal', 'cM', 'pM', 'delConfirmModal', 'editCatModal'].some(function(id) {
+  const el = document.getElementById(id);
+  return el && el.style.display === 'flex';
+});
 
-      if (isBusy || dragCatIndex !== null || dragItemIndex !== null) {
-        console.log("System Sync Skipped: User is working.");
-        return; // ข้ามการดึงข้อมูลรอบนี้ไปก่อน เพื่อไม่ให้รบกวนบอส
-      }
+if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
+  console.log("System Sync Skipped: User is working or has unsaved changes.");
+  return; 
+}
 
       loadDashboardData(false, token, currentDeepSearchQuery);
       loadApproveList(token);
@@ -1978,14 +1979,15 @@
     .then(function(res) { 
       return res.json(); 
     })
-    .then(function(d) {
-      
-      if (d.status === 'success') {
-        renderMenuAccordion(d.data); 
-        showToast("✅ การจัดเรียงระบบเมนูสำเร็จ และออนไลน์แล้ว!");
-      } else {
-        alert("เกิดข้อผิดพลาด: " + d.message);
-      }
+    // แก้ไขในส่วน .then ของ fetch (ประมาณบรรทัด 612)
+.then(function(d) {
+  if (d.status === 'success') {
+    isUnsaved = false; // ✅ ปลดล็อคระบบให้รีเฟรชได้ตามปกติ
+    renderMenuAccordion(d.data); 
+    showToast("✅ การจัดเรียงระบบเมนูสำเร็จ และออนไลน์แล้ว!");
+  } else {
+    alert("เกิดข้อผิดพลาด: " + d.message);
+  }
       
       saveBtn.innerHTML = '<i class="fas fa-save"></i> บันทึกลำดับ';
       saveBtn.disabled = false;
@@ -2369,27 +2371,28 @@ window.openEditCatModal = (catName) => {
 
 window.executeEditCategory = () => {
     const newName = document.getElementById('editCatInput').value.trim();
-    
-    // ถ้าชื่อว่าง หรือ ชื่อเหมือนเดิม ไม่ต้องทำอะไร
     if (newName === "" || newName === oldCatName) return closeM('editCatModal');
 
-    // 1. ค้นหาตำแหน่งหมวดหมู่เดิมใน Array
+    // 🔒 1. ดักชื่อซ้ำ: ถ้าชื่อใหม่มีอยู่ในรายการหมวดหมู่แล้ว ให้เตือนและหยุดทำงาน
+    if (menuObj.categories.includes(newName)) {
+        alert("❌ ชื่อหมวดหมู่นี้มีอยู่แล้ว กรุณาใช้ชื่ออื่นครับบอส!");
+        return;
+    }
+
     const idx = menuObj.categories.indexOf(oldCatName);
     if (idx > -1) {
-        // เปลี่ยนชื่อในรายการหมวดหมู่
         menuObj.categories[idx] = newName;
-        
-        // 2. 🛡️ จุดสำคัญ: ย้ายสินค้าทั้งหมดจาก 'ชื่อเดิม' ไปที่ 'ชื่อใหม่' (สินค้าไม่หาย)
         menuObj.grouped[newName] = menuObj.grouped[oldCatName];
-        delete menuObj.grouped[oldCatName]; // ลบชื่อเก่าออกจากหน่วยความจำ
-        
-        // 3. ถ้าบอสกำลังเปิดดูหมวดนี้อยู่ ให้เปลี่ยนชื่อที่เลือกด้วย
+        delete menuObj.grouped[oldCatName];
         if (currentCat === oldCatName) currentCat = newName;
+
+        // 🔒 2. สั่งล็อคระบบ: กันการรีเฟรชจนกว่าจะกดปุ่มสีส้ม
+        isUnsaved = true; 
     }
 
     closeM('editCatModal');
-    renderMenuAccordion(menuObj); // วาดหน้าจอใหม่ทันที
-    showToast("✏️ เปลี่ยนชื่อหมวดหมู่เป็น '" + newName + "' แล้ว (อย่าลืมกดบันทึกลำดับ)");
+    renderMenuAccordion(menuObj);
+    showToast("✏️ เปลี่ยนชื่อหมวดหมู่เรียบร้อย (อย่าลืมกดบันทึกลำดับสีส้ม)");
 };
 </script>
 </body>
