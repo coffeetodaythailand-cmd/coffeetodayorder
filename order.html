@@ -549,24 +549,37 @@
   function buildProductUI(initData) {
     const t = document.getElementById('tabs'), l = document.getElementById('lists');
     t.innerHTML = ""; l.innerHTML = "";
+    
+    let isFirstRender = true; // 🎯 กันบั๊กแท็บไม่โชว์
+
     initData.categories.forEach((c, i) => {
-      const b = document.createElement('button'); b.className = `tab-btn tbtn ${i===0?'active':''}`; b.innerText = c;
+      // 🕵️‍♂️ กรองหมวดหมู่: หน้าล็อคสต็อก (ถ้าเป็น normal ให้ข้ามเลย)
+      const displayTag = (initData.categorySettings && initData.categorySettings[c]) ? initData.categorySettings[c] : 'both';
+      if (displayTag === 'normal') return;
+
+      const b = document.createElement('button'); 
+      b.className = `tab-btn tbtn ${isFirstRender ? 'active' : ''}`; 
+      b.innerText = c;
       b.onclick = () => { 
         document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); 
         document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); 
         document.getElementById(`s-${i}`).classList.add('active'); 
       };
       t.appendChild(b);
-      const s = document.createElement('div'); s.id = `s-${i}`; s.className = `table-section ${i===0?'active':''}`;
+
+      const s = document.createElement('div'); 
+      s.id = `s-${i}`; 
+      s.className = `table-section ${isFirstRender ? 'active' : ''}`;
+      
+      isFirstRender = false; // ปิดสถานะแท็บแรก
+
       let h = `<table width="100%"><thead><tr><th>สินค้า</th><th width="100">คงเหลือ</th><th width="75">สั่ง</th></tr></thead><tbody>`;
       initData.products[c].forEach(p => { 
-        // 🚀 1. ถ้าสถานะเป็น Inactive ให้ "ซ่อน" ทันที (หน้าเว็บจะโหลดเร็วขึ้น)
         if (p.status === 'Inactive') return;
 
-        // 🚀 2. เช็คสถานะ SoldOut (ของหมด)
         const isSoldOut = (p.status === 'SoldOut');
         const rowClass = isSoldOut ? 'sold-out-row' : '';
-        const inputAttr = isSoldOut ? 'disabled readonly' : ''; // ล็อกช่องกรอกข้อมูล
+        const inputAttr = isSoldOut ? 'disabled readonly' : '';
         const badge = isSoldOut ? '<span class="badge-soldout">หมด</span>' : '';
 
         h += `<tr class="${rowClass}">
@@ -577,13 +590,14 @@
       });
       s.innerHTML = h + `</tbody></table>`; l.appendChild(s);
     });
+    
     const oB = document.createElement('button'); oB.className='tab-btn tbtn'; oB.innerText='อื่นๆ';
     oB.onclick = () => { 
       document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active')); oB.classList.add('active'); 
       document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('active')); 
       document.getElementById('sec-others').classList.add('active'); 
     };
-    t.appendChild(oB); addRow(); 
+    t.appendChild(oB); addRow();
   }
 
   function addRow() {
