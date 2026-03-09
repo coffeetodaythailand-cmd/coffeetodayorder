@@ -472,51 +472,55 @@
       DRAG & DROP CHIPS
       =========================================================================
     */
-    .chips-container {
-      display: flex; 
-      gap: 12px; 
-      flex-wrap: wrap; 
-      padding: 10px 5px 30px;
-    }
-    
-    .chip {
-      background-color: var(--white); 
-      padding: 10px 22px; 
-      border-radius: 50px;
-      border: 1px solid var(--border); 
-      font-family: 'Prompt'; 
-      font-size: 14px;
-      cursor: grab; 
-      transition: all 0.3s; 
-      white-space: nowrap; 
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-    }
-    
-    .chip:active {
-      cursor: grabbing;
-    }
-    
-    .chip.active { 
-      background-color: var(--red); 
-      color: var(--white); 
-      border-color: var(--red); 
-      box-shadow: 0 8px 25px rgba(169, 29, 58, 0.25); 
-    }
-    
-    .cat-item.dragging {
-      opacity: 0.5;
-      background: #FAFAFA;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      transform: scale(0.98);
-    }
-    
-    .chip.dragging {
-      opacity: 0.5;
-      transform: scale(0.95);
-    }
+    /* ----------------------------------------------------------------------------
+   🎯 ชุด CSS จัดระเบียบหมวดหมู่ (Auto Grid System - ยืดเต็มพื้นที่)
+   ---------------------------------------------------------------------------- */
+.chips-container {
+    display: grid;
+    /* แบ่งช่องตามความกว้าง ขั้นต่ำ 280px ถ้าที่เหลือก็ให้ยืดออก (1fr) */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 15px; 
+    padding: 10px 0 30px;
+}
+
+.chip {
+    background-color: var(--white);
+    padding: 12px 20px; 
+    border-radius: 20px;
+    border: 1px solid #EEEEEE; 
+    font-family: 'Prompt'; 
+    font-size: 14px;
+    cursor: grab; 
+    transition: all 0.3s ease; 
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.chip span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+.chip.active { 
+    background-color: var(--red); 
+    color: var(--white);
+    border-color: var(--red); 
+    box-shadow: 0 8px 25px rgba(169, 29, 58, 0.25); 
+}
+
+.chip:active { cursor: grabbing; }
+
+.cat-item.dragging, .chip.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
 
     /*
       =========================================================================
