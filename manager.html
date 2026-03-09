@@ -1055,7 +1055,7 @@
     </div>
     <h2 style="margin:0; font-family:'Prompt'; color:var(--dark); font-size: 22px;">แจ้งเตือนจากระบบ</h2>
     <p id="systemAlertMsg" style="color: #666; margin: 15px 0 30px; font-size: 15px; line-height: 1.6;"></p>
-    <button class="btn" style="width: 100%; background-color: var(--orange); color: white; border-radius: 15px; box-shadow: 0 8px 20px rgba(243,156,18,0.25);" onclick="closeM('systemAlertModal')">รับทราบครับบอส</button>
+    <button class="btn" style="width: 100%; background-color: var(--orange); color: white; border-radius: 15px; box-shadow: 0 8px 20px rgba(243,156,18,0.25);" onclick="closeM('systemAlertModal')">ปิดหน้าต่าง</button>
   </div>
 </div>
 <script>
@@ -2387,7 +2387,7 @@ window.executeEditCategory = () => {
 
     // 🔒 1. ดักชื่อซ้ำ: ถ้าชื่อใหม่มีอยู่ในรายการหมวดหมู่แล้ว ให้เตือนและหยุดทำงาน
     if (menuObj.categories.includes(newName)) {
-        showAlert("❌ ชื่อหมวดหมู่นี้มีอยู่แล้ว กรุณาใช้ชื่ออื่นครับ!");
+        showAlert("❌ ชื่อหมวดหมู่นี้มีอยู่แล้ว!");
         return;
     }
 
