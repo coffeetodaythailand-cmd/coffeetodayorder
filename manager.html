@@ -1946,7 +1946,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     menuObj = menuData;
     let chipsHtml = '', itemsHtml = '', selectHtml = '';
 
-    // 🔍 กรณี A: โหมดค้นหา
+    // 🔍 โหมดค้นหา
     if (menuSearchQuery !== "") {
       document.getElementById('catChips').innerHTML = `<div class="chip active" style="background:var(--dark); color:white; border-color:var(--dark); width:100%; justify-content:center; cursor:default; grid-column: 1 / -1; font-size:14px;"><span style="text-align:center;"><i class="fas fa-search"></i> ผลการค้นหาสำหรับ: "${menuSearchQuery}"</span></div>`;
       menuData.categories.forEach(cat => {
@@ -1960,7 +1960,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
       return; 
     }
 
-    // 📦 กรณี B: โหมดปกติ
+    // 📦 โหมดปกติ
     if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
     menuData.categories.forEach((cat, idx) => {
       const isSelected = (cat === currentCat ? 'active' : '');
@@ -2009,7 +2009,7 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
           <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:16px;" onclick="prepareDelete('prod', ${idx}, '${nameSafe}', '${catName}')"></i>
         </div>
       </div>`;
-    });
+  }
 
     // วาดสินค้าในหมวดที่เลือก
     if(currentCat && menuData.grouped[currentCat]) {
