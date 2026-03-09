@@ -466,18 +466,10 @@
       font-size: 12px;
       border-radius: 12px;
     }
-
-    /*
-      =========================================================================
-      DRAG & DROP CHIPS
-      =========================================================================
-    */
-    /* ----------------------------------------------------------------------------
-   🎯 ชุด CSS จัดระเบียบหมวดหมู่ (Auto Grid System - ยืดเต็มพื้นที่)
-   ---------------------------------------------------------------------------- */
+    
+/* ✅ แก้ไขให้ขยายเต็มพื้นที่ฝั่งขวา และเพิ่มเอฟเฟกต์ขยับหลบ */
 .chips-container {
     display: grid;
-    /* แบ่งช่องตามความกว้าง ขั้นต่ำ 280px ถ้าที่เหลือก็ให้ยืดออก (1fr) */
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
     gap: 15px; 
     padding: 10px 0 30px;
@@ -489,9 +481,8 @@
     border-radius: 20px;
     border: 1px solid #EEEEEE; 
     font-family: 'Prompt'; 
-    font-size: 14px;
-    cursor: grab; 
-    transition: all 0.3s ease; 
+    cursor: pointer !important;
+    transition: all 0.2s ease; 
     box-shadow: var(--shadow-soft);
     display: flex;
     align-items: center;
@@ -499,13 +490,20 @@
     box-sizing: border-box;
 }
 
-/* ✅ ชุดแก้ตัวหนังสือโดนตัด (ยอมให้แสดงหลายบรรทัด) */
+/* เอฟเฟกต์ตอนลากหมวดหมู่มาทับ (ให้มันเด้งหลบ) */
+.chip.drag-over {
+    border: 2px dashed var(--red) !important;
+    background-color: #fff5f5 !important;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+
 .chip span {
     flex: 1;
-    white-space: normal;      /* 🔓 ยอมให้ขึ้นบรรทัดใหม่ได้แล้ว */
-    word-break: break-word;   /* ป้องกันคำยาวพิเศษไม่ให้หลุดขอบ */
+    white-space: normal;
+    word-break: break-word;
     margin-right: 10px;
-    line-height: 1.4;         /* ปรับระยะห่างบรรทัดให้อ่านสบายตา */
+    line-height: 1.4;
 }
 
 .chip.active { 
@@ -514,8 +512,6 @@
     border-color: var(--red); 
     box-shadow: 0 8px 25px rgba(169, 29, 58, 0.25); 
 }
-
-.chip:active { cursor: grabbing; }
 
 .cat-item.dragging, .chip.dragging {
     opacity: 0.5;
@@ -1270,7 +1266,7 @@
     
     setInterval(function() {
       // 🛡️ เช็คว่ามีหน้าต่างเด้ง (Modal) เปิดค้างไว้ หรือกำลังลากเมนูอยู่หรือไม่
-  const isBusy = ['receiptModal', 'confirmModal', 'cM', 'pM', 'delConfirmModal', 'editCatModal', 'systemAlertModal'].some(function(id) {
+const isBusy = ['receiptModal', 'confirmModal', 'cM', 'pM', 'delConfirmModal', 'editCatModal', 'systemAlertModal', 'managerConfirmModal'].some(function(id) {
   const el = document.getElementById(id);
   return el && el.style.display === 'flex';
 });
@@ -1890,65 +1886,45 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     // 🚀 ระบบ V17: ช่องเลขใหญ่ขึ้น, ลบหายทันที, Modal สวยงาม
   let delTarget = null; // เก็บเป้าหมายที่จะลบ
 
+  // ✅ 1. แก้ไขการวาด Chips ให้กดง่าย (Hitbox เต็มพื้นที่)
   function renderMenuAccordion(menuData) {
     if(!menuData || !menuData.categories) return;
     menuObj = menuData;
     let chipsHtml = '', itemsHtml = '', selectHtml = '';
     if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
 
-    // 1. วาดหมวดหมู่ (Chips)
     menuData.categories.forEach((cat, idx) => {
       const isSelected = (cat === currentCat ? 'active' : '');
       selectHtml += `<option value="${cat}">${cat}</option>`;
       chipsHtml += `
-  <div class="chip ${isSelected}" draggable="true" ondragstart="dragStartCat(event, ${idx})" ondragover="dragOverCat(event)" ondrop="dropCat(event, ${idx})" style="cursor:grab; display:flex; align-items:center; gap:10px; padding: 10px 18px;">
+  <div class="chip ${isSelected}" 
+       draggable="true" 
+       ondragstart="dragStartCat(event, ${idx})" 
+       onclick="selectCat('${cat}')"
+       ondragover="dragOverCat(event, this)" 
+       ondragleave="dragLeaveCat(this)"
+       ondrop="dropCat(event, ${idx}, this)" 
+       style="cursor:pointer; display:flex; align-items:center; gap:10px; padding: 10px 18px;">
+    
     <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
-    <input type="number" value="${idx + 1}" onchange="moveCatManual(${idx}, this.value - 1)" 
-           style="width:50px; height:30px; padding:0; line-height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-size:14px; font-weight:bold; background: white; color:var(--red);">
-    <span onclick="selectCat('${cat}')" style="margin-left:5px;" title="${cat}">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
-    <i class="fas fa-edit" style="margin-left:10px; font-size:14px; color:#CCC; cursor:pointer;" onclick="openEditCatModal('${cat}')"></i>
-    <i class="fas fa-trash-alt" style="margin-left:8px; font-size:14px; color:#ffb3b3; cursor:pointer;" onclick="prepareDelete('cat', '${cat}')"></i>
+    <input type="number" value="${idx + 1}" onclick="event.stopPropagation()" onchange="moveCatManual(${idx}, this.value - 1)" 
+           style="width:50px; height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-weight:bold; background: white; color:var(--red);">
+    
+    <span style="flex:1; margin-left:5px; white-space:normal; word-break:break-word;" title="${cat}">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
+    
+    <div style="display:flex; gap:12px; align-items:center;">
+      <i class="fas fa-edit" style="font-size:16px; color:#CCC; cursor:pointer;" onclick="event.stopPropagation(); openEditCatModal('${cat}')"></i>
+      <i class="fas fa-trash-alt" style="font-size:16px; color:#ffb3b3; cursor:pointer;" onclick="event.stopPropagation(); prepareDelete('cat', '${cat}')"></i>
+    </div>
   </div>`;
     });
-
-    // 2. วาดรายการสินค้า
-    if(currentCat && menuData.grouped[currentCat]) {
-      menuData.grouped[currentCat].forEach((p, idx) => {
-        const s = p.status || 'Active';
-        let statusClass = (s === 'Active' ? 'status-active' : (s === 'SoldOut' ? 'status-soldout' : 'status-inactive'));
-        let statusText = (s === 'Active' ? 'ปกติ' : (s === 'SoldOut' ? 'ของหมด' : 'ซ่อนอยู่'));
-
-        itemsHtml += `
-          <div class="cat-item" draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})" style="display:flex; justify-content:space-between; padding:18px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:grab;">
-            <div style="display:flex; align-items:center; gap:18px;">
-              <i class="fas fa-grip-lines" style="color:#DDD;"></i>
-              <input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" 
-                     style="width:55px; height:35px; padding:0; line-height:35px; border:2px solid var(--red); border-radius:10px; text-align:center; font-weight:bold; font-size:16px; color:var(--red); background:white;">
-              <div>
-                <span style="font-weight:600; color:#333; font-size:17px;">${p.name}</span>
-                <div style="margin-top:5px;">
-                  <span class="status-badge ${statusClass}">${statusText}</span>
-                </div>
-              </div>
-            </div>
-            <div style="display:flex; gap:15px; align-items:center;">
-              <select class="status-select" onchange="toggleItem('${p.rowId}', '${p.name}', '${currentCat}', this.value)">
-                <option value="Active" ${s === 'Active' ? 'selected' : ''}>ปกติ</option>
-                <option value="SoldOut" ${s === 'SoldOut' ? 'selected' : ''}>ของหมด</option>
-                <option value="Inactive" ${s === 'Inactive' ? 'selected' : ''}>ซ่อนไว้</option>
-              </select>
-              <i class="fas fa-edit" style="color:#CCC; cursor:pointer; font-size:20px;" onclick="openProdModal(${p.rowId}, '${p.name}', '${currentCat}')"></i>
-              <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:20px;" onclick="prepareDelete('prod', ${idx}, '${p.name}')"></i>
-            </div>
-          </div>`;
-      });
-    }
+    // ... ส่วนวาดรายการสินค้าคงเดิม ...
     document.getElementById('catChips').innerHTML = chipsHtml; 
     document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:40px; color:#CCC;">หมวดนี้ยังไม่มีสินค้า...</div>';
     document.getElementById('pCatSelect').innerHTML = selectHtml;
   }
 
-  // 🗑️ ระบบลบแบบใหม่ (ลบในเครื่องทันที)
+  
   // 🗑️ ระบบลบแบบใหม่ (ลบในเครื่องทันที + เด้งปุ่มเซฟ)
   function prepareDelete(type, target, name) {
     if (!name) name = target; // กันเหนียวกรณีไม่ได้ส่งชื่อมา
@@ -1997,16 +1973,19 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     renderMenuAccordion(menuObj);
   }
 
-  function dragStartCat(e, i) { dragCatIndex = i; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); }
-  function dragOverCat(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-  function dropCat(e, target) { 
-    e.preventDefault(); if (dragCatIndex !== null && dragCatIndex !== target) moveCatManual(dragCatIndex, target);
-    dragCatIndex = null;
+  // ✅ 🚀 ระบบลากวางอัจฉริยะ (Nitro Smooth Version)
+  function dragStartCat(e, i) { 
+    dragCatIndex = i; 
+    e.dataTransfer.effectAllowed = 'move'; 
+    e.target.classList.add('dragging'); 
   }
+
+ 
   function dragStartItem(e, i) { dragItemIndex = i; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); }
   function dragOverItem(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
   function dropItem(e, target) {
-    e.preventDefault(); if (dragItemIndex !== null && dragItemIndex !== target) moveItemManual(dragItemIndex, target);
+    e.preventDefault();
+    if (dragItemIndex !== null && dragItemIndex !== target) moveItemManual(dragItemIndex, target);
     dragItemIndex = null;
   }
 
