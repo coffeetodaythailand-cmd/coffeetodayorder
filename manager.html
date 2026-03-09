@@ -1887,28 +1887,30 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
   let delTarget = null; // เก็บเป้าหมายที่จะลบ
 
   // ✅ 1. แก้ไขการวาด Chips ให้กดง่าย (Hitbox เต็มพื้นที่)
+  // ✅ 1. วาดหมวดหมู่และรายการสินค้า (ฉบับสมบูรณ์)
   function renderMenuAccordion(menuData) {
     if(!menuData || !menuData.categories) return;
     menuObj = menuData;
     let chipsHtml = '', itemsHtml = '', selectHtml = '';
     if(!currentCat && menuData.categories.length > 0) currentCat = menuData.categories[0];
 
+    // --- วาดหมวดหมู่ด้านบน ---
     menuData.categories.forEach((cat, idx) => {
       const isSelected = (cat === currentCat ? 'active' : '');
       selectHtml += `<option value="${cat}">${cat}</option>`;
       chipsHtml += `
   <div class="chip ${isSelected}" 
        draggable="true" 
+       onclick="selectCat('${cat}')" 
        ondragstart="dragStartCat(event, ${idx})" 
-       onclick="selectCat('${cat}')"
        ondragover="dragOverCat(event, this)" 
        ondragleave="dragLeaveCat(this)"
        ondrop="dropCat(event, ${idx}, this)" 
-       style="cursor:pointer; display:flex; align-items:center; gap:10px; padding: 10px 18px;">
+       style="display:flex; align-items:center; gap:10px; padding: 10px 18px;">
     
     <i class="fas fa-grip-vertical" style="color:#CCC;"></i>
     <input type="number" value="${idx + 1}" onclick="event.stopPropagation()" onchange="moveCatManual(${idx}, this.value - 1)" 
-           style="width:50px; height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-weight:bold; background: white; color:var(--red);">
+           style="width:50px; height:30px; padding:0; line-height:30px; border:2px solid rgba(0,0,0,0.1); border-radius:8px; text-align:center; font-weight:bold; background: white; color:var(--red);">
     
     <span style="flex:1; margin-left:5px; white-space:normal; word-break:break-word;" title="${cat}">${cat} (${menuData.grouped[cat] ? menuData.grouped[cat].length : 0})</span>
     
@@ -1918,12 +1920,44 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     </div>
   </div>`;
     });
-    // ... ส่วนวาดรายการสินค้าคงเดิม ...
+
+    // --- วาดรายการสินค้าด้านล่าง (ส่วนที่เคยหายไป) ---
+    if(currentCat && menuData.grouped[currentCat]) {
+      menuData.grouped[currentCat].forEach((p, idx) => {
+        const s = p.status || 'Active';
+        let statusClass = (s === 'Active' ? 'status-active' : (s === 'SoldOut' ? 'status-soldout' : 'status-inactive'));
+        let statusText = (s === 'Active' ? 'ปกติ' : (s === 'SoldOut' ? 'ของหมด' : 'ซ่อนอยู่'));
+
+        itemsHtml += `
+          <div class="cat-item" draggable="true" ondragstart="dragStartItem(event, ${idx})" ondragover="dragOverItem(event)" ondrop="dropItem(event, ${idx})" style="display:flex; justify-content:space-between; padding:18px 0; border-bottom:1px solid #F8F9FA; align-items:center; cursor:grab;">
+            <div style="display:flex; align-items:center; gap:18px;">
+              <i class="fas fa-grip-lines" style="color:#DDD;"></i>
+              <input type="number" value="${idx + 1}" onchange="moveItemManual(${idx}, this.value - 1)" 
+                     style="width:55px; height:35px; padding:0; line-height:35px; border:2px solid var(--red); border-radius:10px; text-align:center; font-weight:bold; font-size:16px; color:var(--red); background:white;">
+              <div>
+                <span style="font-weight:600; color:#333; font-size:17px;">${p.name}</span>
+                <div style="margin-top:5px;">
+                  <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:15px; align-items:center;">
+              <select class="status-select" onchange="toggleItem('${p.rowId}', '${p.name}', '${currentCat}', this.value)">
+                <option value="Active" ${s === 'Active' ? 'selected' : ''}>ปกติ</option>
+                <option value="SoldOut" ${s === 'SoldOut' ? 'selected' : ''}>ของหมด</option>
+                <option value="Inactive" ${s === 'Inactive' ? 'selected' : ''}>ซ่อนไว้</option>
+              </select>
+              <i class="fas fa-edit" style="color:#CCC; cursor:pointer; font-size:20px;" onclick="openProdModal(${p.rowId}, '${p.name}', '${currentCat}')"></i>
+              <i class="fas fa-trash-alt" style="color:#EEE; cursor:pointer; font-size:20px;" onclick="prepareDelete('prod', ${idx}, '${p.name}')"></i>
+            </div>
+          </div>`;
+      });
+    }
+
     document.getElementById('catChips').innerHTML = chipsHtml; 
     document.getElementById('menuItems').innerHTML = itemsHtml || '<div style="text-align:center; padding:40px; color:#CCC;">หมวดนี้ยังไม่มีสินค้า...</div>';
     document.getElementById('pCatSelect').innerHTML = selectHtml;
   }
-
   
   // 🗑️ ระบบลบแบบใหม่ (ลบในเครื่องทันที + เด้งปุ่มเซฟ)
   function prepareDelete(type, target, name) {
@@ -1980,7 +2014,25 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     e.target.classList.add('dragging'); 
   }
 
- 
+  function dragOverCat(e, el) { 
+    e.preventDefault(); 
+    e.dataTransfer.dropEffect = 'move'; 
+    if(el && el.classList) el.classList.add('drag-over'); 
+  }
+  
+  function dragLeaveCat(el) { 
+    if(el && el.classList) el.classList.remove('drag-over'); 
+  }
+
+  function dropCat(e, target, el) { 
+    e.preventDefault(); 
+    if(el && el.classList) el.classList.remove('drag-over'); 
+    if (dragCatIndex !== null && dragCatIndex !== target) {
+      moveCatManual(dragCatIndex, target);
+    }
+    dragCatIndex = null;
+  }
+
   function dragStartItem(e, i) { dragItemIndex = i; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); }
   function dragOverItem(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
   function dropItem(e, target) {
@@ -1988,7 +2040,6 @@ if (isBusy || dragCatIndex !== null || dragItemIndex !== null || isUnsaved) {
     if (dragItemIndex !== null && dragItemIndex !== target) moveItemManual(dragItemIndex, target);
     dragItemIndex = null;
   }
-
   // ---------------------------------------------------------
   // ✅ saveMenuOrder (เวอร์ชันสมบูรณ์: ส่งป้ายกำกับหน้าสั่งไปบันทึก)
   // ---------------------------------------------------------
